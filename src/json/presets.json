@@ -1,0 +1,22 @@
+{
+    "items": [
+        {
+            "title": "Example of presets ↓",
+            "subtitle": "Press ⏎ to apply the preset or ⌘⏎ to modify it. These are just examples, you can remove them",
+            "arg": "title=remove me",
+            "id": "31415926535897932384626433837950"
+        },
+        {
+            "title": "80's French Movies",
+            "subtitle": "Return french movies released between 1980 and 1990",
+            "arg": "libtype=movie/decade=1980/country=681",
+            "id": "375ceb17f4126175e618f582347cfac9"
+        },
+        {
+            "title": "One Piece Episode",
+            "subtitle": "Search one piece episode by episode number",
+            "arg": "libtype=episode/advancedFilters={'show.title': 'one piece', 'episode.index': '1'}",
+            "id": "4ef4e7ba68303564505d8d925c033f14"
+        }
+    ]
+}

@@ -1,0 +1,126 @@
+[
+  {
+    "short_key": "ac",
+    "long_key": "actor"
+  },
+  {
+    "short_key": "af",
+    "long_key": "advancedFilters"
+  },
+  {
+    "short_key": "al",
+    "long_key": "audioLanguage"
+  },
+  {
+    "short_key": "ct",
+    "long_key": "country"
+  },
+  {
+    "short_key": "co",
+    "long_key": "collection"
+  },
+  {
+    "short_key": "cr",
+    "long_key": "contentRating"
+  },
+  {
+    "short_key": "de",
+    "long_key": "decade"
+  },
+  {
+    "short_key": "di",
+    "long_key": "director"
+  },
+  {
+    "short_key": "du",
+    "long_key": "duplicate"
+  },
+  {
+    "short_key": "ed",
+    "long_key": "editionTitle"
+  },
+  {
+    "short_key": "ge",
+    "long_key": "genre"
+  },
+  {
+    "short_key": "hd",
+    "long_key": "hdr"
+  },
+  {
+    "short_key": "id",
+    "long_key": "index"
+  },
+  {
+    "short_key": "in",
+    "long_key": "inProgress"
+  },
+  {
+    "short_key": "la",
+    "long_key": "label"
+  },
+  {
+    "short_key": "lt",
+    "long_key": "libtype"
+  },
+  {
+    "short_key": "mo",
+    "long_key": "mood"
+  },
+  {
+    "short_key": "nw",
+    "long_key": "network"
+  },
+  {
+    "short_key": "pr",
+    "long_key": "producer"
+  },
+  {
+    "short_key": "re",
+    "long_key": "resolution"
+  },
+  {
+    "short_key": "sl",
+    "long_key": "subtitleLanguage"
+  },
+  {
+    "short_key": "so",
+    "long_key": "sort"
+  },
+  {
+    "short_key": "st",
+    "long_key": "studio"
+  },
+  {
+    "short_key": "sy",
+    "long_key": "style"
+  },
+  {
+    "short_key": "tl",
+    "long_key": "title"
+  },
+  {
+    "short_key": "uw",
+    "long_key": "unwatched"
+  },
+  {
+    "short_key": "um",
+    "long_key": "unmatched"
+  },
+  {
+    "short_key": "ul",
+    "long_key": "unwatchedLeaves"
+  },
+  {
+    "short_key": "ur",
+    "long_key": "userRating"
+  },
+  {
+    "short_key": "wr",
+    "long_key": "writer"
+  },
+  {
+    "short_key": "yr",
+    "long_key": "year"
+  }
+]
