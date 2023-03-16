@@ -2,3 +2,4 @@
 **/.DS_Store
 src/prefs.plist
 **/__pycache__
+src/tests

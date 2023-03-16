@@ -4,11 +4,11 @@
 [![made with hearth by Benjamin Oddou](https://img.shields.io/badge/made%20with%20%E2%99%A5%20by-benjamin%20oddou-DBA33A.svg?style=flat)](https://github.com/BenjaminOddou)
 [![saythanks](https://img.shields.io/badge/say-thanks-000000.svg?style=flat)](https://saythanks.io/to/BenjaminOddou)
 
-✨ Welcome to the Alfred Plex repository: **An Alfred Workflowk** ✨
+✨ Welcome to the Alfred Plex repository: **An Alfred Workflow** ✨
 
 ![vlc](public/vlc.gif)
 
-## ✅ Prerequisite
+## ✅ Prerequisites
 
 * 🍎 MacOS.
 * 🎩 Alfred 5. Note that the [Alfred Powerpack](https://www.alfredapp.com/powerpack/) is required to use workflows.
@@ -34,9 +34,9 @@ python --version
 
 ## 🧙‍♂️ Invoke the Workflow
 
-There workflow is divided in 4 parts :
+The workflow is divided in 4 parts :
 
-1. `cplex`: Manage servers and perform actions (scan librairies, modify settings, backup logs and databases...).
+1. `cplex`: Manage servers and perform actions (scan libraries, modify settings, backup logs and databases...).
 2. `splex`: Search medias throughout your servers.
 3. `dplex`: Filtering & sorting options of your plex media server(s).
 4. `pplex`: Manage presets to rapidly search medias.
@@ -61,7 +61,7 @@ Click on the server to display informations and perform actions.
 * Display connected accounts.
 * Display connected devices (keeps history of devices).
 * Display running sessions.
-* Peform actions on library sections:
+* Perform actions on library sections:
   * Scan library sections (search for new medias).
   * Refresh library sections (download fresh media info from the internet).
   * Display history.
@@ -78,7 +78,7 @@ Click on the server to display informations and perform actions.
 
 #### 1. Simple search
 
-In this mode, you search medias on your servers directly by typing your request. You can optionally add a `/` followed by one of the following mediatype: *track, album, artist, collection, actor, director, genre, movie, photo, photoalbum, playlist, show, episode, clip*.
+In this mode, you search medias on your servers directly by typing your request. You can optionally add a `/` followed by one of the following media types: *track, album, artist, collection, actor, director, genre, movie, photo, photoalbum, playlist, show, episode, clip*.
 
 Link to the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io/en/latest/modules/server.html#plexapi.server.PlexServer.search).
 
@@ -98,9 +98,9 @@ The following example returns `movies` released between `1980` and `1990` in the
 
 #### 3. Actions on medias
 
-1. Open the media on the web. Simply press ⏎ to open the media on plex. There is exception for the following mediatypes: *actor, collection, director, artist, genre*, see `3.` below.
-2. Stream the media with `VLC`. This is only available for the following mediatypes: *movie, episode, track, clip*. Press ⌘⏎ to open the media in `VLC`. 🚨 **It requires `VLC` 3.0 or above and the vlc cli. See to know how to install the cli.** 🚨
-3. Nested search. If you press ⏎ on one of the following mediatypes *actor, collection, director, artist, genre*, this will trigger an advance search.
+1. Open the media on the web. Simply press ⏎ to open the media on plex. There is exception for the following media typess: *actor, collection, director, artist, genre*, see `3.` below.
+2. Stream the media with `VLC`. This is only available for the following media types: *movie, episode, track, clip*. Press ⌘⏎ to open the media in `VLC`. 🚨 **It requires `VLC` 3.0 or above and the vlc cli. See below to know how to install the cli.** 🚨
+3. Nested search. If you press ⏎ on one of the following media types *actor, collection, director, artist, genre*, this will trigger an advance search.
 
 #### 4. VLC integration
 
@@ -186,7 +186,7 @@ Simply press ⌘⏎ to enter in the modified mode. Press ⏎ to edit the `title/
 
 ![preset_modify](public/preset_modify.webp)
 
-#### 3. Modify a preset
+#### 3. Apply a preset
 
 Simply press ⏎ on a preset to apply its value to the search workflow.
 
