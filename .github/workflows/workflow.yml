@@ -1,2 +1,0 @@
-- name: Codecov report
-  uses: codecov/codecov-action@v3
