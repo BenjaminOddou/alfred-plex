@@ -3,6 +3,7 @@
 
 [![made with hearth by Benjamin Oddou](https://img.shields.io/badge/made%20with%20%E2%99%A5%20by-benjamin%20oddou-DBA33A.svg?style=flat)](https://github.com/BenjaminOddou)
 [![saythanks](https://img.shields.io/badge/say-thanks-000000.svg?style=flat)](https://saythanks.io/to/BenjaminOddou)
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-986821.svg)](https://www.python.org/downloads/macos/)
 
 ✨ Welcome to the Alfred Plex repository: **An Alfred Workflow** ✨
 
@@ -13,7 +14,7 @@
 * 🍎 MacOS.
 * 🎩 Alfred 5. Note that the [Alfred Powerpack](https://www.alfredapp.com/powerpack/) is required to use workflows.
 * 📺 An access to a plex media server.
-* ❗ Requires **python 3.6** or above.
+* ❗ Requires **python 3.7** or above.
 
 ## 🏎️ Plex API
 
@@ -26,7 +27,7 @@ This workflow uses the [Python-PlexAPI](https://github.com/pkkid/python-plexapi)
 
 ## 🧰 Setup the workflow
 
-☑️ Install Python 3.6 or above. Check your version with:
+☑️ Install Python 3.7 or above. Check your version with:
 
 ```shell
 python --version
@@ -99,8 +100,9 @@ The following example returns `movies` released between `1980` and `1990` in the
 #### 3. Actions on medias
 
 1. Open the media on the web. Simply press ⏎ to open the media on plex. There is exception for the following media typess: *actor, collection, director, artist, genre*, see `3.` below.
-2. Stream the media with `VLC`. This is only available for the following media types: *movie, episode, track, clip*. Press ⌘⏎ to open the media in `VLC`. 🚨 **It requires `VLC` 3.0 or above and the vlc cli. See below to know how to install the cli.** 🚨
+2. Stream the media with `VLC`. This is only available for the following media types: *movie, episode, track, clip*. Press ⌘⏎ to open the media in `VLC`. 🚨 **It requires `VLC` 3.0 or above and the vlc cli. See below to know how to install the cli.**
 3. Nested search. If you press ⏎ on one of the following media types *actor, collection, director, artist, genre*, this will trigger an advance search.
+4. Get infos on movies and tv shows using the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow by [Tom McKnight](https://github.com/tmcknight). Press ⇧⏎ to trigger the workflow. 🚨 **It requires `Movie and TV Show Search` Alfred workflow 2.16.0 or above.**
 
 #### 4. VLC integration
 

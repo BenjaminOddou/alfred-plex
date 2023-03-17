@@ -10,13 +10,33 @@ downloads_folder = os.environ['downloads_folder'] # default = ~/Downloads
 sound = os.environ['sound'] # default = Submarine
 date_format = os.environ['date_format'] # default = %d-%m-%Y
 filters_bool = bool(os.environ['filters_aliases']) # default = yes
-try:
-    # default = 15
-    limit_number = int(os.environ['limit_number'])
-    days_history = int(os.environ['days_history'])
-except:
-    limit_number = 15
-    days_history = 15
+default_view = {'sort': 'originallyAvailableAt:desc'}
+limit_number = 15
+days_history = 15
+
+default_list = [
+  {
+    'title': 'default_view',
+    'func': json.loads
+  },
+  {
+    'title': 'limit_number',
+    'func': int
+  },
+  {
+    'title': 'days_history',
+    'func': int
+  }
+]
+
+for obj in default_list:
+    try:
+        value = os.environ.get(obj['title'])
+        if obj['func'] == json.loads:
+                value = value.replace('\'', '\"')
+        globals()[obj['title']] = obj['func'](value)
+    except ValueError:
+        pass
 
 # Path to servers json file
 servers_file_path = os.path.join(data_folder, 'servers.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.json
@@ -82,10 +102,13 @@ def servers_file():
         return {'items': []}
     
 def presets_file():
-    if not os.path.isfile(presets_file_path) or os.path.getsize(presets_file_path) == 0:
-        shutil.copy('./json/presets.json', presets_file_path)
-    with open(presets_file_path, 'r') as file:
-        return json.load(file)
+    try:
+        if not os.path.isfile(presets_file_path) or os.path.getsize(presets_file_path) == 0:
+            shutil.copy('./json/presets.json', presets_file_path)
+        with open(presets_file_path, 'r') as file:
+            return json.load(file)
+    except:
+        return {'items': []}
 
 def delist(_type: str, items: list):
     items.append({'skip': _type})

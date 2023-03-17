@@ -1,8 +1,9 @@
+import os
 import sys
 import json
 sys.path.insert(0, './lib')
 from lib.plexapi.server import PlexServer
-from utils import display_notification, servers_file_path, servers_file
+from utils import display_notification, servers_file_path, servers_file, data_folder
 from urllib.parse import urlparse, parse_qs
 
 query = sys.argv[1].split(';')[0]
@@ -12,7 +13,7 @@ if query == '_delete':
     for item in data['items']:
         if item.get('machineIdentifier') == sys.argv[1].split(';')[1]:
             data['items'].remove(item)
-            display_notification('✅ Sucess !', f'The Plex Media Server {item.get("title")} is removed')
+            message = f'The Plex Media Server {item.get("title")} is removed'
             break
 else:
     try:
@@ -35,7 +36,7 @@ else:
                 'plexToken': plexToken,
             }
             data['items'].append(json_obj)
-            display_notification('✅ Sucess !', f'The Plex Media Server {plex_instance.friendlyName} is added')
+            message = f'The Plex Media Server {plex_instance.friendlyName} is added'
         except:
             display_notification('🚨 Error !', 'Failed to connect to the Plex server. Check the IP and token')
             exit()
@@ -43,5 +44,13 @@ else:
         display_notification('🚨 Error !', 'Invalid URL format')
         exit()
 
-with open(servers_file_path, 'w') as file:
-    json.dump(data, file, indent=4)
+if not os.path.exists(data_folder):
+    os.makedirs(data_folder)
+
+try:
+    with open(servers_file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+    if message:
+        display_notification('✅ Sucess !', message)
+except:
+    display_notification('🚨 Error !', 'Data can\'t be written in servers.json')

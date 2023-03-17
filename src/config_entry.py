@@ -235,7 +235,7 @@ if data.get('items'):
                         },
                         {
                             'title': 'Refresh All Library Sections',
-                            'subtitle': f'Forces a download of fresh media info from the internet ǀ Last Refresh: {lastUpdate}',
+                            'subtitle': f'Forces a download of fresh media infos from the internet ǀ Last Refresh: {lastUpdate}',
                             'arg': f'_run;{serverID};refresh;all',
                             'icon': {
                                 'path': 'icons/refresh.webp',
@@ -310,7 +310,7 @@ if data.get('items'):
                         },
                         {
                             'title': f'Refresh {lTitle} Section',
-                            'subtitle': f'Forces a download of fresh media info from the internet ǀ Last Refresh: {lastUpdate}',
+                            'subtitle': f'Forces a download of fresh media infos from the internet ǀ Last Refresh: {lastUpdate}',
                             'arg': f'_run;{serverID};refresh;{sectionID}',
                             'icon': {
                                 'path': 'icons/refresh.webp',

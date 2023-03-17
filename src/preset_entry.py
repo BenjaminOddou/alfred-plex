@@ -2,7 +2,7 @@ import os
 import sys
 import time
 import json
-from utils import presets_file, filters_bool, aliases_file, display_notification, addReturnbtn
+from utils import presets_file, filters_bool, aliases_file, display_notification, addReturnbtn, default_element
 
 query = sys.argv[1]
 
@@ -114,6 +114,9 @@ if data.get('items'):
                     }
                 ]:
                     items.append(elem)
+else:
+    items = []
+    default_element('no_PMS', items)
 
 filtered_items = [item for item in items if query.lower() in item['title'].lower() or query.lower() in item['subtitle'].lower()]
 

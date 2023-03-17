@@ -3,7 +3,7 @@ import json
 sys.path.insert(0, './lib')
 from lib.plexapi.server import PlexServer
 from lib.plexapi import utils
-from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification
+from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view
 
 # full query
 query = sys.argv[1]
@@ -101,10 +101,20 @@ def register_elements(database: list):
             streamURL = media.getStreamURL() if mType == 'track' else media.getStreamURL(protocol="dash")
             json_obj['mods'].update({
                 'cmd': {
-                    'subtitle': 'Press ⏎ play the media in a VLC instance',
+                    'subtitle': 'Press ⏎ to play the media in a VLC instance',
                     'arg': f'_stream;{streamURL};{mTitle}',
                     'icon': {
                         'path': 'icons/vlc.webp',
+                    },
+                }
+            })
+        if mType in ['movie', 'show']:
+            json_obj['mods'].update({
+                'shift': {
+                    'subtitle': 'Press ⏎ to get media infos using Movie and TV Show Search workflow',
+                    'arg': f'_mtvsearch;{plex_instance.machineIdentifier};{media.librarySectionID};{mType};{media.key}',
+                    'icon': {
+                        'path': 'icons/movie_and_tv_show_search.webp',
                     },
                 }
             })
@@ -152,7 +162,7 @@ if data.get('items'):
                 delist('invalid_FILTERS', items)
         else:
             try:
-                database = plex_instance.library.search(limit=limit_number) if query == '' else plex_instance.search(query, limit=limit_number) if not '/' in query else plex_instance.search(query.split('/')[0], mediatype=query.split('/')[1], limit=limit_number)
+                database = plex_instance.library.search(limit=limit_number, **default_view) if query == '' else plex_instance.search(query, limit=limit_number) if not '/' in query else plex_instance.search(query.split('/')[0], mediatype=query.split('/')[1], limit=limit_number)
                 register_elements(database)
             except:
                 delist('no_ELEM', items)
