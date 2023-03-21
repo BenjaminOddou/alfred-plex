@@ -3,9 +3,12 @@ sys.path.insert(0, './lib')
 from lib.plexapi.server import PlexServer
 from utils import servers_file, display_notification
 
-query = sys.argv[1].split(';')
+try:
+    query = sys.argv[1].split(';')
+    _machineID, _sectionID, _type, _key = query[1], query[2], query[3], query[4]
+except IndexError:
+    query = _machineID = _sectionID = _type = _key = ''
 
-_machineID, _sectionID, _type, _key = query[1], query[2], query[3], query[4]
 
 data = servers_file()
 

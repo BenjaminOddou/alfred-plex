@@ -9,7 +9,10 @@ from utils import default_element, servers_file, aliases_file, filters_bool, dis
 
 items = []
 
-query = sys.argv[1]
+try:
+    query = sys.argv[1]
+except IndexError:
+    query = ''
 
 data = servers_file()
 

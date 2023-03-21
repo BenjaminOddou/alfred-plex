@@ -5,36 +5,55 @@ import shutil
 import datetime
 
 # Workflow variables
-data_folder = os.environ['data_folder'] # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex
-downloads_folder = os.environ['downloads_folder'] # default = ~/Downloads
-sound = os.environ['sound'] # default = Submarine
-date_format = os.environ['date_format'] # default = %d-%m-%Y
-filters_bool = bool(os.environ['filters_aliases']) # default = yes
-default_view = {'sort': 'originallyAvailableAt:desc'}
+data_folder = os.path.expanduser('~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex')
+downloads_folder = os.path.expanduser('~/Downloads')
+sound = 'Submarine'
+date_format = '%d-%m-%Y'
+filters_bool = True
+default_view = '{"sort": "originallyAvailableAt:desc"}'
 limit_number = 15
 days_history = 15
 
 default_list = [
-  {
-    'title': 'default_view',
-    'func': json.loads
-  },
-  {
-    'title': 'limit_number',
-    'func': int
-  },
-  {
-    'title': 'days_history',
-    'func': int
-  }
+    {
+        'title': 'data_folder',
+    },
+    {
+        'title': 'downloads_folder',
+    },
+    {
+        'title': 'sound',
+    },
+    {
+        'title': 'date_format',
+    },
+    {
+        'title': 'filters_bool',
+        'func': bool
+    },
+    {
+        'title': 'default_view',
+        'func': json.loads
+    },
+    {
+        'title': 'limit_number',
+        'func': int
+    },
+    {
+        'title': 'days_history',
+        'func': int
+    }
 ]
 
 for obj in default_list:
     try:
-        value = os.environ.get(obj['title'])
-        if obj['func'] == json.loads:
+        value = os.environ.get(obj.get('title'))
+        if not value:
+            value = globals()[obj.get('title')]
+        function = obj.get('func')
+        if function == json.loads and value:
                 value = value.replace('\'', '\"')
-        globals()[obj['title']] = obj['func'](value)
+        globals()[obj.get('title')] = function(value) if function else value
     except ValueError:
         pass
 

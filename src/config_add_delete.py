@@ -6,18 +6,22 @@ from lib.plexapi.server import PlexServer
 from utils import display_notification, servers_file_path, servers_file, data_folder
 from urllib.parse import urlparse, parse_qs
 
-query = sys.argv[1].split(';')[0]
+try:
+    query = sys.argv[1].split(';')
+    _type, _input = query[0], query[1]
+except IndexError:
+    exit()
 
-if query == '_delete':
+if _type == '_delete':
     data = servers_file()
     for item in data['items']:
-        if item.get('machineIdentifier') == sys.argv[1].split(';')[1]:
+        if item.get('machineIdentifier') == _input:
             data['items'].remove(item)
             message = f'The Plex Media Server {item.get("title")} is removed'
             break
-else:
+elif _type == '_new':
     try:
-        parsed_url = urlparse(query)        
+        parsed_url = urlparse(_input)        
         baseURL = f'{parsed_url.scheme}://{parsed_url.netloc}'
         plexToken = parse_qs(parsed_url.query).get("X-Plex-Token", [None])[0]
         try:

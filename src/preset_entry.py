@@ -4,7 +4,10 @@ import time
 import json
 from utils import presets_file, filters_bool, aliases_file, display_notification, addReturnbtn, default_element
 
-query = sys.argv[1]
+try:
+    query = sys.argv[1]
+except IndexError:
+    query = ''
 
 data = presets_file()
 

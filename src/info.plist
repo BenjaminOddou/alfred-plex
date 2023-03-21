@@ -128,7 +128,7 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>FA85B334-BF76-4EA8-B05B-0F5D51A07E4F</string>
+				<string>1DEB0085-8E6C-402A-818E-B7933DF3C170</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -168,6 +168,19 @@
 			<dict>
 				<key>destinationuid</key>
 				<string>23BBD045-338E-4B7D-AACB-117358711209</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>3670BB45-F70D-4DB0-AA6F-33937548796F</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>B7D72747-2F01-4239-BE6A-87EF8842564B</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -454,7 +467,7 @@
 			</dict>
 			<dict>
 				<key>destinationuid</key>
-				<string>B7D72747-2F01-4239-BE6A-87EF8842564B</string>
+				<string>3670BB45-F70D-4DB0-AA6F-33937548796F</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -755,8 +768,6 @@
 				<false/>
 			</dict>
 		</array>
-		<key>FA85B334-BF76-4EA8-B05B-0F5D51A07E4F</key>
-		<array/>
 	</dict>
 	<key>createdby</key>
 	<string>Benjamin Oddou</string>
@@ -809,6 +820,15 @@
 				<string></string>
 				<key>type</key>
 				<integer>5</integer>
+			</dict>
+			<key>inboundconfig</key>
+			<dict>
+				<key>custominputarg</key>
+				<string>{var:split1};{query}</string>
+				<key>externalid</key>
+				<string>{query}</string>
+				<key>usecustominputarg</key>
+				<true/>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.action.script</string>
@@ -906,14 +926,6 @@
 			<integer>1</integer>
 		</dict>
 		<dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.junction</string>
-			<key>uid</key>
-			<string>B7D72747-2F01-4239-BE6A-87EF8842564B</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
 			<key>config</key>
 			<dict>
 				<key>alfredfiltersresults</key>
@@ -983,6 +995,35 @@
 			<string>02EE564C-369D-42E3-A658-FBB34D997483</string>
 			<key>version</key>
 			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.junction</string>
+			<key>uid</key>
+			<string>B7D72747-2F01-4239-BE6A-87EF8842564B</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>matchmode</key>
+				<integer>1</integer>
+				<key>matchstring</key>
+				<string>(.+);</string>
+				<key>regexcaseinsensitive</key>
+				<false/>
+				<key>regexmultiline</key>
+				<false/>
+				<key>replacestring</key>
+				<string></string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.replace</string>
+			<key>uid</key>
+			<string>3670BB45-F70D-4DB0-AA6F-33937548796F</string>
+			<key>version</key>
+			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -1571,6 +1612,15 @@
 				<key>type</key>
 				<integer>5</integer>
 			</dict>
+			<key>inboundconfig</key>
+			<dict>
+				<key>custominputarg</key>
+				<string>{var:split1};{query}</string>
+				<key>externalid</key>
+				<string>{query}</string>
+				<key>usecustominputarg</key>
+				<true/>
+			</dict>
 			<key>type</key>
 			<string>alfred.workflow.action.script</string>
 			<key>uid</key>
@@ -1959,7 +2009,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>python3 search_stream.py "${split2}" "${split3}"</string>
+				<string>python3 search_stream.py "$split2" "$split3"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -1970,7 +2020,7 @@
 			<key>type</key>
 			<string>alfred.workflow.action.script</string>
 			<key>uid</key>
-			<string>FA85B334-BF76-4EA8-B05B-0F5D51A07E4F</string>
+			<string>1DEB0085-8E6C-402A-818E-B7933DF3C170</string>
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
@@ -2394,7 +2444,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>1295</real>
 			<key>ypos</key>
-			<real>140</real>
+			<real>145</real>
 		</dict>
 		<key>081EE9B5-4C76-4808-A55A-8C318FC5D5E1</key>
 		<dict>
@@ -2423,6 +2473,15 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<integer>11</integer>
 			<key>xpos</key>
 			<real>860</real>
+			<key>ypos</key>
+			<real>865</real>
+		</dict>
+		<key>1DEB0085-8E6C-402A-818E-B7933DF3C170</key>
+		<dict>
+			<key>colorindex</key>
+			<integer>3</integer>
+			<key>xpos</key>
+			<real>1295</real>
 			<key>ypos</key>
 			<real>865</real>
 		</dict>
@@ -2457,6 +2516,13 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<real>1660</real>
 			<key>ypos</key>
 			<real>330</real>
+		</dict>
+		<key>3670BB45-F70D-4DB0-AA6F-33937548796F</key>
+		<dict>
+			<key>xpos</key>
+			<real>745</real>
+			<key>ypos</key>
+			<real>175</real>
 		</dict>
 		<key>3BC3C875-DB4C-49ED-B5BD-46C692693C70</key>
 		<dict>
@@ -2609,7 +2675,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>1295</real>
 			<key>ypos</key>
-			<real>255</real>
+			<real>260</real>
 		</dict>
 		<key>92D4B56E-3395-42A2-9F54-D5E692755206</key>
 		<dict>
@@ -2660,7 +2726,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>1195</real>
 			<key>ypos</key>
-			<real>170</real>
+			<real>175</real>
 		</dict>
 		<key>BAF6B52D-591D-4CCA-A900-48BF6CF3DFA2</key>
 		<dict>
@@ -2683,7 +2749,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>745</real>
 			<key>ypos</key>
-			<real>285</real>
+			<real>290</real>
 		</dict>
 		<key>C4229DB5-0CB7-4930-97D8-078335DF3808</key>
 		<dict>
@@ -2776,7 +2842,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>860</real>
 			<key>ypos</key>
-			<real>255</real>
+			<real>260</real>
 		</dict>
 		<key>E6F9453B-7823-4175-9D2A-02D815624F8F</key>
 		<dict>
@@ -2805,15 +2871,6 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<real>1040</real>
 			<key>ypos</key>
 			<real>1100</real>
-		</dict>
-		<key>FA85B334-BF76-4EA8-B05B-0F5D51A07E4F</key>
-		<dict>
-			<key>colorindex</key>
-			<integer>3</integer>
-			<key>xpos</key>
-			<real>1295</real>
-			<key>ypos</key>
-			<real>865</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
@@ -2968,7 +3025,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>type</key>
 			<string>popupbutton</string>
 			<key>variable</key>
-			<string>filters_aliases</string>
+			<string>filters_bool</string>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -3140,7 +3197,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>1.1.0</string>
+	<string>1.1.1</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>

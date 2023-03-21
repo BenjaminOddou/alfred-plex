@@ -4,19 +4,23 @@ import json
 import secrets
 from utils import presets_file, display_notification, presets_file_path
 
-query = sys.argv[1]
-_type = os.environ['split1']
+try:
+    query = sys.argv[1].split(';')
+    _type, _input = query[0], query[1]
+except IndexError:
+    exit()
+
 data = presets_file() if presets_file().get('items') else {'items':[]}
 if _type == '_delete':
     for item in data['items']:
-        if item.get('id') == query:
+        if item.get('id') == _input:
             data['items'].remove(item)
             display_notification('✅ Sucess !', f'The Preset {item.get("title")} is removed')
             break
 elif _type == '_new':
     try:
         value = os.environ['_new_preset']
-        title, subtitle = query.split('/')[0], query.split('/')[1]
+        title, subtitle = _input.split('/')[0], _input.split('/')[1]
     except:
         display_notification('🚨 Error !', 'Invalid input')
         exit()
@@ -37,7 +41,7 @@ elif _type == '_modify':
                 title = item.get('title')
                 break
         if _subtype == 'tl&sb':
-            title, subtitle = query.split('/')[0], query.split('/')[1]
+            title, subtitle = _input.split('/')[0], _input.split('/')[1]
             for item in data['items']:
                 if item.get('id') == _key:
                     item['title'] = title
@@ -45,7 +49,7 @@ elif _type == '_modify':
         elif _subtype == 'arg':
             for item in data['items']:
                 if item.get('id') == _key:
-                    item['arg'] = query
+                    item['arg'] = _input
         display_notification('✅ Sucess !', f'The Preset {title} is modified')
     except:
         display_notification('🚨 Error !', 'Invalid input')

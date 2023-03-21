@@ -23,7 +23,10 @@ def makeHistory(h, lName):
         }
     })
 
-query = sys.argv[1]
+try:
+    query = sys.argv[1]
+except IndexError:
+    query = ''
 
 data = servers_file()
 

@@ -6,7 +6,10 @@ from lib.plexapi import utils
 from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view
 
 # full query
-query = sys.argv[1]
+try:
+    query = sys.argv[1]
+except IndexError:
+    query = ''
 
 # Full list of filters
 query_dict = {}
