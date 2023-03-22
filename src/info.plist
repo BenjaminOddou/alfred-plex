@@ -4,8 +4,6 @@
 <dict>
 	<key>bundleid</key>
 	<string>com.benjamino.plex</string>
-	<key>category</key>
-	<string>Tools</string>
 	<key>connections</key>
 	<dict>
 		<key>02EE564C-369D-42E3-A658-FBB34D997483</key>
@@ -137,6 +135,46 @@
 				<false/>
 			</dict>
 		</array>
+		<key>1BC54BA6-3FA9-4D44-B71D-8805D9C65F7D</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>95D6FD39-DD23-48E9-ACE7-F8F7EA2692C3</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>64690AF8-C4D4-415F-8ED5-3F1EBEFF634C</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>DFCE7BBE-A90A-4169-B869-2050422F145E</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>1DEB0085-8E6C-402A-818E-B7933DF3C170</key>
+		<array/>
+		<key>214466CB-E5BD-44AA-86E7-57162F32338F</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>1BC54BA6-3FA9-4D44-B71D-8805D9C65F7D</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>23BBD045-338E-4B7D-AACB-117358711209</key>
 		<array>
 			<dict>
@@ -154,7 +192,7 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>C4229DB5-0CB7-4930-97D8-078335DF3808</string>
+				<string>214466CB-E5BD-44AA-86E7-57162F32338F</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -326,6 +364,19 @@
 			<dict>
 				<key>destinationuid</key>
 				<string>D0786415-52DE-4713-A9A4-64D3DA2431F3</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>95D6FD39-DD23-48E9-ACE7-F8F7EA2692C3</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>C4229DB5-0CB7-4930-97D8-078335DF3808</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -597,6 +648,19 @@
 			<dict>
 				<key>destinationuid</key>
 				<string>BB5ECA85-4793-4141-AFE1-B3077A1DDAD2</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>DFCE7BBE-A90A-4169-B869-2050422F145E</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>C4229DB5-0CB7-4930-97D8-078335DF3808</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -2009,7 +2073,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>python3 search_stream.py "$split2" "$split3"</string>
+				<string>python3 search_stream.py "$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -2035,7 +2099,8 @@
 				<string>for pid in $(ps aux | grep '[V]LC' | awk '{print $2}'); do
   echo "Killing process $pid"
   kill $pid
-done</string>
+done
+echo -n "$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -2047,6 +2112,27 @@ done</string>
 			<string>alfred.workflow.action.script</string>
 			<key>uid</key>
 			<string>141679F0-C1FB-48A4-A933-265C08ABA409</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>matchmode</key>
+				<integer>1</integer>
+				<key>matchstring</key>
+				<string>(.+);</string>
+				<key>regexcaseinsensitive</key>
+				<false/>
+				<key>regexmultiline</key>
+				<false/>
+				<key>replacestring</key>
+				<string></string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.replace</string>
+			<key>uid</key>
+			<string>95D6FD39-DD23-48E9-ACE7-F8F7EA2692C3</string>
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
@@ -2138,6 +2224,59 @@ done</string>
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>conditions</key>
+				<array>
+					<dict>
+						<key>inputstring</key>
+						<string>{var:_lib1}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>0</integer>
+						<key>matchstring</key>
+						<string>0</string>
+						<key>outputlabel</key>
+						<string>filter</string>
+						<key>uid</key>
+						<string>64690AF8-C4D4-415F-8ED5-3F1EBEFF634C</string>
+					</dict>
+				</array>
+				<key>elselabel</key>
+				<string>else</string>
+				<key>hideelse</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.conditional</string>
+			<key>uid</key>
+			<string>1BC54BA6-3FA9-4D44-B71D-8805D9C65F7D</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>delimiter</key>
+				<string>;</string>
+				<key>discardemptyarguments</key>
+				<false/>
+				<key>outputas</key>
+				<integer>0</integer>
+				<key>trimarguments</key>
+				<true/>
+				<key>variableprefix</key>
+				<string>_lib</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.split</string>
+			<key>uid</key>
+			<string>214466CB-E5BD-44AA-86E7-57162F32338F</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>delimiter</key>
 				<string>;</string>
 				<key>discardemptyarguments</key>
@@ -2153,6 +2292,21 @@ done</string>
 			<string>alfred.workflow.utility.split</string>
 			<key>uid</key>
 			<string>4A5D5ED4-5EAD-4941-8D28-1D24F854332A</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>inboundconfig</key>
+			<dict>
+				<key>externalid</key>
+				<string>{query}</string>
+				<key>usecustominputarg</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.junction</string>
+			<key>uid</key>
+			<string>DFCE7BBE-A90A-4169-B869-2050422F145E</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -2395,33 +2549,26 @@ done</string>
 
 ✨ *Browse and perform actions on your plex media servers* ✨
 
-## ✅ Prerequisite
-
-* 🍎 MacOS.
-* 🎩 Alfred 5. Note that the [Alfred Powerpack](https://www.alfredapp.com/powerpack/) is required to use workflows.
-* 📺 An access to a plex media server.
-* ❗ Requires **python 3.6** or above.
-
 ## 🏎️ Plex API
 
-This workflow uses the [Python-PlexAPI](https://github.com/pkkid/python-plexapi) but doesn't cover all possibilities of this tool. If you see a feature from the Python-PlexAPI that can be incorporated in this workflow, please let me know!
+This workflow uses the [Python-PlexAPI](https://github.com/pkkid/python-plexapi) but doesn't cover all capabilities of this tool. If you see a good feature from the Python-PlexAPI that can be incorporated in this workflow, please let me know by opening an issue or sending a pull request.
 
 ## 🧰 Setup the workflow
 
-☑️ Install Python 3.6 or above. Check your version with :
+Install Python 3.7 or above. Check your version with:
 
-`python --version` 
+`python --version`
 
-## 🧙‍♂️ Invoke the Workflow
+## 🧙‍♂️ Invoke the workflow
 
-There workflow is divided in 4 parts :
+The workflow is divided in 4 parts :
 
-1. `cplex`: Manage servers and perform actions (scan librairies, modify settings, backup logs and databases...).
+1. `cplex`: Manage servers and perform actions (scan libraries, modify settings, backup logs and databases...).
 2. `splex`: Search medias throughout your servers.
 3. `dplex`: Filtering &amp; sorting options of your plex media server(s).
 4. `pplex`: Manage presets to rapidly search medias.
 
-You can edit these triggers in the user configuration panel with the `🕹️` symbol.
+You can edit these triggers (flagged with a `🕹️` symbol) in the user configuration panel.
 
 ## 🤖 Usage of the workflow
 
@@ -2442,28 +2589,28 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>colorindex</key>
 			<integer>3</integer>
 			<key>xpos</key>
-			<real>1295</real>
+			<real>1380</real>
 			<key>ypos</key>
 			<real>145</real>
 		</dict>
 		<key>081EE9B5-4C76-4808-A55A-8C318FC5D5E1</key>
 		<dict>
 			<key>xpos</key>
-			<real>745</real>
+			<real>705</real>
 			<key>ypos</key>
 			<real>400</real>
 		</dict>
 		<key>0C7BEDCD-25E0-42EE-AA50-3B064007573E</key>
 		<dict>
 			<key>xpos</key>
-			<real>1985</real>
+			<real>2090</real>
 			<key>ypos</key>
 			<real>785</real>
 		</dict>
 		<key>0F7819B8-8841-48CB-91F5-5BC37918373D</key>
 		<dict>
 			<key>xpos</key>
-			<real>1510</real>
+			<real>1615</real>
 			<key>ypos</key>
 			<real>825</real>
 		</dict>
@@ -2472,25 +2619,39 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>colorindex</key>
 			<integer>11</integer>
 			<key>xpos</key>
-			<real>860</real>
+			<real>1205</real>
 			<key>ypos</key>
 			<real>865</real>
+		</dict>
+		<key>1BC54BA6-3FA9-4D44-B71D-8805D9C65F7D</key>
+		<dict>
+			<key>xpos</key>
+			<real>290</real>
+			<key>ypos</key>
+			<real>900</real>
 		</dict>
 		<key>1DEB0085-8E6C-402A-818E-B7933DF3C170</key>
 		<dict>
 			<key>colorindex</key>
 			<integer>3</integer>
 			<key>xpos</key>
-			<real>1295</real>
+			<real>1380</real>
 			<key>ypos</key>
 			<real>865</real>
+		</dict>
+		<key>214466CB-E5BD-44AA-86E7-57162F32338F</key>
+		<dict>
+			<key>xpos</key>
+			<real>180</real>
+			<key>ypos</key>
+			<real>910</real>
 		</dict>
 		<key>23BBD045-338E-4B7D-AACB-117358711209</key>
 		<dict>
 			<key>note</key>
-			<string>Please submit issues and feature requests at https://github.com/BenjaminOddou/alfred-plex</string>
+			<string>dplex - filters &amp; sort options of your plex media server(s).</string>
 			<key>xpos</key>
-			<real>1735</real>
+			<real>1840</real>
 			<key>ypos</key>
 			<real>300</real>
 		</dict>
@@ -2499,7 +2660,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>colorindex</key>
 			<integer>3</integer>
 			<key>xpos</key>
-			<real>1295</real>
+			<real>1380</real>
 			<key>ypos</key>
 			<real>485</real>
 		</dict>
@@ -2513,98 +2674,98 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>2EBA3D29-CBC6-44E2-B18F-3145377D2C8D</key>
 		<dict>
 			<key>xpos</key>
-			<real>1660</real>
+			<real>1765</real>
 			<key>ypos</key>
 			<real>330</real>
 		</dict>
 		<key>3670BB45-F70D-4DB0-AA6F-33937548796F</key>
 		<dict>
 			<key>xpos</key>
-			<real>745</real>
+			<real>705</real>
 			<key>ypos</key>
 			<real>175</real>
 		</dict>
 		<key>3BC3C875-DB4C-49ED-B5BD-46C692693C70</key>
 		<dict>
 			<key>xpos</key>
-			<real>860</real>
+			<real>1205</real>
 			<key>ypos</key>
 			<real>985</real>
 		</dict>
 		<key>3CD5B6ED-10DE-4CCC-9B53-94FE8DF5EDDF</key>
 		<dict>
 			<key>xpos</key>
-			<real>2275</real>
+			<real>2380</real>
 			<key>ypos</key>
 			<real>890</real>
 		</dict>
 		<key>3F328B5D-A1A1-4480-B9F1-FA080DEDBE89</key>
 		<dict>
 			<key>xpos</key>
-			<real>2630</real>
+			<real>2735</real>
 			<key>ypos</key>
 			<real>420</real>
 		</dict>
 		<key>442E934D-80E9-41F0-A223-9BCAF437A189</key>
 		<dict>
 			<key>xpos</key>
-			<real>1510</real>
+			<real>1615</real>
 			<key>ypos</key>
 			<real>300</real>
 		</dict>
 		<key>453137C9-9358-4E77-A2F5-F06291FD43FE</key>
 		<dict>
 			<key>xpos</key>
-			<real>2105</real>
+			<real>2210</real>
 			<key>ypos</key>
 			<real>700</real>
 		</dict>
 		<key>4A5D5ED4-5EAD-4941-8D28-1D24F854332A</key>
 		<dict>
 			<key>xpos</key>
-			<real>435</real>
+			<real>705</real>
 			<key>ypos</key>
 			<real>910</real>
 		</dict>
 		<key>516B24BD-CF67-4FFE-B777-0857B2D41F0B</key>
 		<dict>
 			<key>xpos</key>
-			<real>1040</real>
+			<real>815</real>
 			<key>ypos</key>
 			<real>370</real>
 		</dict>
 		<key>5A337C9A-D015-4EF1-8879-B95F9C64B94F</key>
 		<dict>
 			<key>xpos</key>
-			<real>2630</real>
+			<real>2735</real>
 			<key>ypos</key>
 			<real>300</real>
 		</dict>
 		<key>5B18DAE4-D2A7-49F2-A376-45BCA0A16C99</key>
 		<dict>
 			<key>xpos</key>
-			<real>2630</real>
+			<real>2735</real>
 			<key>ypos</key>
 			<real>185</real>
 		</dict>
 		<key>5E144612-C363-4E2E-9EC4-6D661E45D703</key>
 		<dict>
 			<key>xpos</key>
-			<real>1040</real>
+			<real>1380</real>
 			<key>ypos</key>
 			<real>1220</real>
 		</dict>
 		<key>5EDF5589-B92D-4332-9738-EDD2FB1FD4EF</key>
 		<dict>
 			<key>xpos</key>
-			<real>2630</real>
+			<real>2735</real>
 			<key>ypos</key>
 			<real>1215</real>
 		</dict>
 		<key>5F467B38-88E0-4305-863A-0B9B04A161E1</key>
 		<dict>
 			<key>xpos</key>
-			<real>435</real>
+			<real>420</real>
 			<key>ypos</key>
 			<real>205</real>
 		</dict>
@@ -2613,28 +2774,28 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>colorindex</key>
 			<integer>3</integer>
 			<key>xpos</key>
-			<real>860</real>
+			<real>1205</real>
 			<key>ypos</key>
 			<real>1220</real>
 		</dict>
 		<key>6600C753-B927-468D-A2A5-A563744BA0C2</key>
 		<dict>
 			<key>xpos</key>
-			<real>900</real>
+			<real>1245</real>
 			<key>ypos</key>
 			<real>1345</real>
 		</dict>
 		<key>664CF5BC-0E41-439A-BE04-CBA73A95D7AA</key>
 		<dict>
 			<key>xpos</key>
-			<real>745</real>
+			<real>705</real>
 			<key>ypos</key>
 			<real>515</real>
 		</dict>
 		<key>69CF353B-BD6F-45DD-867A-7401578A11EB</key>
 		<dict>
 			<key>xpos</key>
-			<real>745</real>
+			<real>1090</real>
 			<key>ypos</key>
 			<real>1130</real>
 		</dict>
@@ -2643,28 +2804,28 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>colorindex</key>
 			<integer>3</integer>
 			<key>xpos</key>
-			<real>2630</real>
+			<real>2735</real>
 			<key>ypos</key>
 			<real>780</real>
 		</dict>
 		<key>7594CE60-6690-4784-AC5F-EDFBED532DB6</key>
 		<dict>
 			<key>xpos</key>
-			<real>2275</real>
+			<real>2380</real>
 			<key>ypos</key>
 			<real>1245</real>
 		</dict>
 		<key>7A90FC13-C431-41A0-A20A-4BEB4C7E7FEA</key>
 		<dict>
 			<key>xpos</key>
-			<real>2275</real>
+			<real>2380</real>
 			<key>ypos</key>
 			<real>215</real>
 		</dict>
 		<key>8882089C-7854-4296-9FF8-760322297DDA</key>
 		<dict>
 			<key>xpos</key>
-			<real>2630</real>
+			<real>2735</real>
 			<key>ypos</key>
 			<real>980</real>
 		</dict>
@@ -2673,72 +2834,79 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>colorindex</key>
 			<integer>3</integer>
 			<key>xpos</key>
-			<real>1295</real>
+			<real>1380</real>
 			<key>ypos</key>
 			<real>260</real>
 		</dict>
 		<key>92D4B56E-3395-42A2-9F54-D5E692755206</key>
 		<dict>
 			<key>xpos</key>
-			<real>2370</real>
+			<real>2475</real>
 			<key>ypos</key>
 			<real>860</real>
+		</dict>
+		<key>95D6FD39-DD23-48E9-ACE7-F8F7EA2692C3</key>
+		<dict>
+			<key>xpos</key>
+			<real>420</real>
+			<key>ypos</key>
+			<real>880</real>
 		</dict>
 		<key>9BF08416-041A-4AF8-AF08-5F2A2FE25464</key>
 		<dict>
 			<key>xpos</key>
-			<real>2275</real>
+			<real>2380</real>
 			<key>ypos</key>
 			<real>1125</real>
 		</dict>
 		<key>A9459B92-595A-4F28-AF71-82218D7C3E96</key>
 		<dict>
 			<key>xpos</key>
-			<real>1915</real>
+			<real>2020</real>
 			<key>ypos</key>
 			<real>855</real>
 		</dict>
 		<key>B09D6C7C-D196-4CD9-BF28-A036C738C9CD</key>
 		<dict>
 			<key>note</key>
-			<string>Please submit issues and feature requests at https://github.com/BenjaminOddou/alfred-plex</string>
+			<string>pplex - manage presets to rapidly search medias.</string>
 			<key>xpos</key>
-			<real>1735</real>
+			<real>1840</real>
 			<key>ypos</key>
 			<real>825</real>
 		</dict>
 		<key>B24E5B6F-3D65-4C7B-BD9E-24A11256F0C5</key>
 		<dict>
 			<key>xpos</key>
-			<real>1040</real>
+			<real>1380</real>
 			<key>ypos</key>
 			<real>745</real>
 		</dict>
 		<key>B6F489D5-47BF-4ADC-84FE-EB9BCCFFAA11</key>
 		<dict>
 			<key>xpos</key>
-			<real>2275</real>
+			<real>2380</real>
 			<key>ypos</key>
 			<real>450</real>
 		</dict>
 		<key>B7D72747-2F01-4239-BE6A-87EF8842564B</key>
 		<dict>
 			<key>xpos</key>
-			<real>1195</real>
+			<real>1280</real>
 			<key>ypos</key>
 			<real>175</real>
 		</dict>
 		<key>BAF6B52D-591D-4CCA-A900-48BF6CF3DFA2</key>
 		<dict>
 			<key>xpos</key>
-			<real>1915</real>
+			<real>2020</real>
 			<key>ypos</key>
 			<real>330</real>
 		</dict>
 		<key>BB5ECA85-4793-4141-AFE1-B3077A1DDAD2</key>
 		<dict>
 			<key>note</key>
-			<string>Please submit issues and feature requests at https://github.com/BenjaminOddou/alfred-plex</string>
+			<string>cplex - manage servers and perform actions.</string>
 			<key>xpos</key>
 			<real>255</real>
 			<key>ypos</key>
@@ -2747,79 +2915,79 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>C111113A-4594-40B5-9BBC-5DAA7E4C2430</key>
 		<dict>
 			<key>xpos</key>
-			<real>745</real>
+			<real>705</real>
 			<key>ypos</key>
 			<real>290</real>
 		</dict>
 		<key>C4229DB5-0CB7-4930-97D8-078335DF3808</key>
 		<dict>
 			<key>note</key>
-			<string>Please submit issues and feature requests at https://github.com/BenjaminOddou/alfred-plex</string>
+			<string>splex - search medias throughout your servers.</string>
 			<key>xpos</key>
-			<real>255</real>
+			<real>510</real>
 			<key>ypos</key>
 			<real>880</real>
 		</dict>
 		<key>C65E86FD-80A6-4422-9B7B-64BC913DEC87</key>
 		<dict>
 			<key>xpos</key>
-			<real>2630</real>
+			<real>2735</real>
 			<key>ypos</key>
 			<real>1095</real>
 		</dict>
 		<key>C669AC08-F6CF-4C85-A501-30B7E6C2FFD0</key>
 		<dict>
 			<key>xpos</key>
-			<real>505</real>
+			<real>510</real>
 			<key>ypos</key>
 			<real>150</real>
 		</dict>
 		<key>C88EA175-4F40-4AD0-A86B-3ACB96DED3C7</key>
 		<dict>
 			<key>xpos</key>
-			<real>2370</real>
+			<real>2475</real>
 			<key>ypos</key>
 			<real>700</real>
 		</dict>
 		<key>CD6ABFB1-3AC4-41A0-8745-2C0273A06DDC</key>
 		<dict>
 			<key>xpos</key>
-			<real>2275</real>
+			<real>2380</real>
 			<key>ypos</key>
 			<real>810</real>
 		</dict>
 		<key>CD864703-CA8A-41B7-A928-F7910957AFF6</key>
 		<dict>
 			<key>xpos</key>
-			<real>860</real>
+			<real>810</real>
 			<key>ypos</key>
 			<real>60</real>
 		</dict>
 		<key>CFA2C672-7A49-4B61-95E4-3D4896FE914C</key>
 		<dict>
 			<key>xpos</key>
-			<real>1040</real>
+			<real>1380</real>
 			<key>ypos</key>
 			<real>630</real>
 		</dict>
 		<key>D0786415-52DE-4713-A9A4-64D3DA2431F3</key>
 		<dict>
 			<key>xpos</key>
-			<real>2530</real>
+			<real>2635</real>
 			<key>ypos</key>
 			<real>810</real>
 		</dict>
 		<key>D4C7DFF9-1A94-4197-BDC4-22E696BCD0A5</key>
 		<dict>
 			<key>xpos</key>
-			<real>1660</real>
+			<real>1765</real>
 			<key>ypos</key>
 			<real>855</real>
 		</dict>
 		<key>DBB760CC-EADE-457E-8633-6B0E58AB67F5</key>
 		<dict>
 			<key>xpos</key>
-			<real>2275</real>
+			<real>2380</real>
 			<key>ypos</key>
 			<real>1010</real>
 		</dict>
@@ -2830,45 +2998,52 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>ypos</key>
 			<real>205</real>
 		</dict>
+		<key>DFCE7BBE-A90A-4169-B869-2050422F145E</key>
+		<dict>
+			<key>xpos</key>
+			<real>420</real>
+			<key>ypos</key>
+			<real>940</real>
+		</dict>
 		<key>E2205941-57D8-42AE-BF01-CAB3EC9970A4</key>
 		<dict>
 			<key>xpos</key>
-			<real>745</real>
+			<real>1090</real>
 			<key>ypos</key>
 			<real>1250</real>
 		</dict>
 		<key>E27E1D83-898C-4BCF-90A4-3727ED0B450C</key>
 		<dict>
 			<key>xpos</key>
-			<real>860</real>
+			<real>810</real>
 			<key>ypos</key>
 			<real>260</real>
 		</dict>
 		<key>E6F9453B-7823-4175-9D2A-02D815624F8F</key>
 		<dict>
 			<key>xpos</key>
-			<real>505</real>
+			<real>810</real>
 			<key>ypos</key>
 			<real>840</real>
 		</dict>
 		<key>E707A6DE-CD8B-41C4-81CF-406DB10718D0</key>
 		<dict>
 			<key>xpos</key>
-			<real>2275</real>
+			<real>2380</real>
 			<key>ypos</key>
 			<real>730</real>
 		</dict>
 		<key>E9F6FF5F-6217-4BA9-B8A8-FD8A401B192F</key>
 		<dict>
 			<key>xpos</key>
-			<real>1985</real>
+			<real>2090</real>
 			<key>ypos</key>
 			<real>305</real>
 		</dict>
 		<key>EDFE14A5-9811-4C73-B2D1-14F471E1A74F</key>
 		<dict>
 			<key>xpos</key>
-			<real>1040</real>
+			<real>1380</real>
 			<key>ypos</key>
 			<real>1100</real>
 		</dict>
@@ -3103,7 +3278,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 				<true/>
 			</dict>
 			<key>description</key>
-			<string>display default result when query is empty (no aliases).</string>
+			<string>display default result when query is empty.</string>
 			<key>label</key>
 			<string>👀 Default view</string>
 			<key>type</key>
@@ -3197,7 +3372,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>1.1.1</string>
+	<string>1.2.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>

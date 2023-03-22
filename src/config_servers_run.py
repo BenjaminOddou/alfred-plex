@@ -8,6 +8,7 @@ try:
     query = sys.argv[1].split(';')
     serverID, _type, _key = query[0], query[1], query[2]
 except IndexError:
+    display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
     exit()
 
 data = servers_file()

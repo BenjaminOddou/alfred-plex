@@ -10,6 +10,7 @@ try:
     query = sys.argv[1].split(';')
     _type, _input = query[0], query[1]
 except IndexError:
+    display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
     exit()
 
 if _type == '_delete':

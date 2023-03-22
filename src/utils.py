@@ -129,11 +129,11 @@ def presets_file():
     except:
         return {'items': []}
 
-def delist(_type: str, items: list):
-    items.append({'skip': _type})
+def delist(_action: str, items: list):
+    items.append({'skip': _action})
 
-def default_element(_type: str, items: list, query: str=None, query_dict: dict=None):
-    if _type == 'no_PMS':
+def default_element(_action: str, items: list, query: str=None, query_dict: dict=None):
+    if _action == 'no_PMS':
         items.append({
             'title': 'No plex media server detected',
             'subtitle': 'Press ⏎ to connect to a plex media server',
@@ -142,7 +142,7 @@ def default_element(_type: str, items: list, query: str=None, query_dict: dict=N
                 'path': 'icons/info.webp',
             },
         })
-    elif _type == 'no_ELEM':
+    elif _action == 'no_ELEM':
         items.append({
             'title': f'No media found for \'{query}\'',
             'subtitle': 'Try to search something else',
@@ -151,7 +151,7 @@ def default_element(_type: str, items: list, query: str=None, query_dict: dict=N
                 'path': 'icons/info.webp',
             },
         })
-    elif _type == 'invalid_FILTERS':
+    elif _action == 'invalid_FILTERS':
         items.append({
             'title': f'No media found for filters={query_dict}',
             'subtitle': f'Press ⏎ to see available options. Aliases are {"activated" if filters_bool else "desactivated"}',
