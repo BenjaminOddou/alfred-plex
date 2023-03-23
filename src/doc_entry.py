@@ -94,7 +94,7 @@ if data.get('items'):
                 })
                 if Type == 'filter':
                     if fType == 'boolean':
-                        choices = json.loads('[{"key": "true", "title": "is true"}]', object_hook=lambda d: SimpleNamespace(**d))
+                        choices = json.loads('[{"key": "1", "title": "is true"}, {"key": "0", "title": "is false"}]', object_hook=lambda d: SimpleNamespace(**d))
                     else:
                         choices = plex_instance.library.sectionByID(sectionID).listFilterChoices(Name)
                     for p in choices:
@@ -104,7 +104,7 @@ if data.get('items'):
                         items.append({
                             'title': p.title,
                             'subtitle': f'Press ⏎ to apply the filter: {pArg}',
-                            'arg': f'_filter;{pArg}',
+                            'arg': f'_filter;0;{pArg}',
                             'icon': {
                                 'path': 'icons/filter.webp',
                             },
@@ -112,12 +112,13 @@ if data.get('items'):
                 elif Type == 'field':
                     choices = plex_instance.library.sectionByID(sectionID).listOperators(fType)
                     for obj in choices:
-                        dict_final = {f'{Name}{obj.key[:-1]}': ''}
+                        Value = 1 if obj.title == 'is true' else 0 if obj.title == 'is false' else ''
+                        dict_final = {f'{Name}{obj.key[:-1]}': Value}
                         pArg = f'{library_filter}={library_type}/{library_advancedFilter}={dict_final}'
                         items.append({
                             'title': f'{Title} \'{obj.title}\'',
                             'subtitle': f'Press ⏎ to apply the advanced filter: {pArg}',
-                            'arg': f'_filter;{pArg}',
+                            'arg': f'_filter;0;{pArg}',
                             'icon': {
                                 'path': 'icons/field.webp',
                             },
@@ -138,7 +139,7 @@ if data.get('items'):
                         items.append({
                             'title': o.get('title'),
                             'subtitle': f'Press ⏎ to apply the sorting: {soArg}',
-                            'arg': f'_sort;{soArg}',
+                            'arg': f'_sort;0;{soArg}',
                             'icon': {
                                 'path': f'icons/sort.webp',
                             },

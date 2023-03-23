@@ -155,7 +155,15 @@ if data.get('items'):
                                 delist('invalid_FILTERS', items)
                                 break
                             elif test_key == 'advancedFilters':
-                                value = eval(value)
+                                try:
+                                    value = eval(value)
+                                except:
+                                    value = {}
+                            else:
+                                try:
+                                    value = int(value)
+                                except ValueError:
+                                    pass
                             query_dict[test_key] = value
                         libtype = query_dict.get('libtype')
                         advancedFilters = query_dict.get('advancedFilters')

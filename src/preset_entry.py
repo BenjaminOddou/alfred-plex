@@ -44,7 +44,7 @@ if data.get('items'):
             title = preset.get('title')
             subtitle = preset.get('subtitle')
             arg = preset.get('arg')
-            nArg = '_search;'
+            nArg = '_search;0;'
             if not filters_bool:
                 nArg += arg
             else:

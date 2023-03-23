@@ -3,7 +3,7 @@ import sys
 import json
 sys.path.insert(0, './lib')
 from lib.plexapi.server import PlexServer
-from utils import display_notification, servers_file, addReturnbtn, parse_time, parse_duration, get_size_string, history_days
+from utils import display_notification, servers_file, addReturnbtn, parse_time, parse_duration, get_size_string, history_days, delist, default_element
 
 def makeHistory(h, lName):
     if h.type == 'movie':
@@ -104,65 +104,68 @@ if data.get('items'):
                 sSubtitle = f'Actual version: {plex_instance.version}'
                 sArg = ''
                 sVersionType = 'ok'
-                if not plex_instance.isLatest():
-                    sTitle = 'Update to the latest version'
-                    sSubtitle += f' -> New version: {plex_instance.checkForUpdate().version}'
-                    sArg = f'_run;{serverID};version;None'
-                    sVersionType = 'update'
-                for elem in [
-                    {
-                        'title': sTitle,
-                        'subtitle': sSubtitle,
-                        'arg': sArg,
-                        'icon': {
-                            'path': f'icons/{sVersionType}.webp',
+                try:
+                    if not plex_instance.isLatest():
+                        sTitle = 'Update to the latest version'
+                        sSubtitle += f' -> New version: {plex_instance.checkForUpdate().version}'
+                        sArg = f'_run;{serverID};version;None'
+                        sVersionType = 'update'
+                    for elem in [
+                        {
+                            'title': sTitle,
+                            'subtitle': sSubtitle,
+                            'arg': sArg,
+                            'icon': {
+                                'path': f'icons/{sVersionType}.webp',
+                            },
                         },
-                    },
-                    {
-                        'title': 'Download logs and databases',
-                        'subtitle': 'Backup your plex media server logs and databases',
-                        'arg': f'_run;{serverID};logs&databases;None',
-                        'icon': {
-                            'path': 'icons/download.webp',
+                        {
+                            'title': 'Download logs and databases',
+                            'subtitle': 'Backup your plex media server logs and databases',
+                            'arg': f'_run;{serverID};logs&databases;None',
+                            'icon': {
+                                'path': 'icons/download.webp',
+                            },
                         },
-                    },
-                ]: 
-                    items.append(elem)
-                for option in [
-                    {
-                        'title': 'Accounts',
-                        'subtitle': 'List of connected accounts to this server',
-                        'type': 'person'
-                    },
-                    {
-                        'title': 'Devices',
-                        'subtitle': 'List of connected devices to this server',
-                        'type': 'device'
-                    },
-                    {
-                        'title': 'Sessions',
-                        'subtitle': 'List of running sessions on this server',
-                        'type': 'watch'
-                    },
-                    {
-                        'title': 'Library Sections',
-                        'subtitle': 'Perform actions and show statistics of server library sections',
-                        'type': 'library'
-                    },
-                    {
-                        'title': 'Settings',
-                        'subtitle': 'Modify your plex media server settings',
-                        'type': 'setting'
-                    },
-                ]:
-                    items.append({
-                        'title': option.get('title'),
-                        'subtitle': option.get('subtitle'),
-                        'arg': f'_rerun;{serverID};{level + 1};{option.get("type")};group',
-                        'icon': {
-                            'path': f'icons/{option.get("type")}.webp',
+                    ]: 
+                        items.append(elem)
+                    for option in [
+                        {
+                            'title': 'Accounts',
+                            'subtitle': 'List of connected accounts to this server',
+                            'type': 'person'
                         },
-                    })
+                        {
+                            'title': 'Devices',
+                            'subtitle': 'List of connected devices to this server',
+                            'type': 'device'
+                        },
+                        {
+                            'title': 'Sessions',
+                            'subtitle': 'List of running sessions on this server',
+                            'type': 'watch'
+                        },
+                        {
+                            'title': 'Library Sections',
+                            'subtitle': 'Perform actions and show statistics of server library sections',
+                            'type': 'library'
+                        },
+                        {
+                            'title': 'Settings',
+                            'subtitle': 'Modify your plex media server settings',
+                            'type': 'setting'
+                        },
+                    ]:
+                        items.append({
+                            'title': option.get('title'),
+                            'subtitle': option.get('subtitle'),
+                            'arg': f'_rerun;{serverID};{level + 1};{option.get("type")};group',
+                            'icon': {
+                                'path': f'icons/{option.get("type")}.webp',
+                            },
+                        })
+                except:
+                    delist('Unauthorized', items)
 
             elif level == 2:
 
@@ -345,7 +348,11 @@ if data.get('items'):
                         lName = plex_instance.library.sectionByID(h.librarySectionID).title
                         makeHistory(h, lName)
 
-                
+for item in items:
+    if 'skip' in item:
+        _action = item.get('skip')
+        items = []
+        default_element(_action, items)
 
 filtered_items = [item for item in items if query.lower() in item['title'].lower() or query.lower() in item['subtitle'].lower()]
 

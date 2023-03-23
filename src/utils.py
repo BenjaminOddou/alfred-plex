@@ -160,6 +160,15 @@ def default_element(_action: str, items: list, query: str=None, query_dict: dict
                 'path': 'icons/info.webp',
             },
         })
+    elif _action == 'Unauthorized':
+        items.append({
+            'title': 'Unauthorized action',
+            'subtitle': 'Check your credentials and ensure that you\'re connected with an admin token',
+            'arg': '',
+            'icon': {
+                'path': 'icons/info.webp',
+            },
+        })
 
 def addReturnbtn(rArg: str, items: list):
     items.append(
