@@ -1031,13 +1031,6 @@
 				<key>withspace</key>
 				<true/>
 			</dict>
-			<key>inboundconfig</key>
-			<dict>
-				<key>externalid</key>
-				<string>{query}</string>
-				<key>usecustominputarg</key>
-				<true/>
-			</dict>
 			<key>type</key>
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
@@ -1112,7 +1105,7 @@
 			<key>config</key>
 			<dict>
 				<key>argument</key>
-				<string>{query}</string>
+				<string></string>
 				<key>passthroughargument</key>
 				<false/>
 				<key>variables</key>
@@ -1309,13 +1302,6 @@
 				<key>withspace</key>
 				<true/>
 			</dict>
-			<key>inboundconfig</key>
-			<dict>
-				<key>externalid</key>
-				<string>{query}</string>
-				<key>usecustominputarg</key>
-				<true/>
-			</dict>
 			<key>type</key>
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
@@ -1387,7 +1373,7 @@
 			<key>config</key>
 			<dict>
 				<key>argument</key>
-				<string>{query}</string>
+				<string></string>
 				<key>passthroughargument</key>
 				<false/>
 				<key>variables</key>
@@ -1583,8 +1569,6 @@
 			<dict>
 				<key>custominputarg</key>
 				<string>title/subtitle</string>
-				<key>externalid</key>
-				<string>{query}</string>
 				<key>usecustominputarg</key>
 				<true/>
 			</dict>
@@ -1625,7 +1609,7 @@
 			<key>config</key>
 			<dict>
 				<key>argument</key>
-				<string>{query}</string>
+				<string></string>
 				<key>passthroughargument</key>
 				<false/>
 				<key>variables</key>
@@ -1865,13 +1849,6 @@
 				<key>withspace</key>
 				<true/>
 			</dict>
-			<key>inboundconfig</key>
-			<dict>
-				<key>externalid</key>
-				<string>{query}</string>
-				<key>usecustominputarg</key>
-				<true/>
-			</dict>
 			<key>type</key>
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
@@ -2000,7 +1977,7 @@
 			<key>config</key>
 			<dict>
 				<key>argument</key>
-				<string>{query}</string>
+				<string></string>
 				<key>passthroughargument</key>
 				<false/>
 				<key>variables</key>
@@ -2532,7 +2509,7 @@ echo -n "$1"</string>
 			<key>config</key>
 			<dict>
 				<key>argument</key>
-				<string></string>
+				<string>please wait...</string>
 				<key>leftcursor</key>
 				<false/>
 			</dict>
@@ -3065,7 +3042,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>json configuration files location.</string>
 			<key>label</key>
-			<string>📁 Data Folder</string>
+			<string>📁 Data folder</string>
 			<key>type</key>
 			<string>filepicker</string>
 			<key>variable</key>
@@ -3086,7 +3063,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>downloads location for this workflow.</string>
 			<key>label</key>
-			<string>📁 Downloads Folder</string>
+			<string>📁 Downloads folder</string>
 			<key>type</key>
 			<string>filepicker</string>
 			<key>variable</key>
@@ -3107,7 +3084,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>manage servers and perform actions.</string>
 			<key>label</key>
-			<string>🕹️ Config Trigger</string>
+			<string>🕹️ Config trigger</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
@@ -3128,7 +3105,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>search medias throughout your servers.</string>
 			<key>label</key>
-			<string>🕹️ Search Trigger</string>
+			<string>🕹️ Search trigger</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
@@ -3149,7 +3126,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>filters &amp; sort options of your plex media server(s).</string>
 			<key>label</key>
-			<string>🕹️ Docs Trigger</string>
+			<string>🕹️ Docs trigger</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
@@ -3170,7 +3147,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>manage presets to rapidly search medias.</string>
 			<key>label</key>
-			<string>🕹️ Presets Trigger</string>
+			<string>🕹️ Presets trigger</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
@@ -3180,23 +3157,23 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>config</key>
 			<dict>
 				<key>default</key>
-				<string>true</string>
+				<string>True</string>
 				<key>pairs</key>
 				<array>
 					<array>
 						<string>Yes 👍</string>
-						<string>true</string>
+						<string>True</string>
 					</array>
 					<array>
 						<string>No 👎</string>
-						<string></string>
+						<string>False</string>
 					</array>
 				</array>
 			</dict>
 			<key>description</key>
 			<string>use aliases to quickly filter or sort a result.</string>
 			<key>label</key>
-			<string>📜 Use Aliases</string>
+			<string>📜 Use aliases</string>
 			<key>type</key>
 			<string>popupbutton</string>
 			<key>variable</key>
@@ -3217,7 +3194,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>customize date format output.</string>
 			<key>label</key>
-			<string>🗓️ Date Format</string>
+			<string>🗓️ Date format</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
@@ -3238,7 +3215,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>limit the number of results to display by library section.</string>
 			<key>label</key>
-			<string>🥵 Limit Results</string>
+			<string>🥵 Limit results</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
@@ -3259,7 +3236,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>number of days included in the history.</string>
 			<key>label</key>
-			<string>📠 History Size</string>
+			<string>📠 History size</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
@@ -3362,17 +3339,479 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>description</key>
 			<string>workflow notification sound.</string>
 			<key>label</key>
-			<string>🎷 Notification Sound</string>
+			<string>🎷 Notification sound</string>
 			<key>type</key>
 			<string>popupbutton</string>
 			<key>variable</key>
 			<string>sound</string>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>arg</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>Desactivated</string>
+						<string>False</string>
+					</array>
+					<array>
+						<string>⏎</string>
+						<string>arg</string>
+					</array>
+					<array>
+						<string>⌘⏎</string>
+						<string>cmd</string>
+					</array>
+					<array>
+						<string>⌘⌥⏎</string>
+						<string>cmd+alt</string>
+					</array>
+					<array>
+						<string>⌘⌃⏎</string>
+						<string>cmd+ctrl</string>
+					</array>
+					<array>
+						<string>⌘⇧⏎</string>
+						<string>cmd+shift</string>
+					</array>
+					<array>
+						<string>⌥⏎</string>
+						<string>alt</string>
+					</array>
+					<array>
+						<string>⌥⌃⏎</string>
+						<string>alt+ctrl</string>
+					</array>
+					<array>
+						<string>⌥⇧⏎</string>
+						<string>alt+shift</string>
+					</array>
+					<array>
+						<string>⌃⏎</string>
+						<string>ctrl</string>
+					</array>
+					<array>
+						<string>⌃⇧⏎</string>
+						<string>ctrl+shift</string>
+					</array>
+					<array>
+						<string>⇧⏎</string>
+						<string>shift</string>
+					</array>
+					<array>
+						<string>fn⏎</string>
+						<string>fn</string>
+					</array>
+					<array>
+						<string>⌘⌥⌃⏎</string>
+						<string>cmd+alt+ctrl</string>
+					</array>
+					<array>
+						<string>⌘⌥⇧⏎</string>
+						<string>cmd+alt+shift</string>
+					</array>
+					<array>
+						<string>⌘⌃⇧⏎</string>
+						<string>cmd+ctrl+shift</string>
+					</array>
+					<array>
+						<string>⌥⌃⇧⏎</string>
+						<string>alt+ctrl+shift</string>
+					</array>
+					<array>
+						<string>⌃⌥⏎</string>
+						<string>ctrl+alt</string>
+					</array>
+					<array>
+						<string>⌃⌥⇧⏎</string>
+						<string>ctrl+alt+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⏎</string>
+						<string>fn+cmd</string>
+					</array>
+					<array>
+						<string>fn+⌥⏎</string>
+						<string>fn+alt</string>
+					</array>
+					<array>
+						<string>fn+⌃⏎</string>
+						<string>fn+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⇧⏎</string>
+						<string>fn+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⏎</string>
+						<string>fn+cmd+alt</string>
+					</array>
+					<array>
+						<string>fn+⌘⌃⏎</string>
+						<string>fn+cmd+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⌘⇧⏎</string>
+						<string>fn+cmd+shift</string>
+					</array>
+					<array>
+						<string>fn+⌥⌃⏎</string>
+						<string>fn+alt+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⌥⇧⏎</string>
+						<string>fn+alt+shift</string>
+					</array>
+					<array>
+						<string>fn+⌃⇧⏎</string>
+						<string>fn+ctrl+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⌃⏎</string>
+						<string>fn+cmd+alt+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⇧⏎</string>
+						<string>fn+cmd+alt+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌃⇧⏎</string>
+						<string>fn+cmd+ctrl+shift</string>
+					</array>
+					<array>
+						<string>fn+⌥⌃⇧⏎</string>
+						<string>fn+alt+ctrl+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⌃⇧⏎</string>
+						<string>fn+cmd+alt+ctrl+shift</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string></string>
+			<key>label</key>
+			<string>Open the media on the web</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>short_web</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>cmd</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>Desactivated</string>
+						<string>False</string>
+					</array>
+					<array>
+						<string>⏎</string>
+						<string>arg</string>
+					</array>
+					<array>
+						<string>⌘⏎</string>
+						<string>cmd</string>
+					</array>
+					<array>
+						<string>⌘⌥⏎</string>
+						<string>cmd+alt</string>
+					</array>
+					<array>
+						<string>⌘⌃⏎</string>
+						<string>cmd+ctrl</string>
+					</array>
+					<array>
+						<string>⌘⇧⏎</string>
+						<string>cmd+shift</string>
+					</array>
+					<array>
+						<string>⌥⏎</string>
+						<string>alt</string>
+					</array>
+					<array>
+						<string>⌥⌃⏎</string>
+						<string>alt+ctrl</string>
+					</array>
+					<array>
+						<string>⌥⇧⏎</string>
+						<string>alt+shift</string>
+					</array>
+					<array>
+						<string>⌃⏎</string>
+						<string>ctrl</string>
+					</array>
+					<array>
+						<string>⌃⇧⏎</string>
+						<string>ctrl+shift</string>
+					</array>
+					<array>
+						<string>⇧⏎</string>
+						<string>shift</string>
+					</array>
+					<array>
+						<string>fn⏎</string>
+						<string>fn</string>
+					</array>
+					<array>
+						<string>⌘⌥⌃⏎</string>
+						<string>cmd+alt+ctrl</string>
+					</array>
+					<array>
+						<string>⌘⌥⇧⏎</string>
+						<string>cmd+alt+shift</string>
+					</array>
+					<array>
+						<string>⌘⌃⇧⏎</string>
+						<string>cmd+ctrl+shift</string>
+					</array>
+					<array>
+						<string>⌥⌃⇧⏎</string>
+						<string>alt+ctrl+shift</string>
+					</array>
+					<array>
+						<string>⌃⌥⏎</string>
+						<string>ctrl+alt</string>
+					</array>
+					<array>
+						<string>⌃⌥⇧⏎</string>
+						<string>ctrl+alt+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⏎</string>
+						<string>fn+cmd</string>
+					</array>
+					<array>
+						<string>fn+⌥⏎</string>
+						<string>fn+alt</string>
+					</array>
+					<array>
+						<string>fn+⌃⏎</string>
+						<string>fn+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⇧⏎</string>
+						<string>fn+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⏎</string>
+						<string>fn+cmd+alt</string>
+					</array>
+					<array>
+						<string>fn+⌘⌃⏎</string>
+						<string>fn+cmd+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⌘⇧⏎</string>
+						<string>fn+cmd+shift</string>
+					</array>
+					<array>
+						<string>fn+⌥⌃⏎</string>
+						<string>fn+alt+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⌥⇧⏎</string>
+						<string>fn+alt+shift</string>
+					</array>
+					<array>
+						<string>fn+⌃⇧⏎</string>
+						<string>fn+ctrl+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⌃⏎</string>
+						<string>fn+cmd+alt+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⇧⏎</string>
+						<string>fn+cmd+alt+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌃⇧⏎</string>
+						<string>fn+cmd+ctrl+shift</string>
+					</array>
+					<array>
+						<string>fn+⌥⌃⇧⏎</string>
+						<string>fn+alt+ctrl+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⌃⇧⏎</string>
+						<string>fn+cmd+alt+ctrl+shift</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string></string>
+			<key>label</key>
+			<string>Stream the media on vlc</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>short_stream</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>shift</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>Desactivated</string>
+						<string>False</string>
+					</array>
+					<array>
+						<string>⏎</string>
+						<string>arg</string>
+					</array>
+					<array>
+						<string>⌘⏎</string>
+						<string>cmd</string>
+					</array>
+					<array>
+						<string>⌘⌥⏎</string>
+						<string>cmd+alt</string>
+					</array>
+					<array>
+						<string>⌘⌃⏎</string>
+						<string>cmd+ctrl</string>
+					</array>
+					<array>
+						<string>⌘⇧⏎</string>
+						<string>cmd+shift</string>
+					</array>
+					<array>
+						<string>⌥⏎</string>
+						<string>alt</string>
+					</array>
+					<array>
+						<string>⌥⌃⏎</string>
+						<string>alt+ctrl</string>
+					</array>
+					<array>
+						<string>⌥⇧⏎</string>
+						<string>alt+shift</string>
+					</array>
+					<array>
+						<string>⌃⏎</string>
+						<string>ctrl</string>
+					</array>
+					<array>
+						<string>⌃⇧⏎</string>
+						<string>ctrl+shift</string>
+					</array>
+					<array>
+						<string>⇧⏎</string>
+						<string>shift</string>
+					</array>
+					<array>
+						<string>fn⏎</string>
+						<string>fn</string>
+					</array>
+					<array>
+						<string>⌘⌥⌃⏎</string>
+						<string>cmd+alt+ctrl</string>
+					</array>
+					<array>
+						<string>⌘⌥⇧⏎</string>
+						<string>cmd+alt+shift</string>
+					</array>
+					<array>
+						<string>⌘⌃⇧⏎</string>
+						<string>cmd+ctrl+shift</string>
+					</array>
+					<array>
+						<string>⌥⌃⇧⏎</string>
+						<string>alt+ctrl+shift</string>
+					</array>
+					<array>
+						<string>⌃⌥⏎</string>
+						<string>ctrl+alt</string>
+					</array>
+					<array>
+						<string>⌃⌥⇧⏎</string>
+						<string>ctrl+alt+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⏎</string>
+						<string>fn+cmd</string>
+					</array>
+					<array>
+						<string>fn+⌥⏎</string>
+						<string>fn+alt</string>
+					</array>
+					<array>
+						<string>fn+⌃⏎</string>
+						<string>fn+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⇧⏎</string>
+						<string>fn+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⏎</string>
+						<string>fn+cmd+alt</string>
+					</array>
+					<array>
+						<string>fn+⌘⌃⏎</string>
+						<string>fn+cmd+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⌘⇧⏎</string>
+						<string>fn+cmd+shift</string>
+					</array>
+					<array>
+						<string>fn+⌥⌃⏎</string>
+						<string>fn+alt+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⌥⇧⏎</string>
+						<string>fn+alt+shift</string>
+					</array>
+					<array>
+						<string>fn+⌃⇧⏎</string>
+						<string>fn+ctrl+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⌃⏎</string>
+						<string>fn+cmd+alt+ctrl</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⇧⏎</string>
+						<string>fn+cmd+alt+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌃⇧⏎</string>
+						<string>fn+cmd+ctrl+shift</string>
+					</array>
+					<array>
+						<string>fn+⌥⌃⇧⏎</string>
+						<string>fn+alt+ctrl+shift</string>
+					</array>
+					<array>
+						<string>fn+⌘⌥⌃⇧⏎</string>
+						<string>fn+cmd+alt+ctrl+shift</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string></string>
+			<key>label</key>
+			<string>Get media infos</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>short_mtvsearch</string>
+		</dict>
 	</array>
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>1.2.1</string>
+	<string>1.2.2</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>

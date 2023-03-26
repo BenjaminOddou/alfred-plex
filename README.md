@@ -56,7 +56,9 @@ Quickly add a server by accessing any XML page from the API, copy the URL and pa
 
 Follow the [Plex Documentation](https://support.plex.tv/articles/201998867-investigate-media-information-and-formats/) to for more details.
 
-Click on the server to display informations and perform actions.
+If you don't have the `View XML` button on the plex client, try to open the browser's dev tool by pressing `⌥⌘i` and copy the link containing the `X-Plex-Token`.
+
+Select the server to view its informations and perform actions.
 * Download last version of plex media server from the web.
 * Backup logs and databases.
 * Display connected accounts.
@@ -89,7 +91,7 @@ Link to the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io
 
 In this mode, you search medias on your library sections. To enter this mode, you can use `filters` and/or `advanced filters`. 
 
-To know how to use them, go to the next section (`📖 Filtering & sorting options of your plex media server(s)`)
+To know how to use them, go to the next section (`Filtering & sorting options of your plex media server(s)`)
 
 Link to the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io/en/latest/modules/library.html#plexapi.library.LibrarySection.search).
 
@@ -168,7 +170,7 @@ Aliases are enabled by default, and allows you, when activated, to write filters
 
 You can disable this behavior in the user control panel by changing the `📜 Use aliases` parameter.
 
-Aliases file can be edited, but be careful about double values. It is the `aliases.json` file located under the `📁 Data Folder` (`~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex` by default).
+Aliases file can be edited, but be careful about double values. It is the `aliases.json` file located under the `📁 Data folder` (`~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex` by default).
 
 Example: `af={'addedAt>>': '30d'}/lt=movie`. It returns `movies` added in plex during the last `30 days`.
 

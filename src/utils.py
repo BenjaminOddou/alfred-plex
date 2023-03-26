@@ -10,9 +10,12 @@ downloads_folder = os.path.expanduser('~/Downloads')
 sound = 'Submarine'
 date_format = '%d-%m-%Y'
 filters_bool = True
-default_view = '{"sort": "originallyAvailableAt:desc"}'
+default_view = {"sort": "originallyAvailableAt:desc"}
 limit_number = 15
 days_history = 15
+short_web = 'arg'
+short_stream = 'cmd'
+short_mtvsearch = 'shift'
 
 default_list = [
     {
@@ -29,11 +32,11 @@ default_list = [
     },
     {
         'title': 'filters_bool',
-        'func': bool
+        'func': eval
     },
     {
         'title': 'default_view',
-        'func': json.loads
+        'func': eval
     },
     {
         'title': 'limit_number',
@@ -42,17 +45,24 @@ default_list = [
     {
         'title': 'days_history',
         'func': int
+    },
+    {
+        'title': 'short_web',
+    },
+    {
+        'title': 'short_stream',
+    },
+    {
+        'title': 'short_mtvsearch',
     }
 ]
 
 for obj in default_list:
     try:
         value = os.environ.get(obj.get('title'))
-        if not value:
+        if not value and obj.get('title') not in ['sound', 'default_view']:
             value = globals()[obj.get('title')]
         function = obj.get('func')
-        if function == json.loads and value:
-                value = value.replace('\'', '\"')
         globals()[obj.get('title')] = function(value) if function else value
     except ValueError:
         pass

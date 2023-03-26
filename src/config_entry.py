@@ -3,7 +3,7 @@ import sys
 import json
 sys.path.insert(0, './lib')
 from lib.plexapi.server import PlexServer
-from utils import display_notification, servers_file, addReturnbtn, parse_time, parse_duration, get_size_string, history_days, delist, default_element
+from utils import display_notification, servers_file, addReturnbtn, parse_time, parse_duration, get_size_string, history_days, default_element
 
 def makeHistory(h, lName):
     if h.type == 'movie':
@@ -165,7 +165,7 @@ if data.get('items'):
                             },
                         })
                 except:
-                    delist('Unauthorized', items)
+                    default_element('Unauthorized', items)
 
             elif level == 2:
 
@@ -347,12 +347,6 @@ if data.get('items'):
                     for h in plex_instance.library.sectionByID(int(_key)).history(mindate=history_days()):
                         lName = plex_instance.library.sectionByID(h.librarySectionID).title
                         makeHistory(h, lName)
-
-for item in items:
-    if 'skip' in item:
-        _action = item.get('skip')
-        items = []
-        default_element(_action, items)
 
 filtered_items = [item for item in items if query.lower() in item['title'].lower() or query.lower() in item['subtitle'].lower()]
 

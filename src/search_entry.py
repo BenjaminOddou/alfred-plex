@@ -4,7 +4,7 @@ import json
 sys.path.insert(0, './lib')
 from lib.plexapi.server import PlexServer
 from lib.plexapi import utils
-from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn
+from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_web, short_stream, short_mtvsearch
 
 # full query
 try:
@@ -29,18 +29,20 @@ items = []
 
 def register_elements(database: list):
     for media in database:
-        mType = media.TYPE if media.TYPE else utils.reverseTagType(media.TAGTYPE) if media.TAGTYPE else ''
+        mType = media.TYPE if media.TYPE else utils.reverseTagType(media.TAGTYPE) if media.TAGTYPE else None
+        if not mType:
+            return
         iType = 'show' if mType in ['season', 'episode'] else 'artist' if mType in ['album', 'track'] else 'person' if mType in ['role', 'director', 'producer', 'artist'] else mType
         fType = 'actor' if mType == 'role' else mType
         mFilter = aliases_file(fType, 'alias_or_long')
-        mDuration = f'{parse_duration(media.duration)}' if mType in ['movie', 'episode', 'track'] else ''
-        mRealeaseDate = f'{parse_time(media.originallyAvailableAt)}' if mType in ['movie', 'episode', 'clip'] else ''
-        eCount = len(media.episodes()) if mType in ['show', 'season'] else ''
-        mDirectorNames = ", ".join([d.tag for d in media.directors]) if mType in ['movie', 'episode'] else ''
+        mDuration = f'{parse_duration(media.duration)}' if mType in ['movie', 'episode', 'track'] else None
+        mRealeaseDate = f'{parse_time(media.originallyAvailableAt)}' if mType in ['movie', 'episode', 'clip'] else None
+        eCount = len(media.episodes()) if mType in ['show', 'season'] else None
+        mDirectorNames = ", ".join([d.tag for d in media.directors]) if mType in ['movie', 'episode'] else None
         mSubtitle = f'{media._server.friendlyName} {f"ǀ {mType}" if mType != "" else ""}'
-        mChild = media.childCount if mType in ['show', 'collection'] else ''
+        mChild = media.childCount if mType in ['show', 'collection'] else None
         mTitle = ''
-        mArg = f'_web;{media.getWebURL()}' if mType not in ['role', 'director', 'genre', ''] else ''
+        mArg = ''
 
         if mType == 'episode':
             mTitle = f'{media.grandparentTitle} ǀ {media.title} ǀ {media.seasonEpisode}'
@@ -110,27 +112,54 @@ def register_elements(database: list):
             },
             'mods': {}
         }
-        if mType in ['movie', 'episode', 'album', 'track', 'clip']:
+        if mType not in ['role', 'director', 'genre', ''] and short_web != '':
+            webArg = f'_web;{media.getWebURL()}'
+            if short_web == 'arg':
+                json_obj.update({
+                    'arg': webArg,
+                })
+            else:
+                json_obj['mods'].update({
+                    f'{short_web}': {
+                        'subtitle': 'Press ⏎ to open the media in plex web',
+                        'arg': webArg,
+                        'icon': {
+                            'path': 'icons/web.webp',
+                        },
+                    }
+                })
+        if mType in ['movie', 'episode', 'album', 'track', 'clip'] and short_stream != '':
             sArg = f'_rerun;1;streams;{plex_instance.machineIdentifier}ǀ{media.librarySectionID}ǀ{mType}ǀ{media.key}' if mType not in ['album', 'track'] and len(media.media) > 1 else f'_stream;{plex_instance.machineIdentifier};{media.librarySectionID};{mType};{media.key};0;0'
-            json_obj['mods'].update({
-                'cmd': {
-                    'subtitle': 'Press ⏎ to play the media in a VLC instance',
+            if short_stream == 'arg':
+                json_obj.update({
                     'arg': sArg,
-                    'icon': {
-                        'path': 'icons/vlc.webp',
-                    },
-                }
-            })
-        if mType in ['movie', 'show']:
-            json_obj['mods'].update({
-                'shift': {
-                    'subtitle': 'Press ⏎ to get media infos using Movie and TV Show Search workflow',
-                    'arg': f'_mtvsearch;{plex_instance.machineIdentifier};{media.librarySectionID};{mType};{media.key}',
-                    'icon': {
-                        'path': 'icons/movie_and_tv_show_search.webp',
-                    },
-                }
-            })
+                })
+            else:
+                json_obj['mods'].update({
+                    f'{short_stream}': {
+                        'subtitle': 'Press ⏎ to play the media in a VLC instance',
+                        'arg': sArg,
+                        'icon': {
+                            'path': 'icons/vlc.webp',
+                        },
+                    }
+                })
+        if mType in ['movie', 'show'] and short_mtvsearch != '':
+            mtvArg = f'_mtvsearch;{plex_instance.machineIdentifier};{media.librarySectionID};{mType};{media.key}'
+            if short_mtvsearch == 'arg':
+                json_obj.update({
+                    'arg': mtvArg,
+                })
+            else:
+                json_obj['mods'].update({
+                    f'{short_mtvsearch}': {
+                        'subtitle': 'Press ⏎ to get media infos using Movie and TV Show Search workflow',
+                        'arg': mtvArg,
+                        'icon': {
+                            'path': 'icons/movie_and_tv_show_search.webp',
+                        },
+                    }
+                })
         items.append(json_obj)
 
 data = servers_file()
