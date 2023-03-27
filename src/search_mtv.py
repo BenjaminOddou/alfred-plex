@@ -4,8 +4,7 @@ from lib.plexapi.server import PlexServer
 from utils import servers_file, display_notification
 
 try:
-    query = sys.argv[1].split(';')
-    _machineID, _sectionID, _type, _key = query[1], query[2], query[3], query[4]
+    _machineID, _sectionID, _type, _key = sys.argv[1].split(';')[1:]
 except IndexError:
     display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
     query = _machineID = _sectionID = _type = _key = ''

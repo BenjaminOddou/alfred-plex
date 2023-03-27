@@ -16,8 +16,7 @@ _level = int(os.environ.get('_lib1', 0))
 _type = os.environ.get('_lib2')
 _keys = os.environ.get('_lib3')
 if _keys and 'ǀ' in _keys:
-    _keys = _keys.split('ǀ')
-    _machineID, _sectionID, _media_type, _media_id = _keys[0], _keys[1], _keys[2], _keys[3]
+    _machineID, _sectionID, _media_type, _media_id =  _keys.split('ǀ')
 else:
     _machineID = _sectionID = _media_type = _media_id = ''
 
@@ -28,98 +27,87 @@ query_dict = {}
 items = []
 
 def register_elements(database: list):
-    for media in database:
-        mType = media.TYPE if media.TYPE else utils.reverseTagType(media.TAGTYPE) if media.TAGTYPE else None
-        if not mType:
-            return
-        iType = 'show' if mType in ['season', 'episode'] else 'artist' if mType in ['album', 'track'] else 'person' if mType in ['role', 'director', 'producer', 'artist'] else mType
-        fType = 'actor' if mType == 'role' else mType
-        mFilter = aliases_file(fType, 'alias_or_long')
-        mDuration = f'{parse_duration(media.duration)}' if mType in ['movie', 'episode', 'track'] else None
-        mRealeaseDate = f'{parse_time(media.originallyAvailableAt)}' if mType in ['movie', 'episode', 'clip'] else None
-        eCount = len(media.episodes()) if mType in ['show', 'season'] else None
-        mDirectorNames = ", ".join([d.tag for d in media.directors]) if mType in ['movie', 'episode'] else None
-        mSubtitle = f'{media._server.friendlyName} {f"ǀ {mType}" if mType != "" else ""}'
-        mChild = media.childCount if mType in ['show', 'collection'] else None
-        mTitle = ''
-        mArg = ''
-
-        if mType == 'episode':
-            mTitle = f'{media.grandparentTitle} ǀ {media.title} ǀ {media.seasonEpisode}'
-            mSubtitle += f' ǀ {mDuration} ǀ {mRealeaseDate} ǀ Director(s): {mDirectorNames}'
-
-        elif mType == 'track':
-            mTitle = f'{media.grandparentTitle} ǀ {media.title} ({media.album().year})'
-            mSubtitle += f' ǀ {mDuration} ǀ Album: {media.parentTitle} - {media.trackNumber} / {len(media.album().tracks())}'
-        
-        elif mType == 'artist':
-            mTitle = media.title
-            mSubtitle += f' ǀ ID: {media.index}'
-            mArg = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}=album/{aliases_file("advancedFilters", "alias_or_long")}={{\'artist.title\': \'{media.title}\'}}'
-
-        elif mType == 'season':
-            mTitle = f'{media.parentTitle} ǀ {media.title}'
-            mSubtitle += f' ǀ {eCount} episode(s)'
-
-        elif mType in ['show', 'movie', 'album']:
-            mTitle = f'{media.title} ({media.year})'
-            if mType == 'show':
-                mSubtitle += f' ǀ {mChild} season(s), {eCount} episode(s) ǀ Studio: {media.studio}'
-            elif mType == 'movie':
-                mSubtitle += f' ǀ {mDuration} ǀ Studio: {media.studio} ǀ Director(s): {mDirectorNames}'
-            elif mType == 'album':
-                mSubtitle += f' ǀ Artist(s): {media.parentTitle} ǀ {len(media.tracks())} track(s) ǀ Studio: {media.studio}'
-
-        elif mType in ['collection', 'role', 'director']:
-            if mType == 'collection':
-                mTitle = f'{media.title} ({media.minYear} - {media.maxYear})'
-                mSubtitle += f' ǀ {mChild} element(s) ǀ ID: {media.index}'
-            else:
-                mTitle = media.tag
-                mSubtitle += f' ǀ ID: {media.id}'
-
-            mId = media.index if mType == 'collection' else media.id
-            mArg = f'_rerun;0;filter;{mFilter}={mId}'
-        
-        elif mType == 'genre':
-            mTitle = f'{media.tag} ({media.librarySectionTitle})'
-            mSubtitle += f' ǀ ID: {media.id}'
-            sFilter = aliases_file('libtype', 'alias_or_long')
-            mArg = f'_rerun;0;filter;{mFilter}={media.id}/{sFilter}={utils.reverseSearchType(media.librarySectionType)}'
-        
-        elif mType == 'playlist':
-            mTitle = f'{media.title} ({parse_time(media.addedAt)})'
-            mSubtitle += f' ǀ {media.playlistType} ǀ {len(media.items())} element(s)'
-        
-        elif mType in ['photo', 'clip']:
-            newType = 'photoalbum' if media.TAG == 'Directory' else mType
-            if newType == 'photoalbum':
-                mTitle = media.title
-                mSubtitle = f'{media._server.friendlyName} ǀ {newType} ǀ {len(media.albums())} album(s) ǀ {len(media.photos())} photo(s)'
-            else:
-                if newType == 'photo':
-                    mTitle = f'{media.parentTitle} ǀ {media.title}'
-                elif newType == 'clip':
-                    mTitle = media.title
-                mSubtitle += f' ǀ {media.year} ǀ Rating: {media.userRating} ǀ Type: {media.media[0].container}'
-
-        json_obj = {
-            'title': mTitle,
-            'subtitle': mSubtitle,
-            'arg': mArg,
-            'icon': {
-                'path': f'icons/{iType}.webp',
-            },
-            'mods': {}
+    def get_title(media):
+        title_funcs = {
+            'movie': lambda: f'{media.title} ({media.year})',
+            'show': lambda: f'{media.title} ({media.year})',
+            'season': lambda: f'{media.parentTitle} ǀ {media.title}',
+            'episode': lambda: f'{media.grandparentTitle} ǀ {media.title} ǀ {media.seasonEpisode}',
+            'artist': lambda: media.title,
+            'album': lambda: f'{media.title} ({media.year})',
+            'track': lambda: f'{media.grandparentTitle} ǀ {media.title} ({media.album().year})',
+            'photoalbum': lambda: media.title,
+            'photo': lambda: f'{media.parentTitle} ǀ {media.title}',
+            'clip': lambda: media.title,
+            'playlist': lambda: f'{media.title} ({parse_time(media.addedAt)})',
+            'collection': lambda: f'{media.title} ({media.minYear} - {media.maxYear})',
+            'actor': lambda: media.tag,
+            'director': lambda: media.tag,
+            'genre': lambda: f'{media.tag} ({media.librarySectionTitle})',
         }
-        if mType not in ['role', 'director', 'genre', ''] and short_web != '':
+        title_func = title_funcs.get(media_type, lambda: '')
+        return f'{title_func()}'
+    
+    def get_subtitle(media):
+        subtitle_funcs = {
+            'movie': lambda: f'{parse_duration(media.duration)} ǀ Studio: {media.studio} ǀ Director(s): {", ".join([d.tag for d in media.directors])}',
+            'show': lambda: f'{media.childCount} season(s), {len(media.episodes())} episode(s) ǀ Studio: {media.studio}',
+            'season': lambda: f'{len(media.episodes())} episode(s)', 
+            'episode': lambda: f'{parse_duration(media.duration)} ǀ {parse_time(media.originallyAvailableAt)} ǀ Director(s): {", ".join([d.tag for d in media.directors])}',
+            'artist': lambda: f'ID: {media.index}',
+            'album': lambda: f'Artist(s): {media.parentTitle} ǀ {len(media.tracks())} track(s) ǀ Studio: {media.studio}',
+            'track': lambda: f'{parse_duration(media.duration)} ǀ Album: {media.parentTitle} - {media.trackNumber} / {len(media.album().tracks())}',
+            'photoalbum': lambda: f'{len(media.albums())} album(s) ǀ {len(media.photos())} photo(s)',
+            'photo': lambda: f'{media.year} ǀ Rating: {media.rating}/10',
+            'clip': lambda: f'{media.year} ǀ Rating: {media.rating}/10',
+            'playlist': lambda: f'{media.playlistType} ǀ {len(media.items())} element(s)',
+            'collection': lambda: f'{media.childCount} element(s) ǀ ID: {media.index}',
+            'actor': lambda: f'ID: {media.id}',
+            'director': lambda: f'ID: {media.id}',
+            'genre': lambda: f'ID: {media.id}',
+        }
+        subtitle_func = subtitle_funcs.get(media_type, lambda: '')
+        return f'{media._server.friendlyName} ǀ {media_type}{" ǀ " if subtitle_func() else ""}{subtitle_func()}'
+    
+    class_media_map = {
+        'Movie': ('movie', 'movie'),
+        'Show': ('show', 'show'),
+        'Season': ('season', 'show'),
+        'Episode': ('episode', 'show'),
+        'Artist': ('artist', 'person'),
+        'Album': ('album', 'artist'),
+        'Track': ('track', 'artist'),
+        'Photoalbum': ('photoalbum', 'photo'),
+        'Photo': ('photo', 'photo'),
+        'Clip': ('clip', 'clip'),
+        'Playlist': ('playlist', 'playlist'),
+        'Collection': ('collection', 'collection'),
+        'Role': ('actor', 'person'),
+        'Director': ('director', 'person'),
+        'Genre': ('genre', 'genre'),
+    }
+    
+    for media in database:
+        
+        media_type, image_type = class_media_map.get(type(media).__name__, (None, None))
+    
+        if not media_type:
+            continue
+    
+        media_arg = ''
+        media_mod = {}
+
+        if media_type == 'artist':
+            media_arg = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}=album/{aliases_file("advancedFilters", "alias_or_long")}={{\'artist.title\': \'{media.title}\'}}'
+        elif media_type in ['actor', 'director', 'genre', 'collection']:
+            media_id = media.index if media_type == 'collection' else media.id
+            media_arg = f'_rerun;0;filter;{aliases_file(media_type, "alias_or_long")}={media_id}'
+        elif short_web != '':
             webArg = f'_web;{media.getWebURL()}'
             if short_web == 'arg':
-                json_obj.update({
-                    'arg': webArg,
-                })
+                media_arg = webArg
             else:
-                json_obj['mods'].update({
+                media_mod.update({
                     f'{short_web}': {
                         'subtitle': 'Press ⏎ to open the media in plex web',
                         'arg': webArg,
@@ -128,14 +116,12 @@ def register_elements(database: list):
                         },
                     }
                 })
-        if mType in ['movie', 'episode', 'album', 'track', 'clip'] and short_stream != '':
-            sArg = f'_rerun;1;streams;{plex_instance.machineIdentifier}ǀ{media.librarySectionID}ǀ{mType}ǀ{media.key}' if mType not in ['album', 'track'] and len(media.media) > 1 else f'_stream;{plex_instance.machineIdentifier};{media.librarySectionID};{mType};{media.key};0;0'
+        if media_type in ['movie', 'episode', 'album', 'track', 'clip'] and short_stream != '':
+            sArg = f'_rerun;1;streams;{plex_instance.machineIdentifier}ǀ{media.librarySectionID}ǀ{media_type}ǀ{media.key}' if media_type not in ['album', 'track'] and len(media.media) > 1 else f'_stream;{plex_instance.machineIdentifier};{media.librarySectionID};{media_type};{media.key};0;0'
             if short_stream == 'arg':
-                json_obj.update({
-                    'arg': sArg,
-                })
+                media_arg = sArg
             else:
-                json_obj['mods'].update({
+                media_mod.update({
                     f'{short_stream}': {
                         'subtitle': 'Press ⏎ to play the media in a VLC instance',
                         'arg': sArg,
@@ -144,14 +130,12 @@ def register_elements(database: list):
                         },
                     }
                 })
-        if mType in ['movie', 'show'] and short_mtvsearch != '':
-            mtvArg = f'_mtvsearch;{plex_instance.machineIdentifier};{media.librarySectionID};{mType};{media.key}'
+        if media_type in ['movie', 'show'] and short_mtvsearch != '':
+            mtvArg = f'_mtvsearch;{plex_instance.machineIdentifier};{media.librarySectionID};{media_type};{media.key}'
             if short_mtvsearch == 'arg':
-                json_obj.update({
-                    'arg': mtvArg,
-                })
+                media_arg = mtvArg
             else:
-                json_obj['mods'].update({
+                media_mod.update({
                     f'{short_mtvsearch}': {
                         'subtitle': 'Press ⏎ to get media infos using Movie and TV Show Search workflow',
                         'arg': mtvArg,
@@ -160,6 +144,16 @@ def register_elements(database: list):
                         },
                     }
                 })
+
+        json_obj = {
+            'title': get_title(media),
+            'subtitle': get_subtitle(media),
+            'arg': media_arg,
+            'icon': {
+                'path': f'icons/{image_type}.webp',
+            },
+            'mods': media_mod
+        }
         items.append(json_obj)
 
 data = servers_file()
@@ -225,10 +219,8 @@ if data.get('items'):
                 if _level == 1:
                     if _type == 'streams':
                         media = plex_instance.library.sectionByID(int(_sectionID)).fetchItem(_media_id)
-                        mIndex = 0
-                        for m in media.media:
-                            pIndex = 0
-                            for p in m.parts:
+                        for mIndex, m in enumerate(media.media):
+                            for pIndex, p in enumerate(m.parts):
                                 pTitle = p.videoStreams()[0].displayTitle
                                 pSub = f'Audio(s): {", ".join([a.displayTitle for a in p.audioStreams()])} ǀ Subtitle(s): {", ".join([a.displayTitle for a in p.subtitleStreams()])}'
                                 items.append({
@@ -239,8 +231,6 @@ if data.get('items'):
                                         'path': f'icons/{_media_type}.webp',
                                     },
                                 })
-                                pIndex += 1
-                            mIndex += 1
 
         if not items:
             if not '=' in query:
@@ -256,8 +246,4 @@ for item in items:
         items = []
         default_element(_action, items, query, query_dict)
 
-output = {
-    'items': items
-}
-
-print(json.dumps(output))
+print(json.dumps({'items': items}))

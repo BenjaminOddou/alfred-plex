@@ -5,8 +5,7 @@ from lib.plexapi.server import PlexServer
 from utils import servers_file, display_notification, downloads_folder
 
 try:
-    query = sys.argv[1].split(';')
-    serverID, _type, _key = query[0], query[1], query[2]
+    serverID, _type, _key = sys.argv[1].split(';')
 except IndexError:
     display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
     exit()

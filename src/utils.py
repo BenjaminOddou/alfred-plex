@@ -59,12 +59,12 @@ default_list = [
 
 for obj in default_list:
     try:
-        value = os.environ.get(obj.get('title'))
-        if not value and obj.get('title') not in ['sound', 'default_view']:
-            value = globals()[obj.get('title')]
+        value = os.environ.get(obj['title'])
+        if not value and obj['title'] not in ['sound', 'default_view']:
+            value = globals()[obj['title']]
         function = obj.get('func')
-        globals()[obj.get('title')] = function(value) if function else value
-    except ValueError:
+        globals()[obj['title']] = function(value) if function else value
+    except:
         pass
 
 # Path to servers json file
@@ -105,22 +105,22 @@ def aliases_file(testkey: str, _type: str):
     if _type == 'alias_and_long':
         for obj in data:
             if filters_bool:
-                if testkey == obj.get('short_key'):
-                    return obj.get('long_key')
+                if testkey == obj['short_key']:
+                    return obj['long_key']
             else:
-                if testkey == obj.get('long_key'):
-                    return obj.get('long_key')
+                if testkey == obj['long_key']:
+                    return obj['long_key']
     elif _type == 'alias_or_long':
         if filters_bool:
             for obj in data:
-                if obj.get('long_key') == testkey:
-                    return obj.get('short_key')
+                if obj['long_key'] == testkey:
+                    return obj['short_key']
         else:
             return testkey
     elif _type == 'alias':
         for obj in data:
-                if obj.get('long_key') == testkey:
-                    return obj.get('short_key')
+                if obj['long_key'] == testkey:
+                    return obj['short_key']
     return None
 
 def servers_file():

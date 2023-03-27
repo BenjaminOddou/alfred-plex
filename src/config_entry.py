@@ -44,8 +44,8 @@ items = [
 level = 0
 
 try:
-    _lib_list = os.environ['_lib'].split(';')
-    serverID, level, _type, _key = _lib_list[0], int(_lib_list[1]), _lib_list[2], _lib_list[3]
+    serverID, level, _type, _key = os.environ['_lib'].split(';')
+    level = int(level)
 except:
     pass
 
@@ -348,10 +348,4 @@ if data.get('items'):
                         lName = plex_instance.library.sectionByID(h.librarySectionID).title
                         makeHistory(h, lName)
 
-filtered_items = [item for item in items if query.lower() in item['title'].lower() or query.lower() in item['subtitle'].lower()]
-
-output = {
-    'items': filtered_items
-}
-
-print(json.dumps(output))
+print(json.dumps({'items': items}))

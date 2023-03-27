@@ -21,10 +21,10 @@ try:
 except:
     level = 0
 
-if data.get('items'):
+if data['items']:
     for obj in data['items']:
-        baseURL = obj.get('baseURL')
-        plexToken = obj.get('plexToken')
+        baseURL = obj['baseURL']
+        plexToken = obj['plexToken']
         try:
             plex_instance = PlexServer(baseURL, plexToken)
         except:
@@ -83,7 +83,7 @@ if data.get('items'):
                         },
                     })
             elif level == 2:
-                _, _, Name, Alias, Type, fType, Title = os.environ['_lib'].split(';')
+                Name, Alias, Type, fType, Title = os.environ['_lib'].split(';')[2:]
                 items.append({
                     'title': 'You can use alternative libtypes',
                     'subtitle': f'Authorized libtypes: {library_subtypes}',
@@ -147,10 +147,4 @@ if data.get('items'):
 else:
     default_element('no_PMS', items)
 
-filtered_items = [item for item in items if query.lower() in item['title'].lower() or query.lower() in item['subtitle'].lower()]
-
-output = {
-    'items': filtered_items
-}
-
-print(json.dumps(output))
+print(json.dumps({'items': items}))

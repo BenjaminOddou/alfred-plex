@@ -14,8 +14,8 @@ data = presets_file()
 level = 0
 
 if '_lib' in os.environ:
-    _lib_list = os.environ['_lib'].split(';')
-    level, _type, _key = int(_lib_list[0]), _lib_list[1], _lib_list[2]
+    level, _type, _key = os.environ['_lib'].split(';')
+    level = int(level)
 else:
     pass
 
@@ -121,10 +121,4 @@ else:
     items = []
     default_element('no_PMS', items)
 
-filtered_items = [item for item in items if query.lower() in item['title'].lower() or query.lower() in item['subtitle'].lower()]
-
-output = {
-    'items': filtered_items
-}
-
-print(json.dumps(output))
+print(json.dumps({'items': items}))

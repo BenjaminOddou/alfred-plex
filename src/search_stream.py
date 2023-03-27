@@ -10,8 +10,7 @@ output = result.stdout.read().decode().strip()
 
 if output:
     try:
-        query = sys.argv[1].split(';')
-        _machineID, _sectionID, _type, _key, _media_index, _part_index = query[1], query[2], query[3], query[4], query[5], query[6]
+        _machineID, _sectionID, _type, _key, _media_index, _part_index = sys.argv[1].split(';')[1:]
     except IndexError:
         display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
         exit()

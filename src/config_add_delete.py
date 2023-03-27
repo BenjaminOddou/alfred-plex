@@ -7,8 +7,7 @@ from utils import display_notification, servers_file_path, servers_file, data_fo
 from urllib.parse import urlparse, parse_qs
 
 try:
-    query = sys.argv[1].split(';')
-    _type, _input = query[0], query[1]
+    _type, _input = sys.argv[1].split(';')
 except IndexError:
     display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
     exit()
