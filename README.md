@@ -101,10 +101,15 @@ The following example returns `movies` released between `1980` and `1990` in the
 
 #### 3. Actions on medias
 
-1. Open the media on the web. Simply press ⏎ to open the media on plex. There is exception for the following media typess: *actor, collection, director, artist, genre*, see `3.` below.
-2. Stream the media with `VLC`. This is only available for the following media types: *movie, episode, track, clip*. Press ⌘⏎ to open the media in `VLC`. *It requires `VLC` 3.0 or above and the vlc cli. See below to know how to install the cli*. If you have multiple versions of the same *movie, episode, clip*, you'll be ask to choose the file you want to play.
-3. Nested search. If you press ⏎ on one of the following media types *actor, collection, director, artist, genre*, this will trigger an advance search.
-4. Get infos on movies and tv shows using the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow by [Tom McKnight](https://github.com/tmcknight). Press ⇧⏎ to trigger the workflow. *It requires `Movie and TV Show Search` Alfred workflow 2.16.0 or above.*
+> The following actions can be configured in the user configuration panel
+
+1. Open the media on the web. Simply press ⌘⏎ to open the media on plex. There is exception for the following media types: *actor, collection, director, artist, genre, show, season*, see below.
+2. Stream the media with `VLC`. This is only available for the following media types: *movie, episode, track, clip*. Press ⌥⏎ to open the media in `VLC`. *It requires `VLC` 3.0 or above and the vlc cli. See below to know how to install the cli*. If you have multiple versions of the same *movie, episode, clip*, you'll be ask to choose the file you want to play.
+3. Get infos on movies and tv shows using the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow by [Tom McKnight](https://github.com/tmcknight). Press ⇧⏎ to trigger the workflow. *It requires `Movie and TV Show Search` Alfred workflow 2.16.0 or above.*
+
+**Exceptions**
+
+If you press ⏎ on one of the following media types *actor, collection, director, artist, genre, show, season*, this will trigger an advance search.
 
 #### 4. VLC integration
 

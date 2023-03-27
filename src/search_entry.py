@@ -51,8 +51,8 @@ def register_elements(database: list):
     def get_subtitle(media):
         subtitle_funcs = {
             'movie': lambda: f'{parse_duration(media.duration)} ǀ Studio: {media.studio} ǀ Director(s): {", ".join([d.tag for d in media.directors])}',
-            'show': lambda: f'{media.childCount} season(s), {len(media.episodes())} episode(s) ǀ Studio: {media.studio}',
-            'season': lambda: f'{len(media.episodes())} episode(s)', 
+            'show': lambda: f'{media.childCount} season(s) ǀ Studio: {media.studio}',
+            'season': lambda: f'Studio: {media.parentStudio}', 
             'episode': lambda: f'{parse_duration(media.duration)} ǀ {parse_time(media.originallyAvailableAt)} ǀ Director(s): {", ".join([d.tag for d in media.directors])}',
             'artist': lambda: f'ID: {media.index}',
             'album': lambda: f'Artist(s): {media.parentTitle} ǀ {len(media.tracks())} track(s) ǀ Studio: {media.studio}',
@@ -97,12 +97,22 @@ def register_elements(database: list):
         media_arg = ''
         media_mod = {}
 
-        if media_type == 'artist':
-            media_arg = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}=album/{aliases_file("advancedFilters", "alias_or_long")}={{\'artist.title\': \'{media.title}\'}}'
-        elif media_type in ['actor', 'director', 'genre', 'collection']:
+        if media_type in ['artist', 'show', 'season']:
+            search_map = {'artist': 'album', 'show': 'season', 'season': 'episode'}
+            if media_type == 'season':
+                value = media.parentTitle.replace("'", "\\'")
+                media_filter = f'{{\'season.index\': {media.index}, \'show.title\': \'{value}\'}}'
+            else:
+                value = media.title.replace("'", "\\'")
+                media_filter = f'{{\'{media_type}.title\': \'{value}\'}}'
+            media_arg = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}={search_map[media_type]}/{aliases_file("advancedFilters", "alias_or_long")}={media_filter}'
+        elif media_type == 'genre':
+            media_arg = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}={utils.reverseSearchType(media.librarySectionType)}/{aliases_file("genre", "alias_or_long")}={media.id}'
+        elif media_type in ['actor', 'director', 'collection']:
             media_id = media.index if media_type == 'collection' else media.id
             media_arg = f'_rerun;0;filter;{aliases_file(media_type, "alias_or_long")}={media_id}'
-        elif short_web != '':
+        
+        if media_type not in ['artist', 'actor', 'director', 'collection', 'genre'] and short_web != '':
             webArg = f'_web;{media.getWebURL()}'
             if short_web == 'arg':
                 media_arg = webArg

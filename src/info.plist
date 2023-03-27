@@ -3349,7 +3349,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>config</key>
 			<dict>
 				<key>default</key>
-				<string>arg</string>
+				<string>cmd</string>
 				<key>pairs</key>
 				<array>
 					<array>
@@ -3503,7 +3503,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>config</key>
 			<dict>
 				<key>default</key>
-				<string>cmd</string>
+				<string>alt</string>
 				<key>pairs</key>
 				<array>
 					<array>
@@ -3811,7 +3811,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>1.2.3</string>
+	<string>1.2.4</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>
