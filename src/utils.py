@@ -4,18 +4,18 @@ import math
 import shutil
 import datetime
 
-# Workflow variables
 data_folder = os.path.expanduser('~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex')
 downloads_folder = os.path.expanduser('~/Downloads')
 sound = 'Submarine'
 date_format = '%d-%m-%Y'
-filters_bool = True
+filters_bool = True if os.environ['filters_bool'] == '1' else False
 default_view = {"sort": "originallyAvailableAt:desc"}
 limit_number = 15
 days_history = 15
-short_web = 'arg'
-short_stream = 'cmd'
-short_mtvsearch = 'shift'
+short_nested_search = 'arg'
+short_web = 'cmd'
+short_stream = 'alt'
+short_mtvsearch = 'ctrl'
 
 default_list = [
     {
@@ -31,10 +31,6 @@ default_list = [
         'title': 'date_format',
     },
     {
-        'title': 'filters_bool',
-        'func': eval
-    },
-    {
         'title': 'default_view',
         'func': eval
     },
@@ -45,6 +41,9 @@ default_list = [
     {
         'title': 'days_history',
         'func': int
+    },
+    {
+        'title': 'short_nested_search',
     },
     {
         'title': 'short_web',
@@ -67,27 +66,18 @@ for obj in default_list:
     except:
         pass
 
-# Path to servers json file
 servers_file_path = os.path.join(data_folder, 'servers.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.json
-
-# Path to aliases json file
 aliases_file_path = os.path.join(data_folder, 'aliases.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/aliases.json
-
-# Path to servers json file
 presets_file_path = os.path.join(data_folder, 'presets.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/presets.json
 
-# Notification builder
 def display_notification(title: str, message: str):
-    # Escape double quotes in title and message
     title = title.replace('"', '\\"')
     message = message.replace('"', '\\"')
     os.system(f'"{os.getcwd()}/notificator" --message "{message}" --title "{title}" --sound "{sound}"')
 
-# Parse datetime object
 def parse_time(time: datetime):
     return time.strftime(date_format)
 
-# Parse duration in milliseconds
 def parse_duration(time):
     total_seconds = divmod(time, 1000)[0]
     hours, remainder = divmod(total_seconds, 3600)
@@ -156,7 +146,7 @@ def default_element(_action: str, items: list, query: str=None, query_dict: dict
         items.append({
             'title': f'No media found for \'{query}\'',
             'subtitle': 'Try to search something else',
-            'arg': '',
+            'valid': False,
             'icon': {
                 'path': 'icons/info.webp',
             },
@@ -174,7 +164,7 @@ def default_element(_action: str, items: list, query: str=None, query_dict: dict
         items.append({
             'title': 'Unauthorized action',
             'subtitle': 'Check your credentials and ensure that you\'re connected with an admin token',
-            'arg': '',
+            'valid': False,
             'icon': {
                 'path': 'icons/info.webp',
             },

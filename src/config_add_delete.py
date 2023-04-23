@@ -30,7 +30,7 @@ elif _type == '_new':
             if data.get('items'):
                 for obj in data['items']:
                     if obj.get('machineIdentifier') == plex_instance.machineIdentifier:
-                        display_notification('⚠️ Warning !', 'Plex Media Server exists already, Plex Token updated')
+                        display_notification('⚠️ Warning !', 'Plex Media Server exists already, delete it then add it again')
                         exit()
             json_obj = {
                 'title': plex_instance.friendlyName,

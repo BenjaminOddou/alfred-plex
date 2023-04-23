@@ -17,7 +17,7 @@ def makeHistory(h, lName):
     items.append({
         'title': hName,
         'subtitle': f'{friendlyName} ǀ {lName} ǀ {h.type} ǀ {parse_time(h.viewedAt)} ǀ {plex_instance.systemAccount(h.accountID).name} ǀ {plex_instance.systemDevice(h.deviceID).name}, {plex_instance.systemDevice(h.deviceID).platform}',
-        'arg': '',
+        'valid': False,
         'icon': {
             'path': 'icons/history.webp',
         }
@@ -174,7 +174,7 @@ if data.get('items'):
                         items.append({
                             'title': account.name,
                             'subtitle': f'Default Audio: {account.defaultAudioLanguage} ǀ Default Subtitles: {account.defaultSubtitleLanguage} ǀ ID: {account.id}',
-                            'arg': account.id,
+                            'valid': False,
                             'icon': {
                                 'path': 'icons/person.webp',
                             },
@@ -186,7 +186,7 @@ if data.get('items'):
                         items.insert(1, {
                             'title': dName,
                             'subtitle': f'Platform: {device.platform} ǀ Created At: {parse_time(device.createdAt)} ǀ ID: {device.id}',
-                            'arg': device.clientIdentifier,
+                            'valid': False,
                             'icon': {
                                 'path': 'icons/device.webp',
                             },
@@ -200,7 +200,7 @@ if data.get('items'):
                             items.append({
                                 'title': sName,
                                 'subtitle': f'{session.player.product} - {session.player.device} {session.player.platform} ǀ {users} ǀ {parse_duration(session.viewOffset)} {session.player.state}',
-                                'arg': '',
+                                'valid': False,
                                 'icon': {
                                     'path': 'icons/watch.webp',
                                 },
@@ -333,7 +333,7 @@ if data.get('items'):
                         {
                             'title': f'{lTitle} Section Size',
                             'subtitle': f'{lSize} ǀ {lByte}',
-                            'arg': '',
+                            'valid': False,
                             'icon': {
                                 'path': 'icons/info.webp',
                             }

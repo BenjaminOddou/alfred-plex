@@ -56,7 +56,7 @@ if data.get('items'):
                         pass
                     test_key = aliases_file(key, 'alias')
                     if not test_key:
-                        display_notification('⚠️ Warning !', f'The preset {title} has invalid parameters')
+                        display_notification('⚠️ Warning !', f'The preset \'{title}\' has invalid parameters')
                         time.sleep(0.2)
                         break
                     nArg += f'{test_key}={value}/'

@@ -26,10 +26,10 @@ if output:
                 exit()
             media = plex_instance.library.sectionByID(int(_sectionID)).fetchItem(_key)
             if _type == 'album':
-                streamURLs = [f'{baseURL}/library/parts/{track.media[0].parts[0].id}?X-Plex-Token={plexToken}' for track in media.tracks()]
+                streamURLs = [f'{baseURL}{track.media[0].parts[0].key}?X-Plex-Token={plexToken}' for track in media.tracks()]
                 streamTitles = [f'{media.parentTitle} ǀ {media.title} ({media.year}) ǀ {track.title} {track.trackNumber} / {len(media.tracks())}' for track in media.tracks()]
             else:
-                streamURLs = [f'{baseURL}/library/parts/{media.media[int(_media_index)].parts[int(_part_index)].id}?X-Plex-Token={plexToken}']
+                streamURLs = [f'{baseURL}{media.media[int(_media_index)].parts[int(_part_index)].key}?X-Plex-Token={plexToken}']
                 if _type == 'episode':
                     streamTitles = [f'{media.grandparentTitle} ǀ {media.title} ǀ {media.seasonEpisode}']
                 elif _type == 'movie':

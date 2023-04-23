@@ -3,6 +3,7 @@
 import sys
 sys.path.insert(0, './lib')
 from lib.plexapi.server import PlexServer
+from lib.plexapi import utils
 from utils import servers_file
 
 data = servers_file()
@@ -16,6 +17,5 @@ except:
     print('error')
     exit()
 
-test = plex_instance.library.search(libtype='movie', hdr=1, limit=5)
-
-print(test)
+test = plex_instance.search('Harry Potter', mediatype='movie')
+print(f'{baseURL}{test[0].media[0].parts[0].key}?download=1&X-Plex-Token={plexToken}')

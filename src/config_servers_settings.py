@@ -16,7 +16,6 @@ except:
     exit()
 
 data = servers_file()
-
 items = []
 
 type_dict = {

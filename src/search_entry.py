@@ -4,9 +4,8 @@ import json
 sys.path.insert(0, './lib')
 from lib.plexapi.server import PlexServer
 from lib.plexapi import utils
-from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_web, short_stream, short_mtvsearch
+from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_nested_search, short_web, short_stream, short_mtvsearch
 
-# full query
 try:
     query = sys.argv[1]
 except IndexError:
@@ -20,10 +19,7 @@ if _keys and 'ǀ' in _keys:
 else:
     _machineID = _sectionID = _media_type = _media_id = ''
 
-# Full list of filters
 query_dict = {}
-
-# Items that will be displayed in alfred
 items = []
 
 def register_elements(database: list):
@@ -58,7 +54,7 @@ def register_elements(database: list):
             'album': lambda: f'Artist(s): {media.parentTitle} ǀ {len(media.tracks())} track(s) ǀ Studio: {media.studio}',
             'track': lambda: f'{parse_duration(media.duration)} ǀ Album: {media.parentTitle} - {media.trackNumber} / {len(media.album().tracks())}',
             'photoalbum': lambda: f'{len(media.albums())} album(s) ǀ {len(media.photos())} photo(s)',
-            'photo': lambda: f'{media.year} ǀ Rating: {media.rating}/10',
+            'photo': lambda: f'{media.year}',
             'clip': lambda: f'{media.year} ǀ Rating: {media.rating}/10',
             'playlist': lambda: f'{media.playlistType} ǀ {len(media.items())} element(s)',
             'collection': lambda: f'{media.childCount} element(s) ǀ ID: {media.index}',
@@ -91,28 +87,43 @@ def register_elements(database: list):
         
         media_type, image_type = class_media_map.get(type(media).__name__, (None, None))
     
-        if not media_type:
+        if media_type is None:
             continue
     
-        media_arg = ''
+        media_arg = None
         media_mod = {}
 
-        if media_type in ['artist', 'show', 'season']:
-            search_map = {'artist': 'album', 'show': 'season', 'season': 'episode'}
-            if media_type == 'season':
-                value = media.parentTitle.replace("'", "\\'")
-                media_filter = f'{{\'season.index\': {media.index}, \'show.title\': \'{value}\'}}'
+        if media_type in ['artist', 'album', 'show', 'season', 'actor', 'director', 'collection', 'genre'] and short_nested_search != '':
+            if media_type in ['artist', 'album', 'show', 'season']:
+                search_map = {'artist': 'album', 'album': 'track', 'show': 'season', 'season': 'episode'}
+                title = media.title.replace("'", "\\'")
+                if media_type in ['season', 'album']:
+                    parentTitle = media.parentTitle.replace("'", "\\'")
+                if media_type == 'season':
+                    media_filter = f'{{\'season.index\': {media.index}, \'show.title=\': \'{parentTitle}\'}}'
+                elif media_type == 'album':
+                    media_filter = f'{{\'album.title=\': \'{title}\', \'artist.title=\': \'{parentTitle}\'}}'
+                else:    
+                    media_filter = f'{{\'{media_type}.title=\': \'{title}\'}}'
+                nested_search = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}={search_map[media_type]}/{aliases_file("advancedFilters", "alias_or_long")}={media_filter}'
+            elif media_type in ['actor', 'director', 'collection']:
+                media_id = media.index if media_type == 'collection' else media.id
+                nested_search = f'_rerun;0;filter;{aliases_file(media_type, "alias_or_long")}={media_id}'
+            elif media_type == 'genre':
+                nested_search = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}={utils.reverseSearchType(media.librarySectionType)}/{aliases_file("genre", "alias_or_long")}={media.id}'
+            if short_nested_search == 'arg':
+                media_arg = nested_search
             else:
-                value = media.title.replace("'", "\\'")
-                media_filter = f'{{\'{media_type}.title\': \'{value}\'}}'
-            media_arg = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}={search_map[media_type]}/{aliases_file("advancedFilters", "alias_or_long")}={media_filter}'
-        elif media_type == 'genre':
-            media_arg = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}={utils.reverseSearchType(media.librarySectionType)}/{aliases_file("genre", "alias_or_long")}={media.id}'
-        elif media_type in ['actor', 'director', 'collection']:
-            media_id = media.index if media_type == 'collection' else media.id
-            media_arg = f'_rerun;0;filter;{aliases_file(media_type, "alias_or_long")}={media_id}'
-        
-        if media_type not in ['artist', 'actor', 'director', 'collection', 'genre'] and short_web != '':
+                media_mod.update({
+                    f'{short_nested_search}': {
+                        'subtitle': 'Press ⏎ to trigger a nested search',
+                        'arg': nested_search,
+                        'icon': {
+                            'path': 'icons/nested_search.webp',
+                        },
+                    }
+                })
+        if media_type not in ['actor', 'director', 'genre', 'photo'] and short_web != '':
             webArg = f'_web;{media.getWebURL()}'
             if short_web == 'arg':
                 media_arg = webArg
@@ -158,12 +169,17 @@ def register_elements(database: list):
         json_obj = {
             'title': get_title(media),
             'subtitle': get_subtitle(media),
-            'arg': media_arg,
             'icon': {
                 'path': f'icons/{image_type}.webp',
             },
-            'mods': media_mod
+            'mods': media_mod,
+            'valid': False
         }
+
+        if media_arg:
+            json_obj['arg'] = media_arg
+            json_obj['valid'] = True
+
         items.append(json_obj)
 
 data = servers_file()

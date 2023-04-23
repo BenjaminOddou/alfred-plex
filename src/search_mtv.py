@@ -9,7 +9,6 @@ except IndexError:
     display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
     query = _machineID = _sectionID = _type = _key = ''
 
-
 data = servers_file()
 
 for obj in data['items']:

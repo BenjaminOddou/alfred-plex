@@ -56,7 +56,7 @@ Quickly add a server by accessing any XML page from the API, copy the URL and pa
 
 Follow the [Plex Documentation](https://support.plex.tv/articles/201998867-investigate-media-information-and-formats/) to for more details.
 
-If you don't have the `View XML` button on the plex client, try to open the browser's dev tool by pressing `⌥⌘i` and copy the link containing the `X-Plex-Token`.
+If you don't have the `View XML` button on the plex client, try to open the browser's dev tool by pressing ⌥⌘i and copy the link containing the `X-Plex-Token`.
 
 Select the server to view its informations and perform actions.
 * Download last version of plex media server from the web.
@@ -103,29 +103,26 @@ The following example returns `movies` released between `1980` and `1990` in the
 
 > The following actions can be configured in the user configuration panel
 
-1. Open the media on the web. Simply press ⌘⏎ to open the media on plex. There is exception for the following media types: *actor, collection, director, artist, genre, show, season*, see below.
-2. Stream the media with `VLC`. This is only available for the following media types: *movie, episode, track, clip*. Press ⌥⏎ to open the media in `VLC`. *It requires `VLC` 3.0 or above and the vlc cli. See below to know how to install the cli*. If you have multiple versions of the same *movie, episode, clip*, you'll be ask to choose the file you want to play.
-3. Get infos on movies and tv shows using the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow by [Tom McKnight](https://github.com/tmcknight). Press ⇧⏎ to trigger the workflow. *It requires `Movie and TV Show Search` Alfred workflow 2.16.0 or above.*
-
-**Exceptions**
-
-If you press ⏎ on one of the following media types *actor, collection, director, artist, genre, show, season*, this will trigger an advance search.
+1. Nested search. Press ⏎ on one of the following media types: *actor, director, collection, artist, album, genre, show, season*, to trigger a nested search.
+2. Open the media on the web. Simply press ⌘⏎ to open the media on plex. Not available for *genre, actor, director* media types.
+3. Stream the media with VLC. This is only available for the following media types: *movie, episode, clip, track, album*. Press ⌥⏎ to open the media in VLC. *It requires VLC 3.0 or above and the vlc cli. See below to know how to install the cli*. If you have multiple versions of the same *movie, episode, clip*, you'll be asked to choose the file you want to play.
+4. Get infos of movies and tv shows using the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow by [Tom McKnight](https://github.com/tmcknight). Press ⌃⏎ to trigger the workflow. *It requires `Movie and TV Show Search` Alfred workflow 2.16.0 or above*. Only available for *movie, show* media types.
 
 #### 4. VLC integration
 
-If you don't have `VLC` on your mac, run the following command to install it via `homebrew`:
+If you don't have VLC on your mac, run the following command to install it via homebrew:
 
 ```shell
 brew install --cask vlc
 ```
 
-If you already have `VLC` installed check the presence of the cli with:
+If you already have VLC installed check the presence of the cli with:
 
 ```shell
 which vlc
 ```
 
-If it is not found, uninstall `VLC` and reinstall it using `homebrew`.
+If it is not found, uninstall VLC and reinstall it using homebrew.
 
 Link to the [homebrew formulae](https://formulae.brew.sh/cask/vlc).
 
@@ -173,7 +170,7 @@ Example: `libtype=movie/sort=originallyAvailableAt:desc`. This will display `mov
 
 Aliases are enabled by default, and allows you, when activated, to write filters more easily. `libtype` becomes `lt`, `studio` becomes `st`...
 
-You can disable this behavior in the user control panel by changing the `📜 Use aliases` parameter.
+You can disable this behavior in the user control panel by unticking the `📜 Use aliases` parameter.
 
 Aliases file can be edited, but be careful about double values. It is the `aliases.json` file located under the `📁 Data folder` (`~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex` by default).
 
