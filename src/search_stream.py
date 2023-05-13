@@ -1,8 +1,8 @@
 import sys
-sys.path.insert(0, './lib')
 import time
+import packages
 import subprocess
-from lib.plexapi.server import PlexServer
+from plexapi.server import PlexServer
 from utils import display_notification, servers_file
 
 result = subprocess.Popen(['mdfind', 'kMDItemContentType == "com.apple.application-bundle" && kMDItemFSName == "VLC.app"'], stdout=subprocess.PIPE)

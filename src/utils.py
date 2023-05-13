@@ -8,7 +8,7 @@ data_folder = os.path.expanduser('~/Library/Application Support/Alfred/Workflow 
 downloads_folder = os.path.expanduser('~/Downloads')
 sound = 'Submarine'
 date_format = '%d-%m-%Y'
-filters_bool = True if os.environ['filters_bool'] == '1' else False
+filters_bool = True if os.getenv('filters_bool') == '1' else False
 default_view = {"sort": "originallyAvailableAt:desc"}
 limit_number = 15
 days_history = 15

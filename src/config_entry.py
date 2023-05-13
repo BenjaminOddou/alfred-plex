@@ -1,8 +1,8 @@
 import os
 import sys
 import json
-sys.path.insert(0, './lib')
-from lib.plexapi.server import PlexServer
+import packages
+from plexapi.server import PlexServer
 from utils import display_notification, servers_file, addReturnbtn, parse_time, parse_duration, get_size_string, history_days, default_element
 
 def makeHistory(h, lName):

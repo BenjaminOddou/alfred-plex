@@ -1,7 +1,7 @@
 import sys
+import packages
 import webbrowser
-sys.path.insert(0, './lib')
-from lib.plexapi.server import PlexServer
+from plexapi.server import PlexServer
 from utils import servers_file, display_notification, downloads_folder
 
 try:

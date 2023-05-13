@@ -1,9 +1,9 @@
 import os
 import sys
 import json
-sys.path.insert(0, './lib')
-from lib.plexapi.server import PlexServer
-from lib.plexapi import utils
+import packages
+from plexapi import utils
+from plexapi.server import PlexServer
 from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_nested_search, short_web, short_stream, short_mtvsearch
 
 try:
@@ -11,9 +11,9 @@ try:
 except IndexError:
     query = ''
 
-_level = int(os.environ.get('_lib1', 0))
-_type = os.environ.get('_lib2')
-_keys = os.environ.get('_lib3')
+_level = int(os.getenv('_lib1', 0))
+_type = os.getenv('_lib2')
+_keys = os.getenv('_lib3')
 if _keys and 'ǀ' in _keys:
     _machineID, _sectionID, _media_type, _media_id =  _keys.split('ǀ')
 else:

@@ -1,10 +1,10 @@
 import os
 import sys
 import json
-sys.path.insert(0, './lib')
+import packages
 import urllib.parse
 from types import SimpleNamespace
-from lib.plexapi.server import PlexServer
+from plexapi.server import PlexServer
 from utils import default_element, servers_file, aliases_file, filters_bool, display_notification, addReturnbtn
 
 try:

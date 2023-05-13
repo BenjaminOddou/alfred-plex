@@ -1,7 +1,7 @@
 import os
 import sys
-sys.path.insert(0, './lib')
-from lib.plexapi.server import PlexServer
+import packages
+from plexapi.server import PlexServer
 from utils import servers_file, display_notification
 
 serverID = os.environ['split2']

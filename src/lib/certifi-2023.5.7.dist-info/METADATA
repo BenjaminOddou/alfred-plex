@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: certifi
-Version: 2022.12.7
+Version: 2023.5.7
 Summary: Python package for providing Mozilla's CA Bundle.
 Home-page: https://github.com/certifi/python-certifi
 Author: Kenneth Reitz
@@ -55,20 +55,6 @@ Or from the command line::
     /usr/local/lib/python3.7/site-packages/certifi/cacert.pem
 
 Enjoy!
-
-1024-bit Root Certificates
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Browsers and certificate authorities have concluded that 1024-bit keys are
-unacceptably weak for certificates, particularly root certificates. For this
-reason, Mozilla has removed any weak (i.e. 1024-bit key) certificate from its
-bundle, replacing it with an equivalent strong (i.e. 2048-bit or greater key)
-certificate from the same CA. Because Mozilla removed these certificates from
-its bundle, ``certifi`` removed them as well.
-
-In previous versions, ``certifi`` provided the ``certifi.old_where()`` function
-to intentionally re-add the 1024-bit roots back into your bundle. This was not
-recommended in production and therefore was removed at the end of 2018.
 
 .. _`Requests`: https://requests.readthedocs.io/en/master/
 

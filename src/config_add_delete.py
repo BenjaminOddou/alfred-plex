@@ -1,10 +1,10 @@
 import os
 import sys
 import json
-sys.path.insert(0, './lib')
-from lib.plexapi.server import PlexServer
-from utils import display_notification, servers_file_path, servers_file, data_folder
+import packages
+from plexapi.server import PlexServer
 from urllib.parse import urlparse, parse_qs
+from utils import display_notification, servers_file_path, servers_file, data_folder
 
 try:
     _type, _input = sys.argv[1].split(';')
