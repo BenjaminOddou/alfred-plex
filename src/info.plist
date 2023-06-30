@@ -305,6 +305,19 @@
 				<false/>
 			</dict>
 		</array>
+		<key>650F672B-6961-4B52-895D-BCB034243503</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>4A5D5ED4-5EAD-4941-8D28-1D24F854332A</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>664CF5BC-0E41-439A-BE04-CBA73A95D7AA</key>
 		<array>
 			<dict>
@@ -1082,7 +1095,7 @@
 			<key>config</key>
 			<dict>
 				<key>externaltriggerid</key>
-				<string>_rerunDocs</string>
+				<string>_rerunHelp</string>
 				<key>passinputasargument</key>
 				<true/>
 				<key>passvariables</key>
@@ -1247,7 +1260,7 @@
 				<key>availableviaurlhandler</key>
 				<false/>
 				<key>triggerid</key>
-				<string>_rerunDocs</string>
+				<string>_rerunHelp</string>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.trigger.external</string>
@@ -1272,7 +1285,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>keyword</key>
-				<string>{var:docs_trigger}</string>
+				<string>{var:help_trigger}</string>
 				<key>queuedelaycustom</key>
 				<integer>3</integer>
 				<key>queuedelayimmediatelyinitially</key>
@@ -1284,7 +1297,7 @@
 				<key>runningsubtext</key>
 				<string>Loading elements...</string>
 				<key>script</key>
-				<string>python3 doc_entry.py "$1"</string>
+				<string>python3 help_entry.py "$1"</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
@@ -1292,7 +1305,7 @@
 				<key>subtext</key>
 				<string>📖 Filtering &amp; sorting options of your plex media server(s)</string>
 				<key>title</key>
-				<string>Plex Filter &amp; Sort Options</string>
+				<string>Plex Help</string>
 				<key>type</key>
 				<integer>5</integer>
 				<key>withspace</key>
@@ -2339,6 +2352,55 @@ echo -n "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>{var:discover_trigger}</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>2</integer>
+				<key>runningsubtext</key>
+				<string>Loading elements...</string>
+				<key>script</key>
+				<string>python3 discover_entry.py "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>✨ Search medias using discover</string>
+				<key>title</key>
+				<string>Plex Discover</string>
+				<key>type</key>
+				<integer>5</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>650F672B-6961-4B52-895D-BCB034243503</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>externaltriggerid</key>
 				<string>_rerunSearch</string>
 				<key>passinputasargument</key>
@@ -2526,12 +2588,13 @@ Install Python 3.7 or above. Check your version with:
 
 ## 🧙‍♂️ Invoke the workflow
 
-The workflow is divided in 4 parts :
+The workflow is divided in 5 parts :
 
 1. `cplex`: Manage servers and perform actions (scan libraries, modify settings, backup logs and databases...).
 2. `splex`: Search medias throughout your servers.
-3. `dplex`: Filtering &amp; sorting options of your plex media server(s).
-4. `pplex`: Manage presets to rapidly search medias.
+3. `dplex`: Search medias on discover.
+4. `hplex`: Filtering &amp; sorting options of your plex media server(s).
+5. `pplex`: Manage presets to rapidly search medias.
 
 You can edit these triggers (flagged with a `🕹️` symbol) in the user configuration panel.
 
@@ -2607,14 +2670,14 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>214466CB-E5BD-44AA-86E7-57162F32338F</key>
 		<dict>
 			<key>xpos</key>
-			<real>180</real>
+			<real>185</real>
 			<key>ypos</key>
 			<real>910</real>
 		</dict>
 		<key>23BBD045-338E-4B7D-AACB-117358711209</key>
 		<dict>
 			<key>note</key>
-			<string>dplex - filters &amp; sort options of your plex media server(s).</string>
+			<string>hplex - filters &amp; sort options of your plex media server(s).</string>
 			<key>xpos</key>
 			<real>1840</real>
 			<key>ypos</key>
@@ -2743,6 +2806,15 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>ypos</key>
 			<real>1220</real>
 		</dict>
+		<key>650F672B-6961-4B52-895D-BCB034243503</key>
+		<dict>
+			<key>note</key>
+			<string>dplex - search medias throughout plex discover.</string>
+			<key>xpos</key>
+			<real>510</real>
+			<key>ypos</key>
+			<real>1060</real>
+		</dict>
 		<key>6600C753-B927-468D-A2A5-A563744BA0C2</key>
 		<dict>
 			<key>xpos</key>
@@ -2760,7 +2832,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>69CF353B-BD6F-45DD-867A-7401578A11EB</key>
 		<dict>
 			<key>xpos</key>
-			<real>1090</real>
+			<real>1085</real>
 			<key>ypos</key>
 			<real>1130</real>
 		</dict>
@@ -2959,7 +3031,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>DEFA05E6-B730-4DAD-AB00-D18BCB18C25F</key>
 		<dict>
 			<key>xpos</key>
-			<real>180</real>
+			<real>185</real>
 			<key>ypos</key>
 			<real>205</real>
 		</dict>
@@ -2973,7 +3045,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>E2205941-57D8-42AE-BF01-CAB3EC9970A4</key>
 		<dict>
 			<key>xpos</key>
-			<real>1090</real>
+			<real>1085</real>
 			<key>ypos</key>
 			<real>1250</real>
 		</dict>
@@ -2987,7 +3059,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>E6F9453B-7823-4175-9D2A-02D815624F8F</key>
 		<dict>
 			<key>xpos</key>
-			<real>810</real>
+			<real>815</real>
 			<key>ypos</key>
 			<real>840</real>
 		</dict>
@@ -3112,13 +3184,224 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 				<true/>
 			</dict>
 			<key>description</key>
-			<string>filters &amp; sort options of your plex media server(s).</string>
+			<string>search medias on discover.</string>
 			<key>label</key>
-			<string>🕹️ Docs trigger</string>
+			<string>🕹️ Discover trigger</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>variable</key>
-			<string>docs_trigger</string>
+			<string>discover_trigger</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>en</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>Afrikaans</string>
+						<string>af</string>
+					</array>
+					<array>
+						<string>Burmese</string>
+						<string>my</string>
+					</array>
+					<array>
+						<string>Català</string>
+						<string>ca</string>
+					</array>
+					<array>
+						<string>Čeština</string>
+						<string>cs</string>
+					</array>
+					<array>
+						<string>Dansk</string>
+						<string>da</string>
+					</array>
+					<array>
+						<string>Deutsch</string>
+						<string>de</string>
+					</array>
+					<array>
+						<string>Eesti</string>
+						<string>et</string>
+					</array>
+					<array>
+						<string>English</string>
+						<string>en</string>
+					</array>
+					<array>
+						<string>English (UK)</string>
+						<string>en-GB</string>
+					</array>
+					<array>
+						<string>Español</string>
+						<string>es</string>
+					</array>
+					<array>
+						<string>Español (Latinoamérica)</string>
+						<string>es-419</string>
+					</array>
+					<array>
+						<string>Français</string>
+						<string>fr</string>
+					</array>
+					<array>
+						<string>Français Canadien</string>
+						<string>fr-CA</string>
+					</array>
+					<array>
+						<string>Hrvatski</string>
+						<string>hr</string>
+					</array>
+					<array>
+						<string>Íslenska</string>
+						<string>is</string>
+					</array>
+					<array>
+						<string>Italiano</string>
+						<string>it</string>
+					</array>
+					<array>
+						<string>Lietuvių kalba</string>
+						<string>lt</string>
+					</array>
+					<array>
+						<string>Magyar</string>
+						<string>hu</string>
+					</array>
+					<array>
+						<string>Nederlands</string>
+						<string>nl</string>
+					</array>
+					<array>
+						<string>Norsk</string>
+						<string>no</string>
+					</array>
+					<array>
+						<string>Polski</string>
+						<string>pl</string>
+					</array>
+					<array>
+						<string>Português</string>
+						<string>pt</string>
+					</array>
+					<array>
+						<string>Português Brasileiro</string>
+						<string>pt-BR</string>
+					</array>
+					<array>
+						<string>Română</string>
+						<string>ro</string>
+					</array>
+					<array>
+						<string>Slovenčina</string>
+						<string>sk</string>
+					</array>
+					<array>
+						<string>Slovenščina</string>
+						<string>sl</string>
+					</array>
+					<array>
+						<string>Suomeksi</string>
+						<string>fi</string>
+					</array>
+					<array>
+						<string>Svenska</string>
+						<string>sv</string>
+					</array>
+					<array>
+						<string>Tiếng Việt</string>
+						<string>vi</string>
+					</array>
+					<array>
+						<string>Türkçe</string>
+						<string>tr</string>
+					</array>
+					<array>
+						<string>Ελληνικά</string>
+						<string>el</string>
+					</array>
+					<array>
+						<string>български език</string>
+						<string>bg</string>
+					</array>
+					<array>
+						<string>русский язык</string>
+						<string>ru</string>
+					</array>
+					<array>
+						<string>српски језик</string>
+						<string>sr</string>
+					</array>
+					<array>
+						<string>українська</string>
+						<string>uk</string>
+					</array>
+					<array>
+						<string>עברית</string>
+						<string>he</string>
+					</array>
+					<array>
+						<string>العربية</string>
+						<string>ar</string>
+					</array>
+					<array>
+						<string>فارسی</string>
+						<string>fa</string>
+					</array>
+					<array>
+						<string>ไทย</string>
+						<string>th</string>
+					</array>
+					<array>
+						<string>한국어</string>
+						<string>ko</string>
+					</array>
+					<array>
+						<string>中文</string>
+						<string>zh</string>
+					</array>
+					<array>
+						<string>日本語</string>
+						<string>ja</string>
+					</array>
+					<array>
+						<string>臺語</string>
+						<string>zh-TW</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string>select the language you prefer for discover.</string>
+			<key>label</key>
+			<string>🌐 Language</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>language</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>hplex</string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<true/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>filters &amp; sort options of your plex media server(s).</string>
+			<key>label</key>
+			<string>🕹️ Help trigger</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>help_trigger</string>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -3690,7 +3973,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>1.3.1</string>
+	<string>1.4.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>

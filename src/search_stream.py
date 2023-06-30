@@ -1,6 +1,5 @@
 import sys
 import time
-import packages
 import subprocess
 from plexapi.server import PlexServer
 from utils import display_notification, servers_file
@@ -10,7 +9,7 @@ output = result.stdout.read().decode().strip()
 
 if output:
     try:
-        _machineID, _sectionID, _type, _key, _media_index, _part_index = sys.argv[1].split(';')[1:]
+        _machineID, _type, _key, _media_index, _part_index = sys.argv[1].split(';')[1:]
     except IndexError:
         display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
         exit()
@@ -24,7 +23,7 @@ if output:
             except:
                 display_notification('🚨 Error !', f'Failed to connect to the Plex server \'{obj.get("title")}\'. Check the IP and token')
                 exit()
-            media = plex_instance.library.sectionByID(int(_sectionID)).fetchItem(_key)
+            media = plex_instance.fetchItem(_key)
             if _type == 'album':
                 streamURLs = [f'{baseURL}{track.media[0].parts[0].key}?X-Plex-Token={plexToken}' for track in media.tracks()]
                 streamTitles = [f'{media.parentTitle} ǀ {media.title} ({media.year}) ǀ {track.title} {track.trackNumber} / {len(media.tracks())}' for track in media.tracks()]
@@ -48,5 +47,6 @@ if output:
             vlc_instance = subprocess.Popen(vlc_args)
             time.sleep(1)
             subprocess.call(['osascript', '-e', 'tell application "System Events" to set frontmost of process "VLC" to true'])
+            break
 else:
     display_notification('🚨 Error !', 'Can\'t locate the VLC app')

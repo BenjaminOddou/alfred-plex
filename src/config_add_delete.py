@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import packages
 from plexapi.server import PlexServer
 from urllib.parse import urlparse, parse_qs
 from utils import display_notification, servers_file_path, servers_file, data_folder

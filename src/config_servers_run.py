@@ -1,5 +1,4 @@
 import sys
-import packages
 import webbrowser
 from plexapi.server import PlexServer
 from utils import servers_file, display_notification, downloads_folder

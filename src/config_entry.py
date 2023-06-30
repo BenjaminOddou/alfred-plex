@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import packages
 from plexapi.server import PlexServer
 from utils import display_notification, servers_file, addReturnbtn, parse_time, parse_duration, get_size_string, history_days, default_element
 
@@ -102,7 +101,7 @@ if data.get('items'):
 
                 sTitle = 'Your server is up to date'
                 sSubtitle = f'Actual version: {plex_instance.version}'
-                sArg = ''
+                sArg = None
                 sVersionType = 'ok'
                 try:
                     if not plex_instance.isLatest():
@@ -115,6 +114,7 @@ if data.get('items'):
                             'title': sTitle,
                             'subtitle': sSubtitle,
                             'arg': sArg,
+                            'valid': False if sArg is None else True,
                             'icon': {
                                 'path': f'icons/{sVersionType}.webp',
                             },

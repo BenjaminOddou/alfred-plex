@@ -1,11 +1,17 @@
 import os
+import sys
+sys.path.insert(0, './lib')
 import json
 import math
+import pickle
 import shutil
 import datetime
+from plexapi.myplex import MyPlexAccount
 
 data_folder = os.path.expanduser('~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex')
+cache_folder = os.path.expanduser('~/Library/Caches/com.runningwithcrayons.Alfred/Workflow Data/com.benjamino.plex')
 downloads_folder = os.path.expanduser('~/Downloads')
+language = 'en'
 sound = 'Submarine'
 date_format = '%d-%m-%Y'
 filters_bool = True if os.getenv('filters_bool') == '1' else False
@@ -23,6 +29,9 @@ default_list = [
     },
     {
         'title': 'downloads_folder',
+    },
+    {
+        'title': 'language',
     },
     {
         'title': 'sound',
@@ -188,3 +197,31 @@ def get_size_string(size: int, decimals=2):
     p = math.pow(1024, i)
     s = round(size / p, decimals)
     return f"{s} {size_name[i]}"
+
+
+def get_plex_account(plextoken):
+    plex_account = None
+
+    if plex_account is None:
+        try:
+            with open(f'{cache_folder}/plex_account_cache.pickle', 'rb') as file:
+                plex_account = pickle.load(file)
+        except (FileNotFoundError, pickle.UnpicklingError):
+            pass
+
+    if plex_account is None:
+        try:
+            plex_account = MyPlexAccount(plextoken, timeout=600)
+        except:
+            display_notification('🚨 Error!', 'Failed to connect to the Plex Discover. Check the token')
+            exit()
+
+        try:
+            if not os.path.exists(cache_folder):
+                os.mkdir(cache_folder)
+            with open(f'{cache_folder}/plex_account_cache.pickle', 'wb') as file:
+                pickle.dump(plex_account, file)
+        except pickle.PickleError:
+            pass
+
+    return plex_account

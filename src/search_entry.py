@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import packages
 from plexapi import utils
 from plexapi.server import PlexServer
 from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_nested_search, short_web, short_stream, short_mtvsearch
@@ -15,9 +14,9 @@ _level = int(os.getenv('_lib1', 0))
 _type = os.getenv('_lib2')
 _keys = os.getenv('_lib3')
 if _keys and 'ǀ' in _keys:
-    _machineID, _sectionID, _media_type, _media_id =  _keys.split('ǀ')
+    _machineID, _media_type, _media_id =  _keys.split('ǀ')
 else:
-    _machineID = _sectionID = _media_type = _media_id = ''
+    _machineID = _media_type = _media_id = ''
 
 query_dict = {}
 items = []
@@ -123,7 +122,7 @@ def register_elements(database: list):
                         },
                     }
                 })
-        if media_type not in ['actor', 'director', 'genre', 'photo'] and short_web != '':
+        if media_type not in ['genre', 'photo', 'actor', 'director'] and short_web != '':
             webArg = f'_web;{media.getWebURL()}'
             if short_web == 'arg':
                 media_arg = webArg
@@ -138,7 +137,7 @@ def register_elements(database: list):
                     }
                 })
         if media_type in ['movie', 'episode', 'album', 'track', 'clip'] and short_stream != '':
-            sArg = f'_rerun;1;streams;{plex_instance.machineIdentifier}ǀ{media.librarySectionID}ǀ{media_type}ǀ{media.key}' if media_type not in ['album', 'track'] and len(media.media) > 1 else f'_stream;{plex_instance.machineIdentifier};{media.librarySectionID};{media_type};{media.key};0;0'
+            sArg = f'_rerun;1;streams;{plex_instance.machineIdentifier}ǀ{media_type}ǀ{media.key}' if media_type not in ['album', 'track'] and len(media.media) > 1 else f'_stream;{plex_instance.machineIdentifier};{media_type};{media.key};0;0'
             if short_stream == 'arg':
                 media_arg = sArg
             else:
@@ -152,7 +151,7 @@ def register_elements(database: list):
                     }
                 })
         if media_type in ['movie', 'show'] and short_mtvsearch != '':
-            mtvArg = f'_mtvsearch;{plex_instance.machineIdentifier};{media.librarySectionID};{media_type};{media.key}'
+            mtvArg = f'_mtvsearch;{plexToken};{media_type};{media.guid.split("/")[-1]}'
             if short_mtvsearch == 'arg':
                 media_arg = mtvArg
             else:
@@ -185,14 +184,14 @@ def register_elements(database: list):
 data = servers_file()
 if data.get('items'):
         for obj in data['items']:
-            if obj.get('machineIdentifier') != _machineID and _level > 0:
+            if obj['machineIdentifier'] != _machineID and _level > 0:
                 continue
-            baseURL = obj.get('baseURL')
-            plexToken = obj.get('plexToken')
+            baseURL = obj['baseURL']
+            plexToken = obj['plexToken']
             try:
                 plex_instance = PlexServer(baseURL, plexToken)
             except:
-                display_notification('🚨 Error !', f'Failed to connect to the Plex server \'{obj.get("title")}\'. Check the IP and token')
+                display_notification('🚨 Error !', f'Failed to connect to the Plex server \'{obj["title"]}\'. Check the IP and token')
                 exit()
             if _level == 0:
                 if '=' in query:
@@ -244,7 +243,7 @@ if data.get('items'):
                 addReturnbtn(rArg, items)
                 if _level == 1:
                     if _type == 'streams':
-                        media = plex_instance.library.sectionByID(int(_sectionID)).fetchItem(_media_id)
+                        media = plex_instance.fetchItem(_media_id)
                         for mIndex, m in enumerate(media.media):
                             for pIndex, p in enumerate(m.parts):
                                 pTitle = p.videoStreams()[0].displayTitle
@@ -252,7 +251,7 @@ if data.get('items'):
                                 items.append({
                                     'title': pTitle,
                                     'subtitle': pSub,
-                                    'arg': f'_stream;{_machineID};{_sectionID};{_media_type};{_media_id};{mIndex};{pIndex}',
+                                    'arg': f'_stream;{_machineID};{_media_type};{_media_id};{mIndex};{pIndex}',
                                     'icon': {
                                         'path': f'icons/{_media_type}.webp',
                                     },
@@ -268,7 +267,7 @@ else:
 
 for item in items:
     if 'skip' in item:
-        _action = item.get('skip')
+        _action = item['skip']
         items = []
         default_element(_action, items, query, query_dict)
 

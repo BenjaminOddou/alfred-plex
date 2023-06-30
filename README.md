@@ -35,12 +35,13 @@ python --version
 
 ## 🧙‍♂️ Invoke the workflow
 
-The workflow is divided in 4 parts :
+The workflow is divided in 5 parts :
 
 1. `cplex`: Manage servers and perform actions (scan libraries, modify settings, backup logs and databases...).
 2. `splex`: Search medias throughout your servers.
-3. `dplex`: Filtering & sorting options of your plex media server(s).
-4. `pplex`: Manage presets to rapidly search medias.
+3. `dplex`: Search medias on discover.
+4. `hplex`: Filtering & sorting options of your plex media server(s).
+5. `pplex`: Manage presets to rapidly search medias.
 
 You can edit these triggers (flagged with a `🕹️` symbol) in the user configuration panel.
 
@@ -126,9 +127,19 @@ If it is not found, uninstall VLC and reinstall it using homebrew.
 
 Link to the [homebrew formulae](https://formulae.brew.sh/cask/vlc).
 
-### Filtering & sorting options of your plex media server(s)
+### Search medias on discover
 
 > Use `dplex` to trigger this flow.
+
+Configure the language in the configuration panel and search medias on discover. You can perform the same actions ** as in the `splex` workflow (see above)
+
+** Except streaming with VLC. Note that nested search allows you to search media title within your servers.
+
+![dplex](public/dplex.webp)
+
+### Filtering & sorting options of your plex media server(s)
+
+> Use `hplex` to trigger this flow.
 
 Filters, fields and sorts options are generated based on your libraries metadata. This will vary regarding your medias and agents used to gather information. 
 

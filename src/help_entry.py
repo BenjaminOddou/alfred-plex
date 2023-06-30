@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import packages
 import urllib.parse
 from types import SimpleNamespace
 from plexapi.server import PlexServer

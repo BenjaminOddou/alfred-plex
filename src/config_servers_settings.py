@@ -1,6 +1,5 @@
 import os
 import sys
-import packages
 from plexapi.server import PlexServer
 from utils import servers_file, display_notification
 

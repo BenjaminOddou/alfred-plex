@@ -7,8 +7,9 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from xml.etree import ElementTree
 
 import requests
-from plexapi import (BASE_HEADERS, CONFIG, TIMEOUT, X_PLEX_CONTAINER_SIZE,
-                     X_PLEX_ENABLE_FAST_CONNECT, X_PLEX_IDENTIFIER, log, logfilter, utils)
+
+from plexapi import (BASE_HEADERS, CONFIG, TIMEOUT, X_PLEX_ENABLE_FAST_CONNECT, X_PLEX_IDENTIFIER,
+                     log, logfilter, utils)
 from plexapi.base import PlexObject
 from plexapi.client import PlexClient
 from plexapi.exceptions import BadRequest, NotFound, Unauthorized
@@ -188,6 +189,8 @@ class MyPlexAccount(PlexObject):
                 raise Unauthorized(message)
             elif response.status_code == 404:
                 raise NotFound(message)
+            elif response.status_code == 422 and "Invalid token" in response.text:
+                raise Unauthorized(message)
             else:
                 raise BadRequest(message)
         if headers.get('Accept') == 'application/json':
@@ -784,7 +787,7 @@ class MyPlexAccount(PlexObject):
             raise BadRequest(f'({response.status_code}) {codename} {response.url}; {errtext}')
         return response.json()['token']
 
-    def history(self, maxresults=9999999, mindate=None):
+    def history(self, maxresults=None, mindate=None):
         """ Get Play History for all library sections on all servers for the owner.
 
             Parameters:
@@ -817,7 +820,7 @@ class MyPlexAccount(PlexObject):
         data = self.query(f'{self.MUSIC}/hubs')
         return self.findItems(data)
 
-    def watchlist(self, filter=None, sort=None, libtype=None, maxresults=9999999, **kwargs):
+    def watchlist(self, filter=None, sort=None, libtype=None, maxresults=None, **kwargs):
         """ Returns a list of :class:`~plexapi.video.Movie` and :class:`~plexapi.video.Show` items in the user's watchlist.
             Note: The objects returned are from Plex's online metadata. To get the matching item on a Plex server,
             search for the media using the guid.
@@ -857,23 +860,10 @@ class MyPlexAccount(PlexObject):
         if libtype:
             params['type'] = utils.searchType(libtype)
 
-        params['X-Plex-Container-Start'] = 0
-        params['X-Plex-Container-Size'] = min(X_PLEX_CONTAINER_SIZE, maxresults)
         params.update(kwargs)
 
-        results, subresults = [], '_init'
-        while subresults and maxresults > len(results):
-            data = self.query(f'{self.METADATA}/library/sections/watchlist/{filter}', params=params)
-            subresults = self.findItems(data)
-            results += subresults[:maxresults - len(results)]
-            params['X-Plex-Container-Start'] += params['X-Plex-Container-Size']
-
-            # totalSize is available in first response, update maxresults from it
-            totalSize = utils.cast(int, data.attrib.get('totalSize'))
-            if maxresults > totalSize:
-                maxresults = totalSize
-
-        return self._toOnlineMetadata(results, **kwargs)
+        key = f'{self.METADATA}/library/sections/watchlist/{filter}{utils.joinArgs(params)}'
+        return self._toOnlineMetadata(self.fetchItems(key, maxresults=maxresults), **kwargs)
 
     def onWatchlist(self, item):
         """ Returns True if the item is on the user's watchlist.
@@ -936,7 +926,49 @@ class MyPlexAccount(PlexObject):
         data = self.query(f"{self.METADATA}/library/metadata/{ratingKey}/userState")
         return self.findItem(data, cls=UserState)
 
-    def searchDiscover(self, query, limit=30, libtype=None):
+    def isPlayed(self, item):
+        """ Return True if the item is played on Discover.
+
+            Parameters:
+                item (:class:`~plexapi.video.Movie`,
+                :class:`~plexapi.video.Show`, :class:`~plexapi.video.Season` or
+                :class:`~plexapi.video.Episode`): Object from searchDiscover().
+                Can be also result from Plex Movie or Plex TV Series agent.
+        """
+        userState = self.userState(item)
+        return bool(userState.viewCount > 0) if userState.viewCount else False
+
+    def markPlayed(self, item):
+        """ Mark the Plex object as played on Discover.
+
+            Parameters:
+                item (:class:`~plexapi.video.Movie`,
+                :class:`~plexapi.video.Show`, :class:`~plexapi.video.Season` or
+                :class:`~plexapi.video.Episode`): Object from searchDiscover().
+                Can be also result from Plex Movie or Plex TV Series agent.
+        """
+        key = f'{self.METADATA}/actions/scrobble'
+        ratingKey = item.guid.rsplit('/', 1)[-1]
+        params = {'key': ratingKey, 'identifier': 'com.plexapp.plugins.library'}
+        self.query(key, params=params)
+        return self
+
+    def markUnplayed(self, item):
+        """ Mark the Plex object as unplayed on Discover.
+
+            Parameters:
+                item (:class:`~plexapi.video.Movie`,
+                :class:`~plexapi.video.Show`, :class:`~plexapi.video.Season` or
+                :class:`~plexapi.video.Episode`): Object from searchDiscover().
+                Can be also result from Plex Movie or Plex TV Series agent.
+        """
+        key = f'{self.METADATA}/actions/unscrobble'
+        ratingKey = item.guid.rsplit('/', 1)[-1]
+        params = {'key': ratingKey, 'identifier': 'com.plexapp.plugins.library'}
+        self.query(key, params=params)
+        return self
+
+    def searchDiscover(self, query, limit=30, libtype=None, language=None):
         """ Search for movies and TV shows in Discover.
             Returns a list of :class:`~plexapi.video.Movie` and :class:`~plexapi.video.Show` objects.
 
@@ -955,7 +987,8 @@ class MyPlexAccount(PlexObject):
             'query': query,
             'limit': limit,
             'searchTypes': libtype,
-            'includeMetadata': 1
+            'includeMetadata': 1,
+            'X-Plex-Language': language
         }
 
         data = self.query(f'{self.METADATA}/library/search', headers=headers, params=params)
@@ -1117,7 +1150,7 @@ class MyPlexUser(PlexObject):
 
         raise NotFound(f'Unable to find server {name}')
 
-    def history(self, maxresults=9999999, mindate=None):
+    def history(self, maxresults=None, mindate=None):
         """ Get all Play History for a user in all shared servers.
             Parameters:
                 maxresults (int): Only return the specified number of results (optional).
@@ -1191,7 +1224,7 @@ class Section(PlexObject):
         self.sectionId = self.id  # For backwards compatibility
         self.sectionKey = self.key  # For backwards compatibility
 
-    def history(self, maxresults=9999999, mindate=None):
+    def history(self, maxresults=None, mindate=None):
         """ Get all Play History for a user for this section in this shared server.
             Parameters:
                 maxresults (int): Only return the specified number of results (optional).
@@ -1324,8 +1357,8 @@ class MyPlexResource(PlexObject):
     def preferred_connections(
         self,
         ssl=None,
-        locations=DEFAULT_LOCATION_ORDER,
-        schemes=DEFAULT_SCHEME_ORDER,
+        locations=None,
+        schemes=None,
     ):
         """ Returns a sorted list of the available connection addresses for this resource.
             Often times there is more than one address specified for a server or client.
@@ -1336,6 +1369,11 @@ class MyPlexResource(PlexObject):
                     only connect to HTTP connections. Set None (default) to connect to any
                     HTTP or HTTPS connection.
         """
+        if locations is None:
+            locations = self.DEFAULT_LOCATION_ORDER[:]
+        if schemes is None:
+            schemes = self.DEFAULT_SCHEME_ORDER[:]
+
         connections_dict = {location: {scheme: [] for scheme in schemes} for location in locations}
         for connection in self.connections:
             # Only check non-local connections unless we own the resource
@@ -1359,8 +1397,8 @@ class MyPlexResource(PlexObject):
         self,
         ssl=None,
         timeout=None,
-        locations=DEFAULT_LOCATION_ORDER,
-        schemes=DEFAULT_SCHEME_ORDER,
+        locations=None,
+        schemes=None,
     ):
         """ Returns a new :class:`~plexapi.server.PlexServer` or :class:`~plexapi.client.PlexClient` object.
             Uses `MyPlexResource.preferred_connections()` to generate the priority order of connection addresses.
@@ -1376,11 +1414,16 @@ class MyPlexResource(PlexObject):
             Raises:
                 :exc:`~plexapi.exceptions.NotFound`: When unable to connect to any addresses for this resource.
         """
+        if locations is None:
+            locations = self.DEFAULT_LOCATION_ORDER[:]
+        if schemes is None:
+            schemes = self.DEFAULT_SCHEME_ORDER[:]
+
         connections = self.preferred_connections(ssl, locations, schemes)
         # Try connecting to all known resource connections in parallel, but
         # only return the first server (in order) that provides a response.
         cls = PlexServer if 'server' in self.provides else PlexClient
-        listargs = [[cls, url, self.accessToken, timeout] for url in connections]
+        listargs = [[cls, url, self.accessToken, self._server._session, timeout] for url in connections]
         log.debug('Testing %s resource connections..', len(listargs))
         results = utils.threaded(_connect, listargs)
         return _chooseConnection('Resource', self.name, results)
@@ -1475,7 +1518,7 @@ class MyPlexDevice(PlexObject):
                 :exc:`~plexapi.exceptions.NotFound`: When unable to connect to any addresses for this device.
         """
         cls = PlexServer if 'server' in self.provides else PlexClient
-        listargs = [[cls, url, self.token, timeout] for url in self.connections]
+        listargs = [[cls, url, self.token, self._server._session, timeout] for url in self.connections]
         log.debug('Testing %s device connections..', len(listargs))
         results = utils.threaded(_connect, listargs)
         return _chooseConnection('Device', self.name, results)
@@ -1725,7 +1768,7 @@ class MyPlexPinLogin:
         return ElementTree.fromstring(data) if data.strip() else None
 
 
-def _connect(cls, url, token, timeout, results, i, job_is_done_event=None):
+def _connect(cls, url, token, session, timeout, results, i, job_is_done_event=None):
     """ Connects to the specified cls with url and token. Stores the connection
         information to results[i] in a threadsafe way.
 
@@ -1733,6 +1776,7 @@ def _connect(cls, url, token, timeout, results, i, job_is_done_event=None):
             cls: the class which is responsible for establishing connection, basically it's
                  :class:`~plexapi.client.PlexClient` or :class:`~plexapi.server.PlexServer`
             url (str): url which should be passed as `baseurl` argument to cls.__init__()
+            session (requests.Session): session which sould be passed as `session` argument to cls.__init()
             token (str): authentication token which should be passed as `baseurl` argument to cls.__init__()
             timeout (int): timeout which should be passed as `baseurl` argument to cls.__init__()
             results (list): pre-filled list for results
@@ -1742,7 +1786,7 @@ def _connect(cls, url, token, timeout, results, i, job_is_done_event=None):
     """
     starttime = time.time()
     try:
-        device = cls(baseurl=url, token=token, timeout=timeout)
+        device = cls(baseurl=url, token=token, session=session, timeout=timeout)
         runtime = int(time.time() - starttime)
         results[i] = (url, token, device, runtime)
         if X_PLEX_ENABLE_FAST_CONNECT and job_is_done_event:
