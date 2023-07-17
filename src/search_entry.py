@@ -3,7 +3,7 @@ import sys
 import json
 from plexapi import utils
 from plexapi.server import PlexServer
-from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_nested_search, short_web, short_stream, short_mtvsearch
+from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player
 
 try:
     query = sys.argv[1]
@@ -143,10 +143,10 @@ def register_elements(database: list):
             else:
                 media_mod.update({
                     f'{short_stream}': {
-                        'subtitle': 'Press ⏎ to play the media in a VLC instance',
+                        'subtitle': f'Press ⏎ to play the media in a {media_player.upper()} instance',
                         'arg': sArg,
                         'icon': {
-                            'path': 'icons/vlc.webp',
+                            'path': f'icons/{media_player}.webp',
                         },
                     }
                 })

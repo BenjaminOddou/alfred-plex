@@ -106,26 +106,29 @@ The following example returns `movies` released between `1980` and `1990` in the
 
 1. Nested search. Press ⏎ on one of the following media types: *actor, director, collection, artist, album, genre, show, season*, to trigger a nested search.
 2. Open the media on the web. Simply press ⌘⏎ to open the media on plex. Not available for *genre, actor, director* media types.
-3. Stream the media with VLC. This is only available for the following media types: *movie, episode, clip, track, album*. Press ⌥⏎ to open the media in VLC. *It requires VLC 3.0 or above and the vlc cli. See below to know how to install the cli*. If you have multiple versions of the same *movie, episode, clip*, you'll be asked to choose the file you want to play.
+3. Stream the media with VLC / IINA. This is only available for the following media types: *movie, episode, clip, track, album*. Press ⌥⏎ to open the media in VLC / IINA. *It requires VLC 3.0+ or IINA 1.0.0+ and the corresponding cli. See below to know how to install the cli*. If you have multiple versions of the same *movie, episode, clip*, you'll be asked to choose the file you want to play.
 4. Get infos of movies and tv shows using the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow by [Tom McKnight](https://github.com/tmcknight). Press ⌃⏎ to trigger the workflow. *It requires `Movie and TV Show Search` Alfred workflow 2.16.0 or above*. Only available for *movie, show* media types.
 
-#### 4. VLC integration
+#### 4. VLC and IINA integration
 
-If you don't have VLC on your mac, run the following command to install it via homebrew:
+If you don't have VLC / IINA on your mac, run the following command to install it via homebrew:
 
 ```shell
 brew install --cask vlc
+brew install --cask iina
 ```
 
-If you already have VLC installed check the presence of the cli with:
+If you already have VLC / IINA installed check the presence of the cli with:
 
 ```shell
 which vlc
+which iina
 ```
 
-If it is not found, uninstall VLC and reinstall it using homebrew.
+If it is not found, uninstall VLC / IINA and reinstall it using homebrew.
 
-Link to the [homebrew formulae](https://formulae.brew.sh/cask/vlc).
+Link to the VLC [homebrew formulae](https://formulae.brew.sh/cask/vlc).
+Link to the IINA [homebrew formulae](https://formulae.brew.sh/cask/iina).
 
 ### Search medias on discover
 
@@ -133,7 +136,7 @@ Link to the [homebrew formulae](https://formulae.brew.sh/cask/vlc).
 
 Configure the language in the configuration panel and search medias on discover. You can perform the same actions ** as in the `splex` workflow (see above)
 
-** Except streaming with VLC. Note that nested search allows you to search media title within your servers.
+** Except streaming with VLC / IINA. Note that nested search allows you to search media title within your servers.
 
 ![dplex](public/dplex.webp)
 

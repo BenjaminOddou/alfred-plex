@@ -18,6 +18,7 @@ filters_bool = True if os.getenv('filters_bool') == '1' else False
 default_view = {"sort": "originallyAvailableAt:desc"}
 limit_number = 15
 days_history = 15
+media_player = 'vlc'
 short_nested_search = 'arg'
 short_web = 'cmd'
 short_stream = 'alt'
@@ -53,6 +54,9 @@ default_list = [
     },
     {
         'title': 'short_nested_search',
+    },
+    {
+        'title': 'media_player',
     },
     {
         'title': 'short_web',

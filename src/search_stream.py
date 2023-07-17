@@ -1,10 +1,9 @@
 import sys
-import time
 import subprocess
 from plexapi.server import PlexServer
-from utils import display_notification, servers_file
+from utils import display_notification, servers_file, media_player
 
-result = subprocess.Popen(['mdfind', 'kMDItemContentType == "com.apple.application-bundle" && kMDItemFSName == "VLC.app"'], stdout=subprocess.PIPE)
+result = subprocess.Popen(['mdfind', f'kMDItemContentType == "com.apple.application-bundle" && kMDItemFSName == "{media_player.upper()}.app"'], stdout=subprocess.PIPE)
 output = result.stdout.read().decode().strip()
 
 if output:
@@ -37,16 +36,20 @@ if output:
                     streamTitles = [f'{media.grandparentTitle} ǀ {media.parentTitle} ({media.album().year}) ǀ {media.title} {media.trackNumber} / {len(media.album().tracks())}']
                 elif _type == 'clip':
                     streamTitles = [media.title]
-            vlc_args = ['vlc', '-I', 'macosx', '--no-xlib', '--no-video-title-show']
-            for url, title in zip(streamURLs, streamTitles):
-                if _type in ['track', 'album']:
-                    command = '--meta-title'
-                else:
-                    command = '--input-title-format'
-                vlc_args.extend([command, title, url])
-            vlc_instance = subprocess.Popen(vlc_args)
-            time.sleep(1)
-            subprocess.call(['osascript', '-e', 'tell application "System Events" to set frontmost of process "VLC" to true'])
+            mp_args = [media_player]
+            if media_player == 'vlc':
+                mp_args.extend(['-I', 'macosx', '--no-xlib', '--no-video-title-show', '--video-on-top'])
+                command = '--meta-title' if _type in ['track', 'album'] else '--input-title-format'
+                for url, title in zip(streamURLs, streamTitles):
+                    mp_args.extend([command, title, url])
+                mp_instance = subprocess.Popen(mp_args)
+            elif media_player == 'iina':
+                mp_args.extend(['--music-mode']) if _type in ['track', 'album'] else None
+                for url, title in zip(streamURLs, streamTitles):
+                    mp_args.extend([f'\"{url}\"', f'--mpv-force-media-title=\"{title}\"'])
+                    # mp_args.extend([url, f'--mpv-force-media-title={title}'])
+                print(' '.join(mp_args), end='')
+            # mp_instance = subprocess.Popen(mp_args)
             break
 else:
-    display_notification('🚨 Error !', 'Can\'t locate the VLC app')
+    display_notification('🚨 Error !', f'Can\'t locate the {media_player} app')
