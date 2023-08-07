@@ -1,12 +1,12 @@
 import os
 import sys
 import json
-from plexapi.server import PlexServer
 from utils import display_notification, servers_file, addReturnbtn, parse_time, parse_duration, get_size_string, history_days, default_element
+from plexapi.server import PlexServer
 
 def makeHistory(h, lName):
     if h.type == 'movie':
-        hName = f'{h.title} ({h.year})'
+        hName = f'{h.title} ({h.originallyAvailableAt.year})'
     elif h.type == 'episode':
         hName = f'{h.grandparentTitle} ǀ {h.title} ǀ {h.seasonEpisode}'
     elif h.type == 'track':
@@ -181,16 +181,20 @@ if data.get('items'):
                         })
 
                 elif _type == 'device':
+                    ids = []
+                    for device in plex_instance.myPlexAccount().devices():
+                        ids.append(device.clientIdentifier)
                     for device in plex_instance.systemDevices():
-                        dName = device.name if device.name != '' else 'Anonymous'
-                        items.insert(1, {
-                            'title': dName,
-                            'subtitle': f'Platform: {device.platform} ǀ Created At: {parse_time(device.createdAt)} ǀ ID: {device.id}',
-                            'valid': False,
-                            'icon': {
-                                'path': 'icons/device.webp',
-                            },
-                        })
+                        if device.clientIdentifier in ids:
+                            dName = device.name if device.name else 'Anonymous'
+                            items.insert(1, {
+                                'title': dName,
+                                'subtitle': f'Platform: {device.platform} ǀ Created At: {parse_time(device.createdAt)} ǀ ID: {device.id}',
+                                'valid': False,
+                                'icon': {
+                                    'path': 'icons/device.webp',
+                                },
+                            })
 
                 elif _type == 'watch':
                     for session in plex_instance.sessions():
@@ -204,6 +208,15 @@ if data.get('items'):
                                 'icon': {
                                     'path': 'icons/watch.webp',
                                 },
+                                'mods':({
+                                    'cmd': {
+                                        'subtitle': 'Press ⏎ to terminate this session',
+                                        'arg': f'_run;{serverID};terminateSession;{session.session.id};{sName}',
+                                        'icon': {
+                                            'path': 'icons/delete.webp',
+                                        },
+                                    }
+                                })
                             })
 
                 elif _type == 'setting':

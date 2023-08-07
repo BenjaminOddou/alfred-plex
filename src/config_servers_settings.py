@@ -1,7 +1,7 @@
 import os
 import sys
-from plexapi.server import PlexServer
 from utils import servers_file, display_notification
+from plexapi.server import PlexServer
 
 serverID = os.environ['split2']
 settingID = os.environ['split3']

@@ -1,10 +1,8 @@
 # this file is used to perform tests. Should be placed in the root folder of the workflow
 
-import sys
-sys.path.insert(0, './lib')
+from plexapi import utils
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
-from plexapi import utils
 from utils import servers_file
 
 data = servers_file()

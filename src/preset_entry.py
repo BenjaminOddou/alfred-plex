@@ -13,7 +13,7 @@ data = presets_file()
 
 level = 0
 
-if '_lib' in os.environ:
+if os.getenv('_lib'):
     level, _type, _key = os.environ['_lib'].split(';')
     level = int(level)
 else:

@@ -1,10 +1,10 @@
 import sys
 import webbrowser
-from plexapi.server import PlexServer
 from utils import servers_file, display_notification, downloads_folder
+from plexapi.server import PlexServer
 
 try:
-    serverID, _type, _key = sys.argv[1].split(';')
+    serverID, _type, _key, _msg = sys.argv[1].split(';')
 except IndexError:
     display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
     exit()
@@ -26,6 +26,9 @@ if data.get('items'):
     try:
         if _type == 'version':
             webbrowser.open(plex_instance.checkForUpdate().downloadURL)
+        elif _type == 'terminateSession':
+            plex_instance.query(f'/status/sessions/terminate?sessionId={_key}&reason={_msg}')
+            display_notification('✅ Sucess !', 'The session terminated correctly with your message')
         elif _type == 'logs&databases':
             display_notification('⏳ 1/2 Please wait !', f'Downloading Logs of {serverName}...')
             plex_instance.downloadLogs(savepath=downloads_folder)

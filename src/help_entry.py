@@ -3,8 +3,8 @@ import sys
 import json
 import urllib.parse
 from types import SimpleNamespace
-from plexapi.server import PlexServer
 from utils import default_element, servers_file, aliases_file, filters_bool, display_notification, addReturnbtn
+from plexapi.server import PlexServer
 
 try:
     query = sys.argv[1]
@@ -13,6 +13,12 @@ except IndexError:
 
 data = servers_file()
 items = []
+
+def is_title_unique(title, items):
+    for item in items:
+        if item.get('title', '') == title:
+            return False
+    return True
 
 try:
     level = int(os.environ['_lib'].split(';')[0])
@@ -54,34 +60,40 @@ if data['items']:
                 for t in library_subtypes:
                     for f in plex_instance.library.sectionByID(sectionID).listFilters(libtype=t):
                         alias = aliases_file(f.filter, 'alias')
-                        items.append({
-                            'title': f'Filter {f.title}',
-                            'subtitle': f'{plex_instance.friendlyName} ǀ {library_name} ǀ Name: {f.filter} ǀ Alias: {alias}',
-                            'arg': f'_rerun;2;{sectionID};{f.filter};{alias};filter;{f.filterType};{f.title}',
-                            'icon': {
-                                'path': f'icons/filter.webp',
-                            },
-                        })
+                        new_title = f'Filter {f.title}'
+                        if is_title_unique(new_title, items):
+                            items.append({
+                                'title': f'Filter {f.title}',
+                                'subtitle': f'{plex_instance.friendlyName} ǀ {library_name} ǀ Name: {f.filter} ǀ Alias: {alias}',
+                                'arg': f'_rerun;2;{sectionID};{f.filter};{alias};filter;{f.filterType};{f.title}',
+                                'icon': {
+                                    'path': f'icons/filter.webp',
+                                },
+                            })
                     for f in plex_instance.library.sectionByID(sectionID).listFields(libtype=t):
                         if not ',' in f.key:
-                            items.append({
-                                'title': f'Field {f.title}',
-                                'subtitle': f'{plex_instance.friendlyName} ǀ {library_name} ǀ Name: {f.key}',
-                                'arg': f'_rerun;2;{sectionID};{f.key};None;field;{f.type};{f.title}',
-                                'icon': {
-                                    'path': f'icons/field.webp',
-                                },
-                            })
+                            new_title = f'Field {f.title}'
+                            if is_title_unique(new_title, items):
+                                items.append({
+                                    'title': new_title,
+                                    'subtitle': f'{plex_instance.friendlyName} ǀ {library_name} ǀ Name: {f.key}',
+                                    'arg': f'_rerun;2;{sectionID};{f.key};None;field;{f.type};{f.title}',
+                                    'icon': {
+                                        'path': f'icons/field.webp',
+                                    },
+                                })
                     for so in plex_instance.library.sectionByID(sectionID).listSorts(libtype=t):
                         if not ',' in so.key:
-                            items.append({
-                                'title': f'Sort {so.title}',
-                                'subtitle': f'{plex_instance.friendlyName} ǀ {library_name} ǀ Name: {so.key}',
-                                'arg': f'_rerun;2;{sectionID};{so.key};None;sort;None;None',
-                                'icon': {
-                                    'path': f'icons/sort.webp',
-                                },
-                            })
+                            new_title = f'Sort {so.title}'
+                            if is_title_unique(new_title, items):
+                                items.append({
+                                    'title': new_title,
+                                    'subtitle': f'{plex_instance.friendlyName} ǀ {library_name} ǀ Name: {so.key}',
+                                    'arg': f'_rerun;2;{sectionID};{so.key};None;sort;None;None',
+                                    'icon': {
+                                        'path': f'icons/sort.webp',
+                                    },
+                                })
             elif level == 2:
                 Name, Alias, Type, fType, Title = os.environ['_lib'].split(';')[2:]
                 filtered_subtypes = [x for x in library_subtypes if x != 'folder']

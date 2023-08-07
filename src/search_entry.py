@@ -1,9 +1,9 @@
 import os
 import sys
 import json
+from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player
 from plexapi import utils
 from plexapi.server import PlexServer
-from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player
 
 try:
     query = sys.argv[1]
@@ -118,12 +118,13 @@ def register_elements(database: list):
                         'subtitle': 'Press ⏎ to trigger a nested search',
                         'arg': nested_search,
                         'icon': {
-                            'path': 'icons/nested_search.webp',
+                            'path': 'icons/folder.webp',
                         },
                     }
                 })
-        if media_type not in ['genre', 'photo', 'actor', 'director'] and short_web != '':
-            webArg = f'_web;{media.getWebURL()}'
+        if media_type not in ['genre', 'photo'] and short_web:
+            urlElem = media.getWebURL() if media_type not in ['actor', 'director'] else f'https://app.plex.tv/desktop/#!/provider/tv.plex.provider.discover/details?key=%2Flibrary%2Fpeople%2F{media.tagKey}&context=search'
+            webArg = f'_web;{urlElem}'
             if short_web == 'arg':
                 media_arg = webArg
             else:
@@ -136,7 +137,7 @@ def register_elements(database: list):
                         },
                     }
                 })
-        if media_type in ['movie', 'episode', 'album', 'track', 'clip'] and short_stream != '':
+        if media_type in ['movie', 'episode', 'album', 'track', 'clip'] and short_stream:
             sArg = f'_rerun;1;streams;{plex_instance.machineIdentifier}ǀ{media_type}ǀ{media.key}' if media_type not in ['album', 'track'] and len(media.media) > 1 else f'_stream;{plex_instance.machineIdentifier};{media_type};{media.key};0;0'
             if short_stream == 'arg':
                 media_arg = sArg
@@ -150,7 +151,7 @@ def register_elements(database: list):
                         },
                     }
                 })
-        if media_type in ['movie', 'show'] and short_mtvsearch != '':
+        if media_type in ['movie', 'show'] and short_mtvsearch:
             mtvArg = f'_mtvsearch;{plexToken};{media_type};{media.guid.split("/")[-1]}'
             if short_mtvsearch == 'arg':
                 media_arg = mtvArg

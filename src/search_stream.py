@@ -1,7 +1,7 @@
 import sys
 import subprocess
-from plexapi.server import PlexServer
 from utils import display_notification, servers_file, media_player
+from plexapi.server import PlexServer
 
 result = subprocess.Popen(['mdfind', f'kMDItemContentType == "com.apple.application-bundle" && kMDItemFSName == "{media_player.upper()}.app"'], stdout=subprocess.PIPE)
 output = result.stdout.read().decode().strip()
@@ -49,7 +49,7 @@ if output:
                     mp_args.extend([f'\"{url}\"', f'--mpv-force-media-title=\"{title}\"'])
                     # mp_args.extend([url, f'--mpv-force-media-title={title}'])
                 print(' '.join(mp_args), end='')
-            # mp_instance = subprocess.Popen(mp_args)
+            #mp_instance = subprocess.Popen(mp_args)
             break
 else:
     display_notification('🚨 Error !', f'Can\'t locate the {media_player} app')

@@ -66,7 +66,7 @@ def register_elements(database: list):
                         'subtitle': 'Press ⏎ to trigger a nested search',
                         'arg': nested_search,
                         'icon': {
-                            'path': 'icons/nested_search.webp',
+                            'path': 'icons/folder.webp',
                         },
                     }
                 })

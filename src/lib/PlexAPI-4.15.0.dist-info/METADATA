@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: PlexAPI
-Version: 4.14.0
+Version: 4.15.0
 Summary: Python bindings for the Plex API.
 Home-page: https://github.com/pkkid/python-plexapi
 Author: Michael Shepanski
@@ -11,9 +11,8 @@ Platform: UNKNOWN
 Classifier: Operating System :: OS Independent
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: BSD License
-Requires-Python: >=3.7
+Requires-Python: >=3.8
 Requires-Dist: requests
-Requires-Dist: backports.cached-property ; python_version <= "3.7"
 
 Python-PlexAPI
 ==============

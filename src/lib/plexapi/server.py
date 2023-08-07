@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from functools import cached_property
 from urllib.parse import urlencode
 from xml.etree import ElementTree
 
@@ -17,7 +18,7 @@ from plexapi.media import Conversion, Optimized
 from plexapi.playlist import Playlist
 from plexapi.playqueue import PlayQueue
 from plexapi.settings import Settings
-from plexapi.utils import cached_property, deprecated
+from plexapi.utils import deprecated
 from requests.status_codes import _codes as codes
 
 # Need these imports to populate utils.PLEXOBJECTS
@@ -797,7 +798,7 @@ class PlexServer(PlexObject):
 
     def continueWatching(self):
         """ Return a list of all items in the Continue Watching hub. """
-        return self.fetchItems('/hubs/home/continueWatching')
+        return self.fetchItems('/hubs/continueWatching/items')
 
     def sessions(self):
         """ Returns a list of all active session (currently playing) media objects. """

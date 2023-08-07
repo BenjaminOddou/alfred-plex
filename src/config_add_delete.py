@@ -1,9 +1,9 @@
 import os
 import sys
 import json
-from plexapi.server import PlexServer
 from urllib.parse import urlparse, parse_qs
 from utils import display_notification, servers_file_path, servers_file, data_folder
+from plexapi.server import PlexServer
 
 try:
     _type, _input = sys.argv[1].split(';')
