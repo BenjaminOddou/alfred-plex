@@ -16,7 +16,6 @@ if _type == '_delete':
     for item in data['items']:
         if item.get('id') == _input:
             data['items'].remove(item)
-            display_notification('✅ Sucess !', f'The Preset {item.get("title")} is removed')
             break
 elif _type == '_new':
     try:
@@ -32,7 +31,6 @@ elif _type == '_new':
         'id': secrets.token_hex(16)
     }
     data['items'].append(json_obj)
-    display_notification('✅ Sucess !', f'The Preset {title} is added')
 elif _type == '_modify':
     try:
         _subtype = os.environ['modif2']
@@ -51,7 +49,6 @@ elif _type == '_modify':
             for item in data['items']:
                 if item.get('id') == _key:
                     item['arg'] = _input
-        display_notification('✅ Sucess !', f'The Preset {title} is modified')
     except:
         display_notification('🚨 Error !', 'Invalid input')
         exit()

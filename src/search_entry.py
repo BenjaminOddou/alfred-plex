@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player
+from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, addMenuBtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player
 from plexapi import utils
 from plexapi.server import PlexServer
 
@@ -104,12 +104,12 @@ def register_elements(database: list):
                     media_filter = f'{{\'album.title=\': \'{title}\', \'artist.title=\': \'{parentTitle}\'}}'
                 else:    
                     media_filter = f'{{\'{media_type}.title=\': \'{title}\'}}'
-                nested_search = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}={search_map[media_type]}/{aliases_file("advancedFilters", "alias_or_long")}={media_filter}'
+                nested_search = f'_rerun;0;filter;{aliases_file(_testkey="libtype", _type="alias_or_long")}={search_map[media_type]}/{aliases_file(_testkey="advancedFilters", _type="alias_or_long")}={media_filter}'
             elif media_type in ['actor', 'director', 'collection']:
                 media_id = media.index if media_type == 'collection' else media.id
-                nested_search = f'_rerun;0;filter;{aliases_file(media_type, "alias_or_long")}={media_id}'
+                nested_search = f'_rerun;0;filter;{aliases_file(_testkey=media_type, _type="alias_or_long")}={media_id}'
             elif media_type == 'genre':
-                nested_search = f'_rerun;0;filter;{aliases_file("libtype", "alias_or_long")}={utils.reverseSearchType(media.librarySectionType)}/{aliases_file("genre", "alias_or_long")}={media.id}'
+                nested_search = f'_rerun;0;filter;{aliases_file(_testkey="libtype", _type="alias_or_long")}={utils.reverseSearchType(media.librarySectionType)}/{aliases_file(_testkey="genre", _type="alias_or_long")}={media.id}'
             if short_nested_search == 'arg':
                 media_arg = nested_search
             else:
@@ -118,7 +118,7 @@ def register_elements(database: list):
                         'subtitle': 'Press ⏎ to trigger a nested search',
                         'arg': nested_search,
                         'icon': {
-                            'path': 'icons/folder.webp',
+                            'path': 'icons/base/folder.webp',
                         },
                     }
                 })
@@ -133,7 +133,7 @@ def register_elements(database: list):
                         'subtitle': 'Press ⏎ to open the media in plex web',
                         'arg': webArg,
                         'icon': {
-                            'path': 'icons/web.webp',
+                            'path': 'icons/base/web.webp',
                         },
                     }
                 })
@@ -147,12 +147,12 @@ def register_elements(database: list):
                         'subtitle': f'Press ⏎ to play the media in a {media_player.upper()} instance',
                         'arg': sArg,
                         'icon': {
-                            'path': f'icons/{media_player}.webp',
+                            'path': f'icons/base/{media_player}.webp',
                         },
                     }
                 })
         if media_type in ['movie', 'show'] and short_mtvsearch:
-            mtvArg = f'_mtvsearch;{plexToken};{media_type};{media.guid.split("/")[-1]}'
+            mtvArg = f'_mtvsearch;{plexUUID};{media_type};{media.guid.split("/")[-1]}'
             if short_mtvsearch == 'arg':
                 media_arg = mtvArg
             else:
@@ -161,7 +161,7 @@ def register_elements(database: list):
                         'subtitle': 'Press ⏎ to get media infos using Movie and TV Show Search workflow',
                         'arg': mtvArg,
                         'icon': {
-                            'path': 'icons/movie_and_tv_show_search.webp',
+                            'path': 'icons/base/movie_and_tv_show_search.webp',
                         },
                     }
                 })
@@ -170,17 +170,20 @@ def register_elements(database: list):
             'title': get_title(media),
             'subtitle': get_subtitle(media),
             'icon': {
-                'path': f'icons/{image_type}.webp',
+                'path': f'icons/base/{image_type}.webp',
             },
             'mods': media_mod,
-            'valid': False
+            'valid': False,
+            'key': f'{get_title(media)}&{get_subtitle(media)}'
         }
 
         if media_arg:
             json_obj['arg'] = media_arg
             json_obj['valid'] = True
 
-        items.append(json_obj)
+        existing_item = next((item for item in items if item.get('key') == json_obj.get('key')), None)
+        if not existing_item:
+            items.append(json_obj)
 
 data = servers_file()
 if data.get('items'):
@@ -189,17 +192,18 @@ if data.get('items'):
                 continue
             baseURL = obj['baseURL']
             plexToken = obj['plexToken']
+            plexUUID = obj['account_uuid']
             try:
                 plex_instance = PlexServer(baseURL, plexToken)
             except:
-                display_notification('🚨 Error !', f'Failed to connect to the Plex server \'{obj["title"]}\'. Check the IP and token')
+                display_notification('🚨 Error !', f'Failed to connect to the plex server {obj["title"]}')
                 exit()
             if _level == 0:
                 if '=' in query:
                     try:
                         for item in query.split('/'):
                             key, value = item.split('=', 1)
-                            test_key = aliases_file(key, 'alias_and_long')
+                            test_key = aliases_file(_testkey=key, _type='alias_and_long')
                             if not test_key:
                                 delist('invalid_FILTERS', items)
                                 break
@@ -235,7 +239,13 @@ if data.get('items'):
                         delist('invalid_FILTERS', items)
                 else:
                     try:
-                        database = plex_instance.library.search(limit=limit_number, **default_view) if query == '' else plex_instance.search(query, limit=limit_number) if not '/' in query else plex_instance.search(query.split('/')[0], mediatype=query.split('/')[1], limit=limit_number)
+                        if query == '':
+                            addMenuBtn(items)
+                            database = plex_instance.library.search(limit=limit_number, **default_view)
+                        elif not '/' in query:
+                            database = plex_instance.search(query, limit=limit_number)
+                        else:
+                            database = plex_instance.search(query.split('/')[0], mediatype=query.split('/')[1], limit=limit_number)
                         register_elements(database)
                     except:
                         delist('no_ELEM', items)
@@ -254,7 +264,7 @@ if data.get('items'):
                                     'subtitle': pSub,
                                     'arg': f'_stream;{_machineID};{_media_type};{_media_id};{mIndex};{pIndex}',
                                     'icon': {
-                                        'path': f'icons/{_media_type}.webp',
+                                        'path': f'icons/base/{_media_type}.webp',
                                     },
                                 })
 
@@ -264,7 +274,8 @@ if data.get('items'):
             else:
                 delist('invalid_FILTERS', items)
 else:
-    delist('no_PMS', items)
+    addMenuBtn(items)
+    default_element('no_PMS', items)
 
 for item in items:
     if 'skip' in item:

@@ -37,15 +37,20 @@ python --version
 
 Launch the menu with `plex`. You can edit this trigger in the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/) panel.
 
-The workflow is divided in 5 parts :
+The workflow is divided in 6 parts :
 
-1. Manage servers and perform actions (scan libraries, modify settings, backup logs and databases...).
-2. Search medias throughout your servers.
-3. Search medias on discover.
-4. Filtering & sorting options of your plex media server(s).
+1. Search medias throughout your servers.
+2. Search medias using discover.
+3. Manage your plex accounts.
+4. Manage servers and perform actions.
 5. Manage presets to rapidly search medias.
+6. Workflow configuration + filter & sort options.
 
 ![menu](public/menu.webp)
+
+To use this workflow, you need to add server(s).In order to do so, you must connect to an account that have access to a plex media server with your credentials. **If you're not the owner of the server, you won't have access to the server settings**.
+
+Go to the `Plex Accounnt` section to know more on how to manage your accounts.
 
 ## 🤖 Usage of the workflow
 
@@ -63,7 +68,7 @@ Link to the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io
 
 In this mode, you search medias on your library sections. To enter this mode, you can use `filters` and/or `advanced filters`. 
 
-To know how to use them, go to the next section (`Filtering & sorting options of your plex media server(s)`)
+To know how to use them, go to the section : `Plex Help`.
 
 Link to the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io/en/latest/modules/library.html#plexapi.library.LibrarySection.search).
 
@@ -101,29 +106,32 @@ If it is not found, uninstall VLC / IINA and reinstall it using homebrew.
 Link to the VLC [homebrew formulae](https://formulae.brew.sh/cask/vlc).
 Link to the IINA [homebrew formulae](https://formulae.brew.sh/cask/iina).
 
-### Plex Discover : Search medias on discover
+### Plex Discover : Search medias using discover
 
-Search medias on [Plex Discover](https://support.plex.tv/articles/discover/). You can perform the same actions ** listed [above](#3-actions-on-medias).
+Search medias and people on [Plex Discover](https://support.plex.tv/articles/discover/). You can perform the same actions ** listed [above](#3-actions-on-medias).
 
 ** Except streaming with VLC / IINA. Note that nested search allows you to search media title within your servers.
 
 ![discover](public/discover.webp)
 
-### Plex Configuration : Manage servers and perform actions
+### Plex Accounts : Manage your plex accounts
 
-Quickly add a server by accessing any XML page from the API, copy the URL and paste it in the Alfred search bar. To display the XML page, you'll need to:
-1. Sign in to your Plex account in Plex Web App.
-2. Browse to a library item and click `View XML` button.
+Connect one or more account to add plex media servers. In this section you can :
+* See the list of your servers. Servers that aren't added to the workflow are greyed out.
+* Manage connected users.
+* Manage connected devices.
+* Manage your whatchlist.
 
-Follow the [Plex Documentation](https://support.plex.tv/articles/201998867-investigate-media-information-and-formats/) to for more details.
+![plex_account](public/plex_account.webp)
 
-If you don't have the `View XML` button on the plex client, try to open the browser's dev tool by pressing <kbd>⌥</kbd><kbd>⌘</kbd><kbd>i</kbd> and copy the link containing the `X-Plex-Token`.
+> Removing a plex account will remove all the servers connected. You can also remove a server directly in the Plex Media Servers section.
+
+### Plex Servers : Manage servers and perform actions
 
 Select the server to view its informations and perform actions.
 * Download last version of plex media server from the web.
 * Backup logs and databases.
-* Display connected accounts.
-* Display connected devices (keeps history of devices).
+* Display connected account.
 * Manage running sessions.
 * Perform actions on library sections:
   * Scan library sections (search for new medias).
@@ -131,6 +139,7 @@ Select the server to view its informations and perform actions.
   * Display history.
   * Display library sections sizes.
 * Display and modify settings of the server.
+* Display real time server statistics.
 
 > New values for settings must match the setting type and must be valid python. For example, boolean must be True or False with capital letter and string must be quoted.
 
@@ -154,7 +163,11 @@ Simply press <kbd>⏎</kbd> on a preset to apply its value to the search workflo
 
 ![preset_entry](public/preset_entry.webp)
 
-### Plex Help : Filtering & sorting options of your plex media server(s)
+### Plex Help : Workflow configuration + filter & sort options
+
+You can manage workflow cache, data and edit filter alias.
+
+![plex_help](public/plex_help.webp)
 
 Filters, fields and sorts options are generated based on your libraries metadata. This will vary regarding your medias and agents used to gather information. 
 
@@ -180,7 +193,7 @@ To know more on how to use these filters, check the [Python-PlexAPI documentatio
 
 Find the list of fields under each library sections of your servers.
 
-Example:  `libtype=episode/advancedFilters={'show.title': 'one piece', 'episode.index': '1071'}`. It returns `episodes` where `episode number` is `1071` and the title of the show contains `one piece`.
+Example:  `libtype=episode/advancedFilters={'show.title': 'one piece', 'episode.index': '1074'}`. It returns `episodes` where `episode number` is `1074` and the title of the show contains `one piece`.
 
 ![advanced_filters](public/advanced_filters.webp)
 

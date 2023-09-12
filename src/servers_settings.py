@@ -37,7 +37,7 @@ if data.get('items'):
     try:
         plex_instance = PlexServer(baseURL, plexToken)
     except:
-        display_notification('🚨 Error !', f'Failed to connect to the Plex server \'{obj.get("title")}\'. Check the IP and token')
+        display_notification('🚨 Error !', f'Failed to connect to the plex server {obj.get("title")}')
         exit()
     try:
         plex_instance.settings.get(settingID).set(new_value)
@@ -47,5 +47,5 @@ if data.get('items'):
         display_notification('🚨 Error !', f'Can\'t attribute {new_value} to {settingID}')
         exit()
 else:
-    display_notification('🚨 Error !', 'Internal Error')
+    display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
     exit()

@@ -21,7 +21,7 @@ if data.get('items'):
         plex_instance = PlexServer(baseURL, plexToken)
         serverName = plex_instance.friendlyName
     except:
-        display_notification('🚨 Error !', f'Failed to connect to the Plex server \'{obj.get("title")}\'. Check the IP and token')
+        display_notification('🚨 Error !', f'Failed to connect to the plex server {obj.get("title")}')
         exit()
     try:
         if _type == 'version':
@@ -30,11 +30,11 @@ if data.get('items'):
             plex_instance.query(f'/status/sessions/terminate?sessionId={_key}&reason={_msg}')
             display_notification('✅ Sucess !', 'The session terminated correctly with your message')
         elif _type == 'logs&databases':
-            display_notification('⏳ 1/2 Please wait !', f'Downloading Logs of {serverName}...')
+            display_notification('⏳ 1/2 Please wait !', f'Downloading {serverName} logs...')
             plex_instance.downloadLogs(savepath=downloads_folder)
-            display_notification('⏳ 2/2 Please wait !', f'Downloading Databases of {serverName}...')
+            display_notification('⏳ 2/2 Please wait !', f'Downloading {serverName} database...')
             plex_instance.downloadDatabases(savepath=downloads_folder)
-            display_notification('✅ Sucess !', f'{serverName} Logs and Databases are located under {downloads_folder}')
+            display_notification('✅ Sucess !', f'{serverName} Logs and databases are located under {downloads_folder}')
         elif _type in ['scan', 'refresh']:
             if _key != 'all':
                 libraryName = plex_instance.library.sectionByID(int(_key)).title

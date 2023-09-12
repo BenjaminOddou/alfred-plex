@@ -79,6 +79,7 @@ for obj in default_list:
     except:
         pass
 
+accounts_file_path = os.path.join(data_folder, 'accounts.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.jso
 servers_file_path = os.path.join(data_folder, 'servers.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.json
 aliases_file_path = os.path.join(data_folder, 'aliases.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/aliases.json
 presets_file_path = os.path.join(data_folder, 'presets.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/presets.json
@@ -100,31 +101,40 @@ def parse_duration(time):
 def history_days():
     return datetime.datetime.today() - datetime.timedelta(days=days_history)
 
-def aliases_file(testkey: str, _type: str):
+def aliases_file(_testkey: str, _type: str, _file=False):
     if not os.path.isfile(aliases_file_path) or os.path.getsize(aliases_file_path) == 0:
         shutil.copy('./json/aliases.json', aliases_file_path)
     with open(aliases_file_path, 'r') as file:
         data = json.load(file)
+        if _file:
+            return data
     if _type == 'alias_and_long':
         for obj in data:
             if filters_bool:
-                if testkey == obj['short_key']:
+                if _testkey == obj['short_key']:
                     return obj['long_key']
             else:
-                if testkey == obj['long_key']:
+                if _testkey == obj['long_key']:
                     return obj['long_key']
     elif _type == 'alias_or_long':
         if filters_bool:
             for obj in data:
-                if obj['long_key'] == testkey:
+                if obj['long_key'] == _testkey:
                     return obj['short_key']
         else:
-            return testkey
+            return _testkey
     elif _type == 'alias':
         for obj in data:
-                if obj['long_key'] == testkey:
+                if obj['long_key'] == _testkey:
                     return obj['short_key']
     return None
+
+def accounts_file():
+    if os.path.isfile(accounts_file_path) and os.path.getsize(accounts_file_path) > 0:
+        with open(accounts_file_path, 'r') as file:
+            return json.load(file)
+    else:
+        return {'items': []}
 
 def servers_file():
     if os.path.isfile(servers_file_path) and os.path.getsize(servers_file_path) > 0:
@@ -149,10 +159,19 @@ def default_element(_action: str, items: list, query: str=None, query_dict: dict
     if _action == 'no_PMS':
         items.append({
             'title': 'No plex media server detected',
-            'subtitle': 'Press ⏎ to connect to a plex media server',
+            'subtitle': 'Press ⏎ and sign in to your plex account',
             'arg': '_login',
             'icon': {
-                'path': 'icons/info.webp',
+                'path': 'icons/base/info.webp',
+            },
+        })
+    elif _action == 'no_ACC':
+        items.append({
+            'title': f'No plex account connected',
+            'subtitle': 'Press ⏎ and sign in to your plex account',
+            'arg': '_login',
+            'icon': {
+                'path': 'icons/base/info.webp',
             },
         })
     elif _action == 'no_ELEM':
@@ -161,25 +180,25 @@ def default_element(_action: str, items: list, query: str=None, query_dict: dict
             'subtitle': 'Try to search something else',
             'valid': False,
             'icon': {
-                'path': 'icons/info.webp',
+                'path': 'icons/base/info.webp',
             },
         })
     elif _action == 'invalid_FILTERS':
         items.append({
             'title': f'No media found for filters={query_dict}',
             'subtitle': f'Press ⏎ to see available options. Aliases are {"activated" if filters_bool else "desactivated"}',
-            'arg': '_option',
+            'arg': '_help',
             'icon': {
-                'path': 'icons/info.webp',
+                'path': 'icons/base/info.webp',
             },
         })
     elif _action == 'Unauthorized':
         items.append({
             'title': 'Unauthorized action',
-            'subtitle': 'Check your credentials and ensure that you\'re connected with an admin token',
+            'subtitle': 'Ensure you are connected with the admin account of this server',
             'valid': False,
             'icon': {
-                'path': 'icons/info.webp',
+                'path': 'icons/base/info.webp',
             },
         })
 
@@ -190,7 +209,19 @@ def addReturnbtn(rArg: str, items: list):
             'subtitle': 'Back to previous state',
             'arg': f'_rerun;{rArg}',
             'icon': {
-                'path': 'icons/return.webp',
+                'path': 'icons/base/return.webp',
+            },
+        }
+    )
+
+def addMenuBtn(items: list):
+    items.append(
+        {
+            'title': 'Return',
+            'subtitle': 'Back to the Menu',
+            'arg': '_rerunMenu',
+            'icon': {
+                'path': 'icons/base/return.webp',
             },
         }
     )
@@ -203,29 +234,44 @@ def get_size_string(size: int, decimals=2):
     return f"{s} {size_name[i]}"
 
 
-def get_plex_account(plextoken):
+def get_plex_account(uuid=None, username=None, password=None, otp=None):
     plex_account = None
+    auth_token = None
 
     if plex_account is None:
         try:
-            with open(f'{cache_folder}/plex_account_cache.pickle', 'rb') as file:
+            with open(f'{cache_folder}/{uuid}', 'rb') as file:
                 plex_account = pickle.load(file)
         except (FileNotFoundError, pickle.UnpicklingError):
             pass
 
     if plex_account is None:
+        for account in accounts_file().get('items'):
+            if account.get('uuid') == uuid:
+                auth_token = account.get('authToken')
+                break
         try:
-            plex_account = MyPlexAccount(plextoken, timeout=600)
+            if uuid:
+                plex_account = MyPlexAccount(token=auth_token)
+            else:
+                plex_account = MyPlexAccount(username=username, password=password, code=otp)
         except:
-            display_notification('🚨 Error!', 'Failed to connect to the Plex Discover. Check the token')
+            display_notification('🚨 Error!', 'Failed to connect to your plex account')
             exit()
 
         try:
             if not os.path.exists(cache_folder):
                 os.mkdir(cache_folder)
-            with open(f'{cache_folder}/plex_account_cache.pickle', 'wb') as file:
+            with open(f'{cache_folder}/{plex_account.uuid}', 'wb') as file:
                 pickle.dump(plex_account, file)
         except pickle.PickleError:
             pass
 
     return plex_account
+
+
+def lst_idx(lst: list, index: int):
+    if 0 <= index < len(lst):
+        return lst[index]
+    else:
+        return None

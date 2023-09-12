@@ -1,8 +1,9 @@
 import os
 import sys
 import json
-from utils import display_notification, servers_file, addReturnbtn, parse_time, parse_duration, get_size_string, history_days, default_element
+from utils import display_notification, servers_file, accounts_file, addReturnbtn, addMenuBtn, parse_time, parse_duration, get_size_string, history_days, default_element
 from plexapi.server import PlexServer
+from datetime import datetime, timedelta
 
 def makeHistory(h, lName):
     if h.type == 'movie':
@@ -18,9 +19,27 @@ def makeHistory(h, lName):
         'subtitle': f'{friendlyName} ǀ {lName} ǀ {h.type} ǀ {parse_time(h.viewedAt)} ǀ {plex_instance.systemAccount(h.accountID).name} ǀ {plex_instance.systemDevice(h.deviceID).name}, {plex_instance.systemDevice(h.deviceID).platform}',
         'valid': False,
         'icon': {
-            'path': 'icons/history.webp',
+            'path': 'icons/base/history.webp',
         }
     })
+
+def format_bit(byte):
+    if byte >= (1024 ** 3):
+        format_bit = byte / (1024 ** 3)
+        unit = 'Gbps'
+    elif byte >= (1024 ** 2):
+        format_bit = byte / (1024 ** 2)
+        unit = 'Mbps'
+    elif byte >= 1024:
+        format_bit = byte / 1024
+        unit = 'Kbps'
+    else:
+        format_bit = byte
+        unit = 'Bps'
+    return f'{round(format_bit * 8, 2)} {unit}'
+
+def percentage(percent):
+    return f'{round(percent, 2)}%'
 
 try:
     query = sys.argv[1]
@@ -29,16 +48,8 @@ except IndexError:
 
 data = servers_file()
 
-items = [
-    {
-        'title': 'Add a new plex media server',
-        'subtitle': 'Connect a new plex media server to the workflow',
-        'arg': '_new',
-        'icon': {
-            'path': 'icons/new.webp',
-        },
-    },
-]
+items = []
+final_json = {'items': items}
 
 level = 0
 
@@ -50,25 +61,28 @@ except:
 
 if data.get('items'):
     if level == 0:
-        items.append({
-            'title': 'Remove the access to a server',
-            'subtitle': 'Remove the access of this workflow to the plex media server',
-            'arg': '_rerun;None;1;delete;None',
-            'icon': {
-                'path': 'icons/delete.webp',
-            },
-        })
+        addMenuBtn(items)
+        for elem in [
+            {
+                'title': 'Remove the access to a server',
+                'subtitle': 'Remove the access of this workflow to the plex media server',
+                'arg': '_rerun;None;1;delete;None',
+                'icon': {
+                    'path': 'icons/base/delete.webp',
+                },
+            }
+        ]:
+            items.append(elem)
         for server in data.get('items'):
             items.append({
                 'title': server.get('title'),
                 'subtitle': server.get('subtitle'),
                 'arg': f'_rerun;{server.get("machineIdentifier")};1;server;None',
                 'icon': {
-                    'path': 'icons/server.webp'
+                    'path': 'icons/base/server.webp'
                 },
             })
     else:
-        items = []
         rArg = f'{serverID};{level - 1};{_type};{_key}'
         addReturnbtn(rArg, items)
 
@@ -78,9 +92,9 @@ if data.get('items'):
                     items.append({
                         'title': server.get('title'),
                         'subtitle': server.get('subtitle'),
-                        'arg': f'_delete;{server.get("machineIdentifier")}',
+                        'arg': f'_delete;server;{server.get("machineIdentifier")}',
                         'icon': {
-                            'path': 'icons/server.webp'
+                            'path': 'icons/base/server.webp'
                         },
                     })
                     
@@ -90,20 +104,23 @@ if data.get('items'):
                 if obj.get('machineIdentifier') == serverID:
                     baseURL = obj.get('baseURL')
                     plexToken = obj.get('plexToken')
-                    friendlyName = obj.get('title')
+                    acc_uuid = obj.get('account_uuid')
+                    owner = obj.get('owner')
             try:
                 plex_instance = PlexServer(baseURL, plexToken)
+                friendlyName = plex_instance.friendlyName
             except:
-                display_notification('🚨 Error !', f'Failed to connect to the Plex server \'{obj.get("title")}\'. Check the IP and token')
+                display_notification('🚨 Error !', f'Failed to connect to the plex server {obj.get("title")}')
                 exit()
 
             if level == 1:
-
-                sTitle = 'Your server is up to date'
-                sSubtitle = f'Actual version: {plex_instance.version}'
-                sArg = None
-                sVersionType = 'ok'
-                try:
+                if not owner:
+                    default_element('Unauthorized', items)
+                else:
+                    sTitle = 'Your server is up to date'
+                    sSubtitle = f'Actual version: {plex_instance.version}'
+                    sArg = None
+                    sVersionType = 'ok'
                     if not plex_instance.isLatest():
                         sTitle = 'Update to the latest version'
                         sSubtitle += f' -> New version: {plex_instance.checkForUpdate().version}'
@@ -116,7 +133,7 @@ if data.get('items'):
                             'arg': sArg,
                             'valid': False if sArg is None else True,
                             'icon': {
-                                'path': f'icons/{sVersionType}.webp',
+                                'path': f'icons/base/{sVersionType}.webp',
                             },
                         },
                         {
@@ -124,25 +141,27 @@ if data.get('items'):
                             'subtitle': 'Backup your plex media server logs and databases',
                             'arg': f'_run;{serverID};logs&databases;None',
                             'icon': {
-                                'path': 'icons/download.webp',
+                                'path': 'icons/base/download.webp',
                             },
                         },
                     ]: 
                         items.append(elem)
+                    accounts = accounts_file()
+                    for account in accounts.get('items'):
+                        if account.get('uuid') == acc_uuid:
+                            items.append({
+                                'title': account.get('title'),
+                                'subtitle': account.get('subtitle'),
+                                'arg': f'_login;{account.get("uuid")};1;account;None',
+                                'icon': {
+                                    'path': 'icons/base/person.webp'
+                                },
+                            })
+                            break
                     for option in [
                         {
-                            'title': 'Accounts',
-                            'subtitle': 'List of connected accounts to this server',
-                            'type': 'person'
-                        },
-                        {
-                            'title': 'Devices',
-                            'subtitle': 'List of connected devices to this server',
-                            'type': 'device'
-                        },
-                        {
                             'title': 'Sessions',
-                            'subtitle': 'List of running sessions on this server',
+                            'subtitle': 'Manage running sessions on this server',
                             'type': 'watch'
                         },
                         {
@@ -155,48 +174,24 @@ if data.get('items'):
                             'subtitle': 'Modify your plex media server settings',
                             'type': 'setting'
                         },
+                        {
+                            'title': 'Statistics',
+                            'subtitle': 'Real time plex server statistics',
+                            'type': 'statistics'
+                        },
                     ]:
                         items.append({
                             'title': option.get('title'),
                             'subtitle': option.get('subtitle'),
                             'arg': f'_rerun;{serverID};{level + 1};{option.get("type")};group',
                             'icon': {
-                                'path': f'icons/{option.get("type")}.webp',
+                                'path': f'icons/base/{option.get("type")}.webp',
                             },
                         })
-                except:
-                    default_element('Unauthorized', items)
 
             elif level == 2:
 
-                if _type == 'person':
-                    for account in plex_instance.systemAccounts():
-                        items.append({
-                            'title': account.name,
-                            'subtitle': f'Default Audio: {account.defaultAudioLanguage} ǀ Default Subtitles: {account.defaultSubtitleLanguage} ǀ ID: {account.id}',
-                            'valid': False,
-                            'icon': {
-                                'path': 'icons/person.webp',
-                            },
-                        })
-
-                elif _type == 'device':
-                    ids = []
-                    for device in plex_instance.myPlexAccount().devices():
-                        ids.append(device.clientIdentifier)
-                    for device in plex_instance.systemDevices():
-                        if device.clientIdentifier in ids:
-                            dName = device.name if device.name else 'Anonymous'
-                            items.insert(1, {
-                                'title': dName,
-                                'subtitle': f'Platform: {device.platform} ǀ Created At: {parse_time(device.createdAt)} ǀ ID: {device.id}',
-                                'valid': False,
-                                'icon': {
-                                    'path': 'icons/device.webp',
-                                },
-                            })
-
-                elif _type == 'watch':
+                if _type == 'watch':
                     for session in plex_instance.sessions():
                         if session:
                             users = ', '.join([u for u in session.usernames])
@@ -206,14 +201,21 @@ if data.get('items'):
                                 'subtitle': f'{session.player.product} - {session.player.device} {session.player.platform} ǀ {users} ǀ {parse_duration(session.viewOffset)} {session.player.state}',
                                 'valid': False,
                                 'icon': {
-                                    'path': 'icons/watch.webp',
+                                    'path': 'icons/base/watch.webp',
                                 },
                                 'mods':({
                                     'cmd': {
                                         'subtitle': 'Press ⏎ to terminate this session',
                                         'arg': f'_run;{serverID};terminateSession;{session.session.id};{sName}',
                                         'icon': {
-                                            'path': 'icons/delete.webp',
+                                            'path': 'icons/base/delete.webp',
+                                        },
+                                    },
+                                    'alt': {
+                                        'subtitle': 'Press ⏎ to see the device details',
+                                        'arg': f'_login;{acc_uuid};3;device;{session.player.machineIdentifier}',
+                                        'icon': {
+                                            'path': 'icons/base/device.webp',
                                         },
                                     }
                                 })
@@ -233,9 +235,54 @@ if data.get('items'):
                             'subtitle': f'Display {title} settings ǀ {eCount} element(s)',
                             'arg': f'_rerun;{serverID};3;setting;{group}',
                             'icon': {
-                                'path': 'icons/setting.webp',
+                                'path': 'icons/base/setting.webp',
                             },
                         })
+                
+                elif _type == 'statistics':
+                    final_json['rerun'] = 1
+                    current_time = datetime.now().replace(microsecond=0) - timedelta(seconds=2)
+                    filters = {
+                        'at>': current_time,
+                    }
+                    resources = plex_instance.resources()[-1]
+                    bandwidthData = plex_instance.bandwidth(timespan='seconds', **filters)
+
+                    total_byte = 0
+                    local_byte = 0
+                    for b in bandwidthData:
+                        total_byte += b.bytes
+                        if b.lan == True:
+                            local_byte += b.bytes
+
+                    distant_byte = total_byte - local_byte
+                    for obj in [
+                        {
+                            'title': 'Server Bandwidth',
+                            'subtitle': f'Distant : {format_bit(distant_byte)} ǀ Local : {format_bit(local_byte)}',
+                            'valid': False,
+                            'icon': {
+                                'path': 'icons/base/bandwidth.webp',
+                            }
+                        },
+                        {
+                            'title': 'CPU Usage',
+                            'subtitle': f'Plex Media Server : {percentage(resources.processCpuUtilization)} ǀ System : {percentage(resources.hostCpuUtilization)}',
+                            'valid': False,
+                            'icon': {
+                                'path': 'icons/base/cpu_ram.webp',
+                            }
+                        },
+                        {
+                            'title': 'RAM Usage',
+                            'subtitle': f'Plex Media Server : {percentage(resources.processMemoryUtilization)} ǀ System : {percentage(resources.hostMemoryUtilization)}',
+                            'valid': False,
+                            'icon': {
+                                'path': 'icons/base/cpu_ram.webp',
+                            }
+                        }
+                    ]:
+                        items.append(obj)
 
                 elif _type in ['library', 'history']:
                     isRefresh = False if any(s.refreshing == False for s in plex_instance.library.sections()) else True
@@ -249,7 +296,7 @@ if data.get('items'):
                             'subtitle': f'Scan all sections for new media ǀ Scaning: {isRefresh}',
                             'arg': f'_run;{serverID};scan;all',
                             'icon': {
-                                'path': 'icons/scan.webp',
+                                'path': 'icons/base/scan.webp',
                             }
                         },
                         {
@@ -257,7 +304,7 @@ if data.get('items'):
                             'subtitle': f'Forces a download of fresh media infos from the internet ǀ Last Refresh: {lastUpdate}',
                             'arg': f'_run;{serverID};refresh;all',
                             'icon': {
-                                'path': 'icons/refresh.webp',
+                                'path': 'icons/base/refresh.webp',
                             }
                         },
                         {
@@ -265,7 +312,7 @@ if data.get('items'):
                             'subtitle': 'History for all library sections',
                             'arg': f'_rerun;{serverID};3;history;all',
                             'icon': {
-                                'path': 'icons/history.webp',
+                                'path': 'icons/base/history.webp',
                             } 
                         }
                     ]:
@@ -276,7 +323,7 @@ if data.get('items'):
                             'subtitle': f'{plex_instance.friendlyName} ǀ Scanner: {s.scanner} ǀ Agent: {s.agent}',
                             'arg': f'_rerun;{serverID};3;library;{s.key}',
                             'icon': {
-                                'path': f'icons/{s.type}.webp',
+                                'path': f'icons/base/{s.type}.webp',
                             },
                         })
 
@@ -294,7 +341,7 @@ if data.get('items'):
                                     'text': f'ID: {setting.id}\nValue: {setting.value}\nType: {setting.type}\nDefault: {setting.default}\nSummary: {setting.summary}',
                                 },
                                 'icon': {
-                                    'path': 'icons/setting.webp',
+                                    'path': 'icons/base/setting.webp',
                                 },
                             })
 
@@ -324,7 +371,7 @@ if data.get('items'):
                             'subtitle': f'Scan this section for new media ǀ Scaning: {isRefresh}',
                             'arg': f'_run;{serverID};scan;{sectionID}',
                             'icon': {
-                                'path': 'icons/scan.webp',
+                                'path': 'icons/base/scan.webp',
                             }
                         },
                         {
@@ -332,7 +379,7 @@ if data.get('items'):
                             'subtitle': f'Forces a download of fresh media infos from the internet ǀ Last Refresh: {lastUpdate}',
                             'arg': f'_run;{serverID};refresh;{sectionID}',
                             'icon': {
-                                'path': 'icons/refresh.webp',
+                                'path': 'icons/base/refresh.webp',
                             }
                         },
                         {
@@ -340,7 +387,7 @@ if data.get('items'):
                             'subtitle': f'History for the {lTitle} section',
                             'arg': f'_rerun;{serverID};4;history;{sectionID}',
                             'icon': {
-                                'path': 'icons/history.webp',
+                                'path': 'icons/base/history.webp',
                             } 
                         },
                         {
@@ -348,7 +395,7 @@ if data.get('items'):
                             'subtitle': f'{lSize} ǀ {lByte}',
                             'valid': False,
                             'icon': {
-                                'path': 'icons/info.webp',
+                                'path': 'icons/base/info.webp',
                             }
                         },
                     ]: 
@@ -360,5 +407,8 @@ if data.get('items'):
                     for h in plex_instance.library.sectionByID(int(_key)).history(mindate=history_days()):
                         lName = plex_instance.library.sectionByID(h.librarySectionID).title
                         makeHistory(h, lName)
+else:
+    addMenuBtn(items)
+    default_element('no_PMS', items)
 
-print(json.dumps({'items': items}))
+print(json.dumps(final_json))

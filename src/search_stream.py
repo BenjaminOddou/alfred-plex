@@ -20,7 +20,7 @@ if output:
             try:
                 plex_instance = PlexServer(baseURL, plexToken)
             except:
-                display_notification('🚨 Error !', f'Failed to connect to the Plex server \'{obj.get("title")}\'. Check the IP and token')
+                display_notification('🚨 Error !', f'Failed to connect to the plex server {obj.get("title")}')
                 exit()
             media = plex_instance.fetchItem(_key)
             if _type == 'album':
