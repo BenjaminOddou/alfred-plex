@@ -42,14 +42,11 @@ if output:
                 command = '--meta-title' if _type in ['track', 'album'] else '--input-title-format'
                 for url, title in zip(streamURLs, streamTitles):
                     mp_args.extend([command, title, url])
-                mp_instance = subprocess.Popen(mp_args)
             elif media_player == 'iina':
                 mp_args.extend(['--music-mode']) if _type in ['track', 'album'] else None
                 for url, title in zip(streamURLs, streamTitles):
-                    mp_args.extend([f'\"{url}\"', f'--mpv-force-media-title=\"{title}\"'])
-                    # mp_args.extend([url, f'--mpv-force-media-title={title}'])
-                print(' '.join(mp_args), end='')
-            #mp_instance = subprocess.Popen(mp_args)
+                    mp_args.extend([url, f'--mpv-force-media-title={title}', '--no-stdin'])
+            mp_instance = subprocess.Popen(mp_args)
             break
 else:
     display_notification('🚨 Error !', f'Can\'t locate the {media_player} app')
