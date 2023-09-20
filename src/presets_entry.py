@@ -2,7 +2,7 @@ import os
 import sys
 import time
 import json
-from utils import presets_file, filters_bool, aliases_file, display_notification, addReturnbtn, addMenuBtn
+from utils import presets_file, filters_bool, alias_file, display_notification, addReturnbtn, addMenuBtn
 
 try:
     query = sys.argv[1]
@@ -56,7 +56,7 @@ if level == 0:
                 except:
                     key, value = ['None', 'None']
                     pass
-                test_key = aliases_file(_testkey=key, _type='alias')
+                test_key = alias_file(_testkey=key, _type='alias')
                 if not test_key:
                     display_notification('⚠️ Warning !', f'The preset {title} has invalid parameters')
                     time.sleep(0.2)

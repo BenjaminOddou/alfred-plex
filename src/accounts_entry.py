@@ -123,7 +123,8 @@ if data.get('items'):
                 if _type == 'servers':
                     for server in plex_account.resources():
                         key = server.accessToken
-                        if key:
+                        r_type = server.provides
+                        if 'server' in r_type:
                             valid = True if key in [s.get('plexToken') for s in servers_file().get('items')] else False
                             items.append({
                                 'title': f'{server.name} ({plex_account.title})',

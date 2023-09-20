@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import limit_number, parse_time, parse_duration, servers_file, aliases_file, delist, default_element, display_notification, default_view, addReturnbtn, addMenuBtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player
+from utils import limit_number, parse_time, parse_duration, servers_file, alias_file, delist, default_element, display_notification, default_view, addReturnbtn, addMenuBtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player
 from plexapi import utils
 from plexapi.server import PlexServer
 
@@ -104,12 +104,12 @@ def register_elements(database: list):
                     media_filter = f'{{\'album.title=\': \'{title}\', \'artist.title=\': \'{parentTitle}\'}}'
                 else:    
                     media_filter = f'{{\'{media_type}.title=\': \'{title}\'}}'
-                nested_search = f'_rerun;0;filter;{aliases_file(_testkey="libtype", _type="alias_or_long")}={search_map[media_type]}/{aliases_file(_testkey="advancedFilters", _type="alias_or_long")}={media_filter}'
+                nested_search = f'_rerun;0;filter;{alias_file(_testkey="libtype", _type="alias_or_long")}={search_map[media_type]}/{alias_file(_testkey="advancedFilters", _type="alias_or_long")}={media_filter}'
             elif media_type in ['actor', 'director', 'collection']:
                 media_id = media.index if media_type == 'collection' else media.id
-                nested_search = f'_rerun;0;filter;{aliases_file(_testkey=media_type, _type="alias_or_long")}={media_id}'
+                nested_search = f'_rerun;0;filter;{alias_file(_testkey=media_type, _type="alias_or_long")}={media_id}'
             elif media_type == 'genre':
-                nested_search = f'_rerun;0;filter;{aliases_file(_testkey="libtype", _type="alias_or_long")}={utils.reverseSearchType(media.librarySectionType)}/{aliases_file(_testkey="genre", _type="alias_or_long")}={media.id}'
+                nested_search = f'_rerun;0;filter;{alias_file(_testkey="libtype", _type="alias_or_long")}={utils.reverseSearchType(media.librarySectionType)}/{alias_file(_testkey="genre", _type="alias_or_long")}={media.id}'
             if short_nested_search == 'arg':
                 media_arg = nested_search
             else:
@@ -203,7 +203,7 @@ if data.get('items'):
                     try:
                         for item in query.split('/'):
                             key, value = item.split('=', 1)
-                            test_key = aliases_file(_testkey=key, _type='alias_and_long')
+                            test_key = alias_file(_testkey=key, _type='alias_and_long')
                             if not test_key:
                                 delist('invalid_FILTERS', items)
                                 break

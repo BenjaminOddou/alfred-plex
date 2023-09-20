@@ -476,7 +476,7 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>5DF3B7FB-5ECF-4A1E-8857-44929033F3C1</string>
+				<string>F6D2306C-4845-4A35-87AB-44720CFC95A5</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -873,7 +873,7 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>5DF3B7FB-5ECF-4A1E-8857-44929033F3C1</string>
+				<string>F6D2306C-4845-4A35-87AB-44720CFC95A5</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -1458,6 +1458,21 @@
 				<integer>0</integer>
 				<key>modifiersubtext</key>
 				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>F6D2306C-4845-4A35-87AB-44720CFC95A5</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>5DF3B7FB-5ECF-4A1E-8857-44929033F3C1</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>B52BAD89-9B36-4B22-97C4-0E40D691617E</string>
 				<key>vitoclose</key>
 				<false/>
 			</dict>
@@ -3448,14 +3463,11 @@ echo -n "$1"</string>
 			<key>config</key>
 			<dict>
 				<key>argument</key>
-				<string>{var:split1};account;{var:username}ǀ{var:password}ǀ{var:otp}</string>
+				<string>{var:split1};account;{var:username}	{var:password}	{query}</string>
 				<key>passthroughargument</key>
 				<false/>
 				<key>variables</key>
-				<dict>
-					<key>otp</key>
-					<string>{query}</string>
-				</dict>
+				<dict/>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.utility.argument</string>
@@ -3666,6 +3678,29 @@ echo -n "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>python3 servers_add_delete.py "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>11</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>5DF3B7FB-5ECF-4A1E-8857-44929033F3C1</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>matchmode</key>
 				<integer>1</integer>
 				<key>matchstring</key>
@@ -3713,29 +3748,6 @@ echo -n "$1"</string>
 			<string>3CB20D94-B4D5-45C3-9DA6-CE51C00BAC2A</string>
 			<key>version</key>
 			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>python3 servers_add_delete.py "$1"</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>type</key>
-				<integer>11</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>5DF3B7FB-5ECF-4A1E-8857-44929033F3C1</string>
-			<key>version</key>
-			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -3904,6 +3916,38 @@ echo -n "$1"</string>
 			<string>alfred.workflow.trigger.external</string>
 			<key>uid</key>
 			<string>0F7819B8-8841-48CB-91F5-5BC37918373D</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>conditions</key>
+				<array>
+					<dict>
+						<key>inputstring</key>
+						<string></string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>1</integer>
+						<key>matchstring</key>
+						<string></string>
+						<key>outputlabel</key>
+						<string></string>
+						<key>uid</key>
+						<string>B52BAD89-9B36-4B22-97C4-0E40D691617E</string>
+					</dict>
+				</array>
+				<key>elselabel</key>
+				<string>else</string>
+				<key>hideelse</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.conditional</string>
+			<key>uid</key>
+			<string>F6D2306C-4845-4A35-87AB-44720CFC95A5</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -4833,9 +4877,9 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>colorindex</key>
 			<integer>3</integer>
 			<key>xpos</key>
-			<real>4850</real>
+			<real>4915</real>
 			<key>ypos</key>
-			<real>1225</real>
+			<real>1220</real>
 		</dict>
 		<key>5E144612-C363-4E2E-9EC4-6D661E45D703</key>
 		<dict>
@@ -5352,6 +5396,13 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>ypos</key>
 			<real>70</real>
 		</dict>
+		<key>F6D2306C-4845-4A35-87AB-44720CFC95A5</key>
+		<dict>
+			<key>xpos</key>
+			<real>4860</real>
+			<key>ypos</key>
+			<real>1250</real>
+		</dict>
 		<key>F912F04D-42DE-4692-B7AF-D529056928FC</key>
 		<dict>
 			<key>xpos</key>
@@ -5443,9 +5494,9 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 				<string></string>
 			</dict>
 			<key>description</key>
-			<string>use aliases to quickly filter or sort a result.</string>
+			<string>use alias to quickly filter or sort a result.</string>
 			<key>label</key>
-			<string>📜 Use aliases</string>
+			<string>📜 Use alias</string>
 			<key>type</key>
 			<string>checkbox</string>
 			<key>variable</key>
@@ -6195,7 +6246,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		</dict>
 	</array>
 	<key>version</key>
-	<string>2.0.1</string>
+	<string>2.0.2</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>

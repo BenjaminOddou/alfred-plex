@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import display_notification, aliases_file, aliases_file_path
+from utils import display_notification, alias_file, alias_file_path
 
 _action, _categ, _pos, _query = sys.argv[1].split(';')
 
@@ -25,7 +25,7 @@ if _action in ['delete', 'reset']:
     else:
         display_notification('⚠️ Warning !', 'Action canceled')
 elif _action == 'modify':
-    data = aliases_file(_testkey=None, _type=None, _file=True)
+    data = alias_file(_testkey=None, _type=None, _file=True)
     for item in data:
         if item["short_key"] == _query:
             display_notification('🚨 Error !', f'The alias {_query} is already used for {item["long_key"]}')
@@ -35,7 +35,7 @@ elif _action == 'modify':
             if item["long_key"] == _categ:
                 item["short_key"] = _query
     try:
-        with open(aliases_file_path, 'w') as file:
+        with open(alias_file_path, 'w') as file:
             json.dump(data, file, indent=4)
         display_notification('✅ Sucess !', f'Alias of {_categ} have been modified to {_query}')
         print(f'1;alias;0', end='')

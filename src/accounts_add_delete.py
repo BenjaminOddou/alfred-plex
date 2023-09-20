@@ -18,12 +18,10 @@ if _type == '_delete':
             display_notification('✅ Sucess !', f'The account {item.get("title")} is removed')
             break
 elif _type == '_new':
-    credentials = _input.split('ǀ')
+    credentials = _input.split('\t')
     username, password, otp = lst_idx(credentials, 0), lst_idx(credentials, 1), lst_idx(credentials, 2)
-    try:
-        plex_account = get_plex_account(username=username, password=password, otp=otp) if _origin == 'account' else get_plex_account(uuid=_input)
-    except:
-        display_notification('🚨 Error !', 'Check your credentials and internet connection')
+    plex_account = get_plex_account(username=username, password=password, otp=otp) if _origin == 'account' else get_plex_account(uuid=_input)
+    if not plex_account:
         exit()
     data = accounts_file() if accounts_file() else {'items': []}
     replace = False

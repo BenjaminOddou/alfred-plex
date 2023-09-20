@@ -111,6 +111,7 @@ class MyPlexAccount(PlexObject):
     # Hub sections
     VOD = 'https://vod.provider.plex.tv'                                                        # get
     MUSIC = 'https://music.provider.plex.tv'                                                    # get
+    DISCOVER = 'https://discover.provider.plex.tv'
     METADATA = 'https://metadata.provider.plex.tv'
     key = 'https://plex.tv/api/v2/user'
 
@@ -187,7 +188,9 @@ class MyPlexAccount(PlexObject):
         self.subscriptionPaymentService = subscription.attrib.get('paymentService')
         self.subscriptionPlan = subscription.attrib.get('plan')
         self.subscriptionStatus = subscription.attrib.get('status')
-        self.subscriptionSubscribedAt = utils.toDatetime(subscription.attrib.get('subscribedAt'), '%Y-%m-%d %H:%M:%S %Z')
+        self.subscriptionSubscribedAt = utils.toDatetime(
+            subscription.attrib.get('subscribedAt') or None, '%Y-%m-%d %H:%M:%S %Z'
+        )
 
         profile = data.find('profile')
         self.profileAutoSelectAudio = utils.cast(bool, profile.attrib.get('autoSelectAudio'))
@@ -1056,7 +1059,7 @@ class MyPlexAccount(PlexObject):
             'includeMetadata': 1
         }
 
-        data = self.query(f'{self.METADATA}/library/search', headers=headers, params=params)
+        data = self.query(f'{self.DISCOVER}/library/search', headers=headers, params=params)
         searchResults = data['MediaContainer'].get('SearchResults', [])
         searchResult = next((s.get('SearchResult', []) for s in searchResults if s.get('id') == 'external'), [])
 

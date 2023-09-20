@@ -126,7 +126,7 @@ Connect one or more account to add plex media servers. In this section you can :
 
 > Removing a plex account will remove all the servers connected. You can also remove a server directly in the Plex Media Servers section.
 
-### Plex Servers : Manage servers and perform actions
+### Plex Media Servers : Manage servers and perform actions
 
 Select the server to view its informations and perform actions.
 * Download last version of plex media server from the web.
@@ -205,11 +205,11 @@ Example: `libtype=movie/sort=originallyAvailableAt:desc`. This will display `mov
 
 ![sorts](public/sorts.webp)
 
-#### 4. Aliases
+#### 4. Alias
 
 Aliases are enabled by default, and allows you, when activated, to write filters more easily. `libtype` becomes `lt`, `studio` becomes `st`...
 
-You can disable this behavior in the user control panel by unticking the `📜 Use aliases` parameter.
+You can disable this behavior in the user control panel by unticking the `📜 Use alias` parameter.
 
 Aliases file can be edited, but be careful about double values. It is the `aliases.json` file located under the `📁 Data folder` (`~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex` by default).
 

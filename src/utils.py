@@ -81,7 +81,7 @@ for obj in default_list:
 
 accounts_file_path = os.path.join(data_folder, 'accounts.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.jso
 servers_file_path = os.path.join(data_folder, 'servers.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.json
-aliases_file_path = os.path.join(data_folder, 'aliases.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/aliases.json
+alias_file_path = os.path.join(data_folder, 'alias.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/alias.json
 presets_file_path = os.path.join(data_folder, 'presets.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/presets.json
 
 def display_notification(title: str, message: str):
@@ -101,10 +101,10 @@ def parse_duration(time):
 def history_days():
     return datetime.datetime.today() - datetime.timedelta(days=days_history)
 
-def aliases_file(_testkey: str, _type: str, _file=False):
-    if not os.path.isfile(aliases_file_path) or os.path.getsize(aliases_file_path) == 0:
-        shutil.copy('./json/aliases.json', aliases_file_path)
-    with open(aliases_file_path, 'r') as file:
+def alias_file(_testkey: str, _type: str, _file=False):
+    if not os.path.isfile(alias_file_path) or os.path.getsize(alias_file_path) == 0:
+        shutil.copy('./json/alias.json', alias_file_path)
+    with open(alias_file_path, 'r') as file:
         data = json.load(file)
         if _file:
             return data
@@ -251,14 +251,13 @@ def get_plex_account(uuid=None, username=None, password=None, otp=None):
                 auth_token = account.get('authToken')
                 break
         try:
-            if uuid:
+            if auth_token:
                 plex_account = MyPlexAccount(token=auth_token)
             else:
                 plex_account = MyPlexAccount(username=username, password=password, code=otp)
         except:
             display_notification('🚨 Error!', 'Failed to connect to your plex account')
-            exit()
-
+            return None
         try:
             if not os.path.exists(cache_folder):
                 os.mkdir(cache_folder)

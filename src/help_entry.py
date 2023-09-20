@@ -3,7 +3,7 @@ import sys
 import json
 import urllib.parse
 from types import SimpleNamespace
-from utils import default_element, servers_file, aliases_file, filters_bool, display_notification, addReturnbtn, addMenuBtn, data_folder, cache_folder
+from utils import default_element, servers_file, alias_file, filters_bool, display_notification, addReturnbtn, addMenuBtn, data_folder, cache_folder
 from plexapi.server import PlexServer
 
 try:
@@ -134,7 +134,7 @@ else:
                     'path': 'icons/base/refresh.webp'
                 },
             })
-            for index, item in enumerate(aliases_file(_testkey=None, _type=None, _file=True)):
+            for index, item in enumerate(alias_file(_testkey=None, _type=None, _file=True)):
                 modified_item = {
                     'title': item['long_key'],
                     'subtitle': f'Alias : {item["short_key"]}',
@@ -187,14 +187,14 @@ else:
                 library_subtypes.append(t.type)
             library_type = plex_instance.library.sectionByID(_sectionID).type
             library_name = plex_instance.library.sectionByID(_sectionID).title
-        library_filter = aliases_file(_testkey='libtype', _type='alias_or_long')
-        library_advancedFilter = aliases_file(_testkey='advancedFilters', _type='alias_or_long')
-        sort_filter = aliases_file(_testkey='sort', _type='alias_or_long')
+        library_filter = alias_file(_testkey='libtype', _type='alias_or_long')
+        library_advancedFilter = alias_file(_testkey='advancedFilters', _type='alias_or_long')
+        sort_filter = alias_file(_testkey='sort', _type='alias_or_long')
         if level == 2:
             if _type == 'filter&sort':
                 for t in library_subtypes:
                     for f in plex_instance.library.sectionByID(_sectionID).listFilters(libtype=t):
-                        alias = aliases_file(_testkey=f.filter, _type='alias')
+                        alias = alias_file(_testkey=f.filter, _type='alias')
                         new_title = f'Filter {f.title}'
                         if is_title_unique(new_title, items):
                             items.append({
