@@ -50,7 +50,7 @@ The workflow is divided in 6 parts :
 
 To use this workflow, you need to add server(s).In order to do so, you must connect to an account that have access to a plex media server with your credentials. **If you're not the owner of the server, you won't have access to the server settings**.
 
-Go to the `Plex Accounnt` section to know more on how to manage your accounts.
+Go to the `Plex Account` section to know more on how to manage your accounts.
 
 ## 🤖 Usage of the workflow
 
@@ -120,11 +120,15 @@ Connect one or more account to add plex media servers. In this section you can :
 * See the list of your servers. Servers that aren't added to the workflow are greyed out.
 * Manage connected users.
 * Manage connected devices.
-* Manage your whatchlist.
+* Manage your watchlist.
 
 ![plex_account](public/plex_account.webp)
 
 > Removing a plex account will remove all the servers connected. You can also remove a server directly in the Plex Media Servers section.
+
+When connected to the workflow, you'll be able to see the device under the `Authorized Devices` section. Follow this [documentation](https://support.plex.tv/articles/115007577087-devices/) to know more.
+
+![device](public/device.webp)
 
 ### Plex Media Servers : Manage servers and perform actions
 
@@ -173,7 +177,7 @@ Filters, fields and sorts options are generated based on your libraries metadata
 
 #### 1. Filters
 
-> Filters can be aliased, see section `4. Aliases` below
+> Filters can be aliased, see section `4. Alias` below
 
 Plex filters can be applied by typing `filterName=value`. Use `/` to separate them. Find the list of filters under each library sections of your servers.
 
@@ -207,15 +211,15 @@ Example: `libtype=movie/sort=originallyAvailableAt:desc`. This will display `mov
 
 #### 4. Alias
 
-Aliases are enabled by default, and allows you, when activated, to write filters more easily. `libtype` becomes `lt`, `studio` becomes `st`...
+Alias are enabled by default, and allows you, when activated, to write filters more easily. `libtype` becomes `lt`, `studio` becomes `st`...
 
 You can disable this behavior in the user control panel by unticking the `📜 Use alias` parameter.
 
-Aliases file can be edited, but be careful about double values. It is the `aliases.json` file located under the `📁 Data folder` (`~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex` by default).
+Alias file can be edited, but be careful about double values. It is the `alias.json` file located under the `📁 Data folder` (`~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex` by default).
 
 Example: `af={'addedAt>>': '30d'}/lt=show`. It returns `shows` added or `shows` containing new elements (seasons, epidodes) in plex during the last `30 days`.
 
-![aliases](public/aliases.webp)
+![alias](public/alias.webp)
 
 ## ⚖️ License
 

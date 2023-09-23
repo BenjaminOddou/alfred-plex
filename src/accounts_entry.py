@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import display_notification, servers_file, accounts_file, addReturnbtn, addMenuBtn, get_plex_account, parse_time
+from utils import servers_file, accounts_file, addReturnbtn, addMenuBtn, get_plex_account, parse_time, display_notification, custom_logger
 
 try:
     query = sys.argv[1]
@@ -72,17 +72,17 @@ if data.get('items'):
             for obj in data['items']:
                 if obj.get('uuid') == accountUUID:
                     account_name = obj.get('title')
-            try:
-                plex_account = get_plex_account(accountUUID)
-            except:
-                display_notification('🚨 Error !', f'Failed to connect to your plex account {account_name}')
+
+            plex_account = get_plex_account(accountUUID)
+            if not plex_account:
+                print(json.dumps({'items': items}))
                 exit()
 
             if level == 1:
                 items.append({
                     'title': 'Sync',
                     'subtitle': 'Refresh data from your plex account and reconnect your servers',
-                    'arg': f'_run;_new;sync;{plex_account.uuid}',
+                    'arg': f'_run;_new;sync;{accountUUID}',
                     'icon': {
                         'path': f'icons/base/refresh.webp',
                     },

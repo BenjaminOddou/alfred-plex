@@ -1,8 +1,7 @@
 import os
 import sys
-import time
 import json
-from utils import presets_file, filters_bool, alias_file, display_notification, addReturnbtn, addMenuBtn
+from utils import presets_file, filters_bool, alias_file, display_notification, addReturnbtn, addMenuBtn, custom_logger
 
 try:
     query = sys.argv[1]
@@ -43,6 +42,7 @@ if level == 0:
     ]:
         items.append(elem)
     for preset in data.get('items'):
+        p_valid = True
         title = preset.get('title')
         subtitle = preset.get('subtitle')
         arg = preset.get('arg')
@@ -58,11 +58,13 @@ if level == 0:
                     pass
                 test_key = alias_file(_testkey=key, _type='alias')
                 if not test_key:
-                    display_notification('⚠️ Warning !', f'The preset {title} has invalid parameters')
-                    time.sleep(0.2)
-                    break
+                    p_valid = False
+                    custom_logger('warning', f'Key : {key} is not valid in the preset : {title}')
+                    test_key = key
                 nArg += f'{test_key}={value}/'
             nArg = nArg[:-1]
+            if p_valid is False:
+                display_notification('⚠️ Warning !', f'The preset {title} has invalid parameters')
         items.append({
             'title': title,
             'subtitle': subtitle,

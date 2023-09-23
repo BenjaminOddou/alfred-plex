@@ -3,7 +3,7 @@ import sys
 import json
 import urllib.parse
 from types import SimpleNamespace
-from utils import default_element, servers_file, alias_file, filters_bool, display_notification, addReturnbtn, addMenuBtn, data_folder, cache_folder
+from utils import default_element, servers_file, alias_file, filters_bool, display_notification, addReturnbtn, addMenuBtn, data_folder, cache_folder, custom_logger
 from plexapi.server import PlexServer
 
 try:
@@ -81,8 +81,10 @@ else:
                 plexToken = obj['plexToken']
                 try:
                     plex_instance = PlexServer(baseURL, plexToken)
-                except:
+                except Exception as e:
                     display_notification('🚨 Error !', f'Failed to connect to the plex server {obj.get("title")}')
+                    custom_logger('error', e)
+                    print(json.dumps({'items': items}))
                     exit()
         else:
             default_element('no_PMS', items)
@@ -129,7 +131,7 @@ else:
             items.append({
                 'title': 'Reset',
                 'subtitle': 'Reset the alias file',
-                'arg': f'_run;reset;alias file;{data_folder}/aliases.json',
+                'arg': f'_run;reset;alias file;{data_folder}/alias.json',
                 'icon': {
                     'path': 'icons/base/refresh.webp'
                 },

@@ -1,12 +1,13 @@
 import os
 import sys
 import json
-from utils import display_notification, accounts_file_path, accounts_file, data_folder, lst_idx, get_plex_account
+from utils import display_notification, accounts_file_path, accounts_file, data_folder, lst_idx, get_plex_account, custom_logger
 
 try:
     _type, _origin, _input = sys.argv[1].split(';')
-except IndexError:
-    display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
+except IndexError as e:
+    display_notification('🚨 Error !', 'Something went wrong, check the logs and create a GitHub issue')
+    custom_logger('error', e)
     exit()
 
 if _type == '_delete':
@@ -37,12 +38,16 @@ elif _type == '_new':
                 replace = True
                 data['items'][idx] = json_obj
                 print(f'_new;{_origin};{plex_account.uuid}', end='')
-                display_notification('✅ Sucess !', f'{plex_account.friendlyName} plex account informations were updated')
+                message = f'{plex_account.friendlyName} plex account informations were updated'
+                display_notification('✅ Sucess !', message)
+                custom_logger('info', message)
                 break
     if not replace:
         data['items'].append(json_obj)
         print(f'_new;{_origin};{plex_account.uuid}', end='')
-        display_notification('✅ Sucess !', f'The account {plex_account.friendlyName} is added')
+        message = f'The account {plex_account.friendlyName} is added'
+        display_notification('✅ Sucess !', message)
+        custom_logger('info', message)
 
 if not os.path.exists(data_folder):
     os.makedirs(data_folder)
@@ -50,5 +55,6 @@ if not os.path.exists(data_folder):
 try:
     with open(accounts_file_path, 'w') as file:
         json.dump(data, file, indent=4)
-except:
+except Exception as e:
     display_notification('🚨 Error !', 'Data can\'t be written in accounts.json')
+    custom_logger('error', e)

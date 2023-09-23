@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import display_notification, servers_file, accounts_file, addReturnbtn, addMenuBtn, parse_time, parse_duration, get_size_string, history_days, default_element
+from utils import display_notification, servers_file, accounts_file, addReturnbtn, addMenuBtn, parse_time, parse_duration, get_size_string, history_days, default_element, custom_logger
 from plexapi.server import PlexServer
 from datetime import datetime, timedelta
 
@@ -109,8 +109,10 @@ if data.get('items'):
             try:
                 plex_instance = PlexServer(baseURL, plexToken)
                 friendlyName = plex_instance.friendlyName
-            except:
+            except Exception as e:
                 display_notification('🚨 Error !', f'Failed to connect to the plex server {obj.get("title")}')
+                custom_logger('error', e)
+                print(json.dumps({'items': items}))
                 exit()
 
             if level == 1:

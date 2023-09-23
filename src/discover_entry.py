@@ -1,4 +1,4 @@
-from utils import default_element, short_web, short_mtvsearch, short_nested_search, language, parse_duration, limit_number, accounts_file, addMenuBtn, get_plex_account
+from utils import default_element, short_web, short_mtvsearch, short_nested_search, language, parse_duration, limit_number, accounts_file, addMenuBtn, get_plex_account, display_notification, custom_logger, splitN
 import sys
 import json
 import requests
@@ -39,7 +39,7 @@ def searchDiscover(query=None, libtype=None, plex_uuid=None):
     if query:
         params1 = {
             'query': query,
-            'limit': limit_number,
+            'limit': splitN(limit_number),
             'searchTypes': libtype,
             'includeMetadata': 1,
             'filterPeople': 1,
@@ -133,7 +133,11 @@ def searchDiscover(query=None, libtype=None, plex_uuid=None):
 plex_account = accounts_file()
 if plex_account.get('items'):
     plex_uuid = plex_account['items'][0]['uuid']
-    database = searchDiscover(query=query, plex_uuid=plex_uuid) if not '/' in query else searchDiscover(query=query.split('/')[0], libtype=query.split('/')[1], plex_uuid=plex_uuid)
+    try:
+        database = searchDiscover(query=query, plex_uuid=plex_uuid) if not '/' in query else searchDiscover(query=query.split('/')[0], libtype=query.split('/')[1], plex_uuid=plex_uuid)
+    except Exception as e:
+        display_notification('🚨 Error !', 'Can\'t connect to plex servers')
+        custom_logger('error', e)
 else:
     default_element('no_ACC', items)
 if items == []:

@@ -1,10 +1,11 @@
 import sys
-from utils import display_notification, get_plex_account
+from utils import display_notification, get_plex_account, custom_logger
 
 try:
     _plex_uuid, _type, _uuid = sys.argv[1].split(';')[1:]
-except IndexError:
-    display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
+except IndexError as e:
+    display_notification('🚨 Error !', 'Something went wrong, check the logs and create a GitHub issue')
+    custom_logger('error', e)
     exit()
 
 plex_account = get_plex_account(uuid=_plex_uuid)

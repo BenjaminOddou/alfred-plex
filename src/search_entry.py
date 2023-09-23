@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import limit_number, parse_time, parse_duration, servers_file, alias_file, delist, default_element, display_notification, default_view, addReturnbtn, addMenuBtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player
+from utils import limit_number, parse_time, parse_duration, servers_file, alias_file, delist, default_element, display_notification, default_view, addReturnbtn, addMenuBtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player, custom_logger
 from plexapi import utils
 from plexapi.server import PlexServer
 
@@ -195,8 +195,11 @@ if data.get('items'):
             plexUUID = obj['account_uuid']
             try:
                 plex_instance = PlexServer(baseURL, plexToken)
-            except:
+            except Exception as e:
                 display_notification('🚨 Error !', f'Failed to connect to the plex server {obj["title"]}')
+                custom_logger('error', e)
+                addMenuBtn(items)
+                print(json.dumps({'items': items}))
                 exit()
             if _level == 0:
                 if '=' in query:

@@ -2,12 +2,13 @@ import os
 import sys
 import json
 import time
-from utils import display_notification, servers_file_path, servers_file, data_folder, get_plex_account
+from utils import display_notification, servers_file_path, servers_file, data_folder, get_plex_account, custom_logger
 
 try:
     _type, _origin, _input = sys.argv[1].split(';')
-except IndexError:
-    display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
+except IndexError as e:
+    display_notification('🚨 Error !', 'Something went wrong, check the logs and create a GitHub issue')
+    custom_logger('error', e)
     exit()
 
 if _type == '_delete':
@@ -20,7 +21,9 @@ if _type == '_delete':
     for item in items_to_remove:
         data['items'].remove(item)
         time.sleep(0.5)
-        display_notification('✅ Success !', f'The plex server {item.get("title")} is removed')
+        message = f'The plex server {item.get("title")} is removed'
+        display_notification('✅ Success !', message)
+        custom_logger('info', message)
 elif _type == '_new':
     plex_account = get_plex_account(uuid=_input)
     data = servers_file() if servers_file() else {'items': []}
@@ -29,8 +32,9 @@ elif _type == '_new':
             continue
         try:
             baseURL = s.connect(timeout=2)._baseurl
-        except:
+        except Exception as e:
             display_notification('🚨 Error !', f'Failed to connect to the plex server {s.name}')
+            custom_logger('error', e)
             continue
         replace = False
         json_obj = {
@@ -47,11 +51,15 @@ elif _type == '_new':
                 if obj.get('machineIdentifier') == s.clientIdentifier:
                     replace = True
                     data['items'][idx] = json_obj
-                    display_notification('✅ Sucess !', f'The plex server {s.name} informations were updated')
+                    message = f'The plex server {s.name} informations were updated'
+                    display_notification('✅ Sucess !', message)
+                    custom_logger('info', message)
                     break
         if not replace:
             data['items'].append(json_obj)
-            display_notification('✅ Sucess !', f'The plex server {s.name} is added')
+            message = f'The plex server {s.name} is added'
+            display_notification('✅ Sucess !', message)
+            custom_logger('info', message)
 
 if not os.path.exists(data_folder):
     os.makedirs(data_folder)
@@ -59,5 +67,6 @@ if not os.path.exists(data_folder):
 try:
     with open(servers_file_path, 'w') as file:
         json.dump(data, file, indent=4)
-except:
+except Exception as e:
     display_notification('🚨 Error !', 'Data can\'t be written in servers.json')
+    custom_logger('error', e)

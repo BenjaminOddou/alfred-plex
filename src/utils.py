@@ -6,7 +6,9 @@ import math
 import pickle
 import shutil
 import datetime
-from plexapi.myplex import MyPlexAccount
+import platform
+import configparser
+import logging as log
 
 data_folder = os.path.expanduser('~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex')
 cache_folder = os.path.expanduser('~/Library/Caches/com.runningwithcrayons.Alfred/Workflow Data/com.benjamino.plex')
@@ -83,6 +85,38 @@ accounts_file_path = os.path.join(data_folder, 'accounts.json') # default = ~/Li
 servers_file_path = os.path.join(data_folder, 'servers.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.json
 alias_file_path = os.path.join(data_folder, 'alias.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/alias.json
 presets_file_path = os.path.join(data_folder, 'presets.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/presets.json
+config_file_path =  os.path.join(data_folder, 'config.ini') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/config.ini
+
+# config file
+os.environ['PLEXAPI_CONFIG_PATH'] = config_file_path
+config = configparser.ConfigParser()
+config['plexapi'] = {
+    'container_size': limit_number,
+    'timeout': '5',
+    'enable_fast_connect': True
+}
+config['header'] = {
+    'device_name': 'Alfred Plex',
+    'product': 'Alfred Worklfow',
+    'version': os.getenv('alfred_workflow_version'),
+    'platform': 'macOS',
+    'platform_version': platform.mac_ver()[0],
+    'language': language
+}
+
+with open(config_file_path, 'w') as configfile:
+    config.write(configfile)
+
+from plexapi.myplex import MyPlexAccount
+
+# Init logger
+logger = log.getLogger('plex')
+logger.setLevel(log.DEBUG)
+log_file_handler = log.FileHandler(os.path.join(cache_folder, f'plex.log'))
+log_file_handler.setLevel(log.DEBUG)
+log_formatter = log.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+log_file_handler.setFormatter(log_formatter)
+logger.addHandler(log_file_handler)
 
 def display_notification(title: str, message: str):
     title = title.replace('"', '\\"')
@@ -186,7 +220,7 @@ def default_element(_action: str, items: list, query: str=None, query_dict: dict
     elif _action == 'invalid_FILTERS':
         items.append({
             'title': f'No media found for filters={query_dict}',
-            'subtitle': f'Press ⏎ to see available options. Aliases are {"activated" if filters_bool else "desactivated"}',
+            'subtitle': f'Press ⏎ to see available options. Alias are {"activated" if filters_bool else "desactivated"}',
             'arg': '_help',
             'icon': {
                 'path': 'icons/base/info.webp',
@@ -227,12 +261,25 @@ def addMenuBtn(items: list):
     )
 
 def get_size_string(size: int, decimals=2):
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    size_name = ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
     i = int(math.floor(math.log(size, 1024)))
     p = math.pow(1024, i)
     s = round(size / p, decimals)
-    return f"{s} {size_name[i]}"
+    return f'{s} {size_name[i]}'
 
+def lst_idx(lst: list, index: int):
+    if 0 <= index < len(lst):
+        return lst[index]
+    else:
+        return None
+
+def custom_logger(level: str, message: str):
+    if level == 'info':
+        logger.info(message)
+    elif level == 'warning':
+        logger.warning(message)
+    elif level == 'error':
+        logger.error(message)
 
 def get_plex_account(uuid=None, username=None, password=None, otp=None):
     plex_account = None
@@ -255,22 +302,30 @@ def get_plex_account(uuid=None, username=None, password=None, otp=None):
                 plex_account = MyPlexAccount(token=auth_token)
             else:
                 plex_account = MyPlexAccount(username=username, password=password, code=otp)
-        except:
+        except Exception as e:
             display_notification('🚨 Error!', 'Failed to connect to your plex account')
+            custom_logger('error', e)
             return None
         try:
             if not os.path.exists(cache_folder):
                 os.mkdir(cache_folder)
             with open(f'{cache_folder}/{plex_account.uuid}', 'wb') as file:
                 pickle.dump(plex_account, file)
-        except pickle.PickleError:
+        except pickle.PickleError as e:
+            custom_logger('warning', e)
             pass
+    else:
+        try:
+            plex_account.users()
+        except Exception as e:
+            display_notification('🚨 Error!', 'Failed to connect to your plex account')
+            custom_logger('error', e)
+            return None
 
     return plex_account
 
-
-def lst_idx(lst: list, index: int):
-    if 0 <= index < len(lst):
-        return lst[index]
+def splitN(number):
+    if number % 2 == 0:
+        return number // 2
     else:
-        return None
+        return (number + 1) // 2

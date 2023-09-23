@@ -2,37 +2,34 @@ import os
 import sys
 import json
 import secrets
-from utils import presets_file, display_notification, presets_file_path
+from utils import presets_file, display_notification, presets_file_path, custom_logger
 
 try:
     query = sys.argv[1].split(';')
     _type, _input = query[0], query[1]
-except IndexError:
-    display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
+except IndexError as e:
+    display_notification('🚨 Error !', 'Something went wrong, check the logs and create a GitHub issue')
+    custom_logger('error', e)
     exit()
 
 data = presets_file() if presets_file().get('items') else {'items':[]}
-if _type == '_delete':
-    for item in data['items']:
-        if item.get('id') == _input:
-            data['items'].remove(item)
-            break
-elif _type == '_new':
-    try:
+try:
+    if _type == '_delete':
+        for item in data['items']:
+            if item.get('id') == _input:
+                data['items'].remove(item)
+                break
+    elif _type == '_new':
         value = os.environ['_new_preset']
         title, subtitle = _input.split('/')[0], _input.split('/')[1]
-    except:
-        display_notification('🚨 Error !', 'Invalid input')
-        exit()
-    json_obj = {
-        'title': title,
-        'subtitle': subtitle,
-        'arg': value,
-        'id': secrets.token_hex(16)
-    }
-    data['items'].append(json_obj)
-elif _type == '_modify':
-    try:
+        json_obj = {
+            'title': title,
+            'subtitle': subtitle,
+            'arg': value,
+            'id': secrets.token_hex(16)
+        }
+        data['items'].append(json_obj)
+    elif _type == '_modify':
         _subtype = os.environ['modif2']
         _key = os.environ['modif5']
         for item in data['items']:
@@ -49,9 +46,10 @@ elif _type == '_modify':
             for item in data['items']:
                 if item.get('id') == _key:
                     item['arg'] = _input
-    except:
-        display_notification('🚨 Error !', 'Invalid input')
-        exit()
+except Exception as e:
+    display_notification('🚨 Error !', 'Invalid input, check the logs')
+    custom_logger('error', e)
+    exit()
 
 with open(presets_file_path, 'w') as file:
     json.dump(data, file, indent=4)

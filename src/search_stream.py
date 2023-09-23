@@ -1,6 +1,6 @@
 import sys
 import subprocess
-from utils import display_notification, servers_file, media_player
+from utils import display_notification, servers_file, media_player, custom_logger
 from plexapi.server import PlexServer
 
 result = subprocess.Popen(['mdfind', f'kMDItemContentType == "com.apple.application-bundle" && kMDItemFSName == "{media_player.upper()}.app"'], stdout=subprocess.PIPE)
@@ -9,8 +9,9 @@ output = result.stdout.read().decode().strip()
 if output:
     try:
         _machineID, _type, _key, _media_index, _part_index = sys.argv[1].split(';')[1:]
-    except IndexError:
-        display_notification('🚨 Error !', 'Something went wrong, please create a GitHub issue')
+    except IndexError as e:
+        display_notification('🚨 Error !', 'Something went wrong, check the logs and create a GitHub issue')
+        custom_logger('error', e)
         exit()
     data = servers_file()
     for obj in data['items']:
@@ -19,8 +20,9 @@ if output:
             plexToken = obj.get('plexToken')
             try:
                 plex_instance = PlexServer(baseURL, plexToken)
-            except:
+            except Exception as e:
                 display_notification('🚨 Error !', f'Failed to connect to the plex server {obj.get("title")}')
+                custom_logger('error', e)
                 exit()
             media = plex_instance.fetchItem(_key)
             if _type == 'album':
@@ -49,4 +51,6 @@ if output:
             mp_instance = subprocess.Popen(mp_args)
             break
 else:
-    display_notification('🚨 Error !', f'Can\'t locate the {media_player} app')
+    warn = f'Can\'t locate the {media_player} app'
+    display_notification('⚠️ Warning !', warn)
+    custom_logger('warning', warn)
