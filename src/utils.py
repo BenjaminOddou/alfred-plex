@@ -81,6 +81,9 @@ for obj in default_list:
     except:
         pass
 
+for folder in [cache_folder, data_folder]:
+    os.makedirs(folder, exist_ok=True)
+
 accounts_file_path = os.path.join(data_folder, 'accounts.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.jso
 servers_file_path = os.path.join(data_folder, 'servers.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.json
 alias_file_path = os.path.join(data_folder, 'alias.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/alias.json
@@ -307,8 +310,6 @@ def get_plex_account(uuid=None, username=None, password=None, otp=None):
             custom_logger('error', e)
             return None
         try:
-            if not os.path.exists(cache_folder):
-                os.mkdir(cache_folder)
             with open(f'{cache_folder}/{plex_account.uuid}', 'wb') as file:
                 pickle.dump(plex_account, file)
         except pickle.PickleError as e:

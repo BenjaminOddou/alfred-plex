@@ -61,9 +61,6 @@ elif _type == '_new':
             display_notification('✅ Sucess !', message)
             custom_logger('info', message)
 
-if not os.path.exists(data_folder):
-    os.makedirs(data_folder)
-
 try:
     with open(servers_file_path, 'w') as file:
         json.dump(data, file, indent=4)
