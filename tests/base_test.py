@@ -10,7 +10,7 @@ server = servers_file()['items'][0] # first server used
 account = accounts_file()['items'][0] # first account used
 try:
     plex_instance = PlexServer(server.get('baseURL'), server.get('plexToken'))
-    plex_account = get_plex_account(account.get('uuid'))
+    plex_account = get_plex_account(uuid=account.get('uuid'))
 except:
     print('error')
     exit()

@@ -116,7 +116,18 @@ Search medias and people on [Plex Discover](https://support.plex.tv/articles/dis
 
 ### Plex Accounts : Manage your plex accounts
 
-Connect one or more account to add plex media servers. In this section you can :
+Connect one or more accounts to add plex media servers. Use one of the following methods to connect to your plex account :
+
+* Use your plex credentials (username + password + OTP if you enabled [2FA](https://support.plex.tv/articles/two-factor-authentication/)).
+* Use a plex account token. This can be useful if you use a [third party application](https://support.plex.tv/articles/use-federated-authentication-to-sign-in/) to sign in to plex. In order to get your account auth token, you'll need to :
+  * Go to https://app.plex.tv/desktop/#!/settings/account.
+  * Open the browser developper tool with <kbd>⌘</kbd><kbd>⌥</kbd><kbd>I</kbd>.
+  * Inspect a request with https://clients.plex.tv/ as base url.
+  * Copy the `X-Plex-Token` and insert in the workflow.
+
+![auth](public/auth.webp)
+
+In this section you can :
 * See the list of your servers. Servers that aren't added to the workflow are greyed out.
 * Manage connected users.
 * Manage connected devices.
@@ -126,7 +137,7 @@ Connect one or more account to add plex media servers. In this section you can :
 
 > Removing a plex account will remove all the servers connected. You can also remove a server directly in the Plex Media Servers section.
 
-When connected to the workflow, you'll be able to see the device under the `Authorized Devices` section. Follow this [documentation](https://support.plex.tv/articles/115007577087-devices/) to know more.
+When connected to the workflow, you'll be able to see the device under the `Authorized Devices` section. Follow this [documentation](https://support.plex.tv/articles/115007577087-devices/) to know more. *Note that when using an authentication token, you'll use the web session from which you obtained the token*.
 
 ![device](public/device.webp)
 

@@ -47,7 +47,7 @@ def searchDiscover(query=None, libtype=None, plex_uuid=None):
         }
         response = requests.get('https://discover.provider.plex.tv/library/search', params=params1, headers=headers) 
     else:
-        plex_account = get_plex_account(plex_uuid)
+        plex_account = get_plex_account(uuid=plex_uuid)
         params2 = {
             'X-Plex-Container-Size': limit_number,
             'X-Plex-Language': language,

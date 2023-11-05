@@ -1,8 +1,7 @@
-import os
 import sys
 import json
 import time
-from utils import display_notification, servers_file_path, servers_file, data_folder, get_plex_account, custom_logger
+from utils import display_notification, servers_file_path, servers_file, get_plex_account, custom_logger
 
 try:
     _type, _origin, _input = sys.argv[1].split(';')
@@ -28,7 +27,7 @@ elif _type == '_new':
     plex_account = get_plex_account(uuid=_input)
     data = servers_file() if servers_file() else {'items': []}
     for s in plex_account.resources():
-        if not s.accessToken:
+        if not 'server' in s.provides:
             continue
         try:
             baseURL = s.connect(timeout=2)._baseurl

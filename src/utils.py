@@ -5,7 +5,7 @@ import json
 import math
 import pickle
 import shutil
-import datetime
+from datetime import datetime, timedelta
 import platform
 import configparser
 import logging as log
@@ -91,20 +91,23 @@ presets_file_path = os.path.join(data_folder, 'presets.json') # default = ~/Libr
 config_file_path =  os.path.join(data_folder, 'config.ini') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/config.ini
 
 # config file
-os.environ['PLEXAPI_CONFIG_PATH'] = config_file_path
 config = configparser.ConfigParser()
+os.environ['PLEXAPI_CONFIG_PATH'] = config_file_path
 config['plexapi'] = {
     'container_size': limit_number,
     'timeout': '5',
-    'enable_fast_connect': True
+    'autoreload': 'false',
+    'enable_fast_connect': 'true',
 }
 config['header'] = {
+    'device': 'OSX',
     'device_name': 'Alfred Plex',
-    'product': 'Alfred Worklfow',
-    'version': os.getenv('alfred_workflow_version'),
+    'language': language,
     'platform': 'macOS',
     'platform_version': platform.mac_ver()[0],
-    'language': language
+    'product': 'Alfred Worklfow',
+    'provides': 'controller',
+    'version': os.getenv('alfred_workflow_version', ''),
 }
 
 with open(config_file_path, 'w') as configfile:
@@ -136,7 +139,7 @@ def parse_duration(time):
     return f'{hours:02d}:{minutes:02d}:{seconds:02d}'
 
 def history_days():
-    return datetime.datetime.today() - datetime.timedelta(days=days_history)
+    return datetime.today() - timedelta(days=days_history)
 
 def alias_file(_testkey: str, _type: str, _file=False):
     if not os.path.isfile(alias_file_path) or os.path.getsize(alias_file_path) == 0:
@@ -284,9 +287,8 @@ def custom_logger(level: str, message: str):
     elif level == 'error':
         logger.error(message)
 
-def get_plex_account(uuid=None, username=None, password=None, otp=None):
+def get_plex_account(uuid=None, auth_token=None, username=None, password=None, otp=None):
     plex_account = None
-    auth_token = None
 
     if plex_account is None:
         try:

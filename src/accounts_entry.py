@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import servers_file, accounts_file, addReturnbtn, addMenuBtn, get_plex_account, parse_time, display_notification, custom_logger
+from utils import servers_file, accounts_file, addReturnbtn, addMenuBtn, get_plex_account, parse_time
 
 try:
     query = sys.argv[1]
@@ -16,7 +16,7 @@ items = []
 new_account = {
     'title': 'Connect a new plex account',
     'subtitle': 'Add a plex account and the connected plex media servers',
-    'arg': '_new',
+    'arg': '_rerun;None;1;new;None',
     'icon': {
         'path': 'icons/base/new.webp',
     },
@@ -58,22 +58,42 @@ if data.get('items'):
         addReturnbtn(rArg, items)
 
         if level == 1 and _type == 'delete':
-                
-                for account in data.get('items'):
-                    items.append({
-                        'title': account.get('title'),
-                        'subtitle': account.get('subtitle'),
-                        'arg': f'_delete;account;{account.get("uuid")}',
-                        'icon': {
-                            'path': 'icons/base/person.webp'
-                        },
-                    })
-        else:
+            for account in data.get('items'):
+                items.append({
+                    'title': account.get('title'),
+                    'subtitle': account.get('subtitle'),
+                    'arg': f'_delete;account;{account.get("uuid")}',
+                    'icon': {
+                        'path': 'icons/base/person.webp'
+                    },
+                })
+        elif level == 1 and _type == 'new':
+            for elem in [
+                {
+                    'title': 'Connect with credentials',
+                    'subtitle': 'Use your plex username + password and optionally an OTP to connect to your account',
+                    'arg': '_new;classic',
+                    'icon': {
+                        'path': 'icons/base/lock.webp'
+                    },
+                },
+                {
+                    'title': 'Connect with an auth token',
+                    'subtitle': 'Use your authentication token to connect to your account',
+                    'arg': '_new;token',
+                    'icon': {
+                        'path': 'icons/base/key.webp'
+                    },
+                }
+            ]:
+                items.append(elem)
+        else :
             for obj in data['items']:
                 if obj.get('uuid') == accountUUID:
                     account_name = obj.get('title')
+                    account_token = obj.get('authToken')
 
-            plex_account = get_plex_account(accountUUID)
+            plex_account = get_plex_account(uuid=accountUUID)
             if not plex_account:
                 print(json.dumps({'items': items}))
                 exit()
@@ -161,8 +181,11 @@ if data.get('items'):
                             if current_index != -1 and current_index < min_index:
                                 min_index = current_index
                                 device_icon_path = f'icons/devices/{filename}'
+                        myDevice = ''
+                        if device.token == account_token:
+                            myDevice = ' (current device)'
                         items.append({
-                            'title': f'{device.name} - {device.platform} {device.platformVersion}',
+                            'title': f'{device.name} - {device.platform} {device.platformVersion}{myDevice}',
                             'subtitle': f'Product: {device.product} ǀ Device: {device.device} ǀ Created at: {parse_time(device.createdAt)}',
                             'arg': f'_rerun;{accountUUID};3;device;{device.clientIdentifier}',
                             'icon': {
@@ -184,8 +207,19 @@ if data.get('items'):
 
                 if _type == 'device':
                     device = plex_account.device(clientId=_key)
+                    isCurDevice = 'false'
+                    if device.token == account_token:
+                        isCurDevice = 'true'
                     geoip = plex_account.geoip(device.publicAddress)
                     for e in [
+                        {
+                            'title': 'Remove Device',
+                            'subtitle': 'Revoke the access of the device to your plex account',
+                            'arg': f'_delete;device;{accountUUID};{_key};{isCurDevice}',
+                            'icon': {
+                                'path': 'icons/base/delete.webp',
+                            },
+                        },
                         {
                             'title': 'Device Name',
                             'subtitle': f'{device.name} - {device.platform} {device.platformVersion}',
