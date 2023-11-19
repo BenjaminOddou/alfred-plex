@@ -5,10 +5,41 @@ from utils import limit_number, parse_time, parse_duration, servers_file, alias_
 from plexapi import utils
 from plexapi.server import PlexServer
 
+query_dict = {}
+items = []
+
 try:
     query = sys.argv[1]
+    try:
+        if '=' in query:
+            new_query_items = []
+            for item in query.split('/'):
+                key, value = item.split('=', 1)
+                test_key = alias_file(_testkey=key, _type='alias_and_long')
+                if not test_key:
+                    delist('invalid_FILTERS', items)
+                    break
+                elif test_key == 'advancedFilters':
+                    try:
+                        value = eval(value)
+                    except:
+                        value = {}
+                else:
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        pass
+                query_dict[test_key] = value
+                libtype = query_dict.get('libtype')
+                advancedFilters = query_dict.get('advancedFilters')
+                kwargs = {key: value for key, value in query_dict.items() if key not in ['advancedFilters', 'server', 'section']}
+    except:
+        pass
 except IndexError:
     query = ''
+
+base_dict = {key: value for key, value in default_view.items() if key not in ['server', 'section']}
+query_dict = default_view if query == '' else query_dict
 
 _level = int(os.getenv('_lib1', 0))
 _type = os.getenv('_lib2')
@@ -17,9 +48,6 @@ if _keys and 'ǀ' in _keys:
     _machineID, _media_type, _media_id =  _keys.split('ǀ')
 else:
     _machineID = _media_type = _media_id = ''
-
-query_dict = {}
-items = []
 
 def register_elements(database: list):
     def get_title(media):
@@ -62,7 +90,7 @@ def register_elements(database: list):
             'genre': lambda: f'ID: {media.id}',
         }
         subtitle_func = subtitle_funcs.get(media_type, lambda: '')
-        return f'{media._server.friendlyName} ǀ {media_type}{" ǀ " if subtitle_func() else ""}{subtitle_func()}'
+        return f'{friendlyName} ǀ {media_type}{" ǀ " if subtitle_func() else ""}{subtitle_func()}'
     
     class_media_map = {
         'Movie': ('movie', 'movie'),
@@ -188,8 +216,9 @@ def register_elements(database: list):
 data = servers_file()
 if data.get('items'):
         for obj in data['items']:
-            if obj['machineIdentifier'] != _machineID and _level > 0:
+            if (obj['machineIdentifier'] != _machineID and _level > 0) or (query_dict.get('server') and obj['friendlyName'].lower() not in query_dict.get('server', '').lower().split(',')):
                 continue
+            friendlyName = obj['friendlyName']
             baseURL = obj['baseURL']
             plexToken = obj['plexToken']
             plexUUID = obj['account_uuid']
@@ -204,31 +233,10 @@ if data.get('items'):
             if _level == 0:
                 if '=' in query:
                     try:
-                        for item in query.split('/'):
-                            key, value = item.split('=', 1)
-                            test_key = alias_file(_testkey=key, _type='alias_and_long')
-                            if not test_key:
-                                delist('invalid_FILTERS', items)
-                                break
-                            elif test_key == 'advancedFilters':
-                                try:
-                                    value = eval(value)
-                                except:
-                                    value = {}
-                            else:
-                                try:
-                                    value = int(value)
-                                except ValueError:
-                                    pass
-                            query_dict[test_key] = value
-                        libtype = query_dict.get('libtype')
-                        advancedFilters = query_dict.get('advancedFilters')
-                        kwargs = {}
-                        for key, value in query_dict.items():
-                            if key != 'advancedFilters':
-                                kwargs[key] = value
                         raw = []
                         for section in plex_instance.library.sections():
+                            if query_dict.get('section') and section.title.lower() not in query_dict.get('section', '').lower().split(','):
+                                continue
                             try:
                                 if libtype and advancedFilters:
                                     raw.append(section.search(**kwargs, limit=limit_number, filters=advancedFilters))
@@ -243,8 +251,15 @@ if data.get('items'):
                 else:
                     try:
                         if query == '':
-                            addMenuBtn(items)
-                            database = plex_instance.library.search(limit=limit_number, **default_view)
+                            if not any(item['arg'] == '_rerunMenu' for item in items):
+                                addMenuBtn(items)
+                            for section in plex_instance.library.sections():
+                                if query_dict.get('section') and section.title.lower() not in query_dict.get('section', '').lower().split(','):
+                                    continue
+                                try:
+                                    database = section.search(limit=limit_number, **base_dict)
+                                except:
+                                    continue
                         elif not '/' in query:
                             database = plex_instance.search(query, limit=limit_number)
                         else:

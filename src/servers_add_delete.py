@@ -39,6 +39,7 @@ elif _type == '_new':
         json_obj = {
             'title': f'{s.name} ({plex_account.title})',
             'subtitle': f'Device: {s.device} ǀ Version: {s.platformVersion}',
+            'friendlyName': s.name,
             'machineIdentifier': s.clientIdentifier,
             'baseURL': baseURL,
             'plexToken': s.accessToken,

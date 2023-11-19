@@ -227,7 +227,7 @@ def default_element(_action: str, items: list, query: str=None, query_dict: dict
         items.append({
             'title': f'No media found for filters={query_dict}',
             'subtitle': f'Press ⏎ to see available options. Alias are {"activated" if filters_bool else "desactivated"}',
-            'arg': '_help',
+            'arg': '_help;1;alias;0',
             'icon': {
                 'path': 'icons/base/info.webp',
             },

@@ -1,13 +1,12 @@
 Metadata-Version: 2.1
 Name: certifi
-Version: 2023.7.22
+Version: 2023.11.17
 Summary: Python package for providing Mozilla's CA Bundle.
 Home-page: https://github.com/certifi/python-certifi
 Author: Kenneth Reitz
 Author-email: me@kennethreitz.com
 License: MPL-2.0
 Project-URL: Source, https://github.com/certifi/python-certifi
-Platform: UNKNOWN
 Classifier: Development Status :: 5 - Production/Stable
 Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)
@@ -65,5 +64,3 @@ Certifi does not support any addition/removal or other modification of the
 CA trust store content. This project is intended to provide a reliable and
 highly portable root of trust to python deployments. Look to upstream projects
 for methods to use alternate trust.
-
-

@@ -80,6 +80,14 @@
     "long_key": "resolution"
   },
   {
+    "short_key": "sc",
+    "long_key": "section"
+  },
+  {
+    "short_key": "sv",
+    "long_key": "server"
+  },
+  {
     "short_key": "sl",
     "long_key": "subtitleLanguage"
   },

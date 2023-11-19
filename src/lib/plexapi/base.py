@@ -565,6 +565,14 @@ class PlexPartialObject(PlexObject):
         """ Returns True if this is not a full object. """
         return not self.isFullObject()
 
+    def isLocked(self, field: str):
+        """ Returns True if the specified field is locked, otherwise False.
+
+            Parameters:
+                field (str): The name of the field.
+        """
+        return next((f.locked for f in self.fields if f.name == field), False)
+
     def _edit(self, **kwargs):
         """ Actually edit an object. """
         if isinstance(self._edits, dict):
@@ -953,8 +961,10 @@ class PlexHistory(object):
         raise NotImplementedError('History objects cannot be reloaded. Use source() to get the source media item.')
 
     def source(self):
-        """ Return the source media object for the history entry. """
-        return self.fetchItem(self._details_key)
+        """ Return the source media object for the history entry
+            or None if the media no longer exists on the server.
+        """
+        return self.fetchItem(self._details_key) if self._details_key else None
 
     def delete(self):
         """ Delete the history entry. """

@@ -215,7 +215,7 @@ if data.get('items'):
                         {
                             'title': 'Remove Device',
                             'subtitle': 'Revoke the access of the device to your plex account',
-                            'arg': f'_delete;device;{accountUUID};{_key};{isCurDevice}',
+                            'arg': f'_delete;device;{accountUUID};{_key};{isCurDevice};{device.name} - {device.platform} {device.platformVersion}',
                             'icon': {
                                 'path': 'icons/base/delete.webp',
                             },

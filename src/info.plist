@@ -261,6 +261,16 @@
 				<key>vitoclose</key>
 				<false/>
 			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>99607014-A16F-4CEC-A94C-3A9FEDC53D81</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
 		</array>
 		<key>1BC54BA6-3FA9-4D44-B71D-8805D9C65F7D</key>
 		<array>
@@ -515,7 +525,7 @@
 			</dict>
 			<dict>
 				<key>destinationuid</key>
-				<string>793A141B-475E-464D-A55E-7DADF9D9F110</string>
+				<string>C7BE0E6E-F058-4609-A0C8-BBC848C61B2A</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -711,31 +721,6 @@
 			<dict>
 				<key>destinationuid</key>
 				<string>7EAD8E50-2479-4B87-B4A0-7292AF17C3D1</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>793A141B-475E-464D-A55E-7DADF9D9F110</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>C7BE0E6E-F058-4609-A0C8-BBC848C61B2A</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>sourceoutputuid</key>
-				<string>B474E837-1DE2-409C-8287-AFB7AEC5F84B</string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>1A746295-794F-46C7-B06C-79D901A43B49</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -992,7 +977,7 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>F9CE20B9-0E5B-4F94-A5AF-FFF4B4A0FF3B</string>
+				<string>917E9B18-D7E3-4E95-BD21-CB8A392CF366</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -1423,7 +1408,7 @@
 			</dict>
 			<dict>
 				<key>destinationuid</key>
-				<string>B24E5B6F-3D65-4C7B-BD9E-24A11256F0C5</string>
+				<string>FAB243B5-3821-446F-B1BA-DA33DC4AFC22</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -1648,11 +1633,11 @@
 				<false/>
 			</dict>
 		</array>
-		<key>F9CE20B9-0E5B-4F94-A5AF-FFF4B4A0FF3B</key>
+		<key>FAB243B5-3821-446F-B1BA-DA33DC4AFC22</key>
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>917E9B18-D7E3-4E95-BD21-CB8A392CF366</string>
+				<string>B24E5B6F-3D65-4C7B-BD9E-24A11256F0C5</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -3175,6 +3160,27 @@
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>matchmode</key>
+				<integer>1</integer>
+				<key>matchstring</key>
+				<string>^([^;]*);</string>
+				<key>regexcaseinsensitive</key>
+				<false/>
+				<key>regexmultiline</key>
+				<false/>
+				<key>replacestring</key>
+				<string></string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.replace</string>
+			<key>uid</key>
+			<string>FAB243B5-3821-446F-B1BA-DA33DC4AFC22</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>argumenttype</key>
 				<integer>0</integer>
 				<key>subtext</key>
@@ -3366,6 +3372,23 @@
 			<key>config</key>
 			<dict>
 				<key>argument</key>
+				<string>_new;classic;{var:username}	{var:password}	{query}</string>
+				<key>passthroughargument</key>
+				<false/>
+				<key>variables</key>
+				<dict/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>uid</key>
+			<string>ED6C51F5-55F8-4F04-9F3F-33734A77DD4C</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
 				<string></string>
 				<key>passthroughargument</key>
 				<false/>
@@ -3379,23 +3402,6 @@
 			<string>alfred.workflow.utility.argument</string>
 			<key>uid</key>
 			<string>78380C80-CF69-4450-B3A3-F508FACAEF86</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>argument</key>
-				<string>_new;classic;{var:username}	{var:password}	{query}</string>
-				<key>passthroughargument</key>
-				<false/>
-				<key>variables</key>
-				<dict/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.argument</string>
-			<key>uid</key>
-			<string>ED6C51F5-55F8-4F04-9F3F-33734A77DD4C</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -4580,14 +4586,59 @@ echo -n "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>externaltriggerid</key>
+				<string>_rerunSearch</string>
+				<key>passinputasargument</key>
+				<true/>
+				<key>passvariables</key>
+				<false/>
+				<key>workflowbundleid</key>
+				<string>self</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.callexternaltrigger</string>
+			<key>uid</key>
+			<string>EDFE14A5-9811-4C73-B2D1-14F471E1A74F</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>matchmode</key>
+				<integer>1</integer>
+				<key>matchstring</key>
+				<string>^([^;]*);</string>
+				<key>regexcaseinsensitive</key>
+				<false/>
+				<key>regexmultiline</key>
+				<false/>
+				<key>replacestring</key>
+				<string></string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.replace</string>
+			<key>uid</key>
+			<string>DBB760CC-EADE-457E-8633-6B0E58AB67F5</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>argumenttype</key>
 				<integer>0</integer>
 				<key>subtext</key>
-				<string>You'll remove the access of this workflow from your plex account, type 'yes' to confirm</string>
+				<string>You'll remove the access of '{var:split6}' from your plex account, type 'yes' to confirm</string>
 				<key>text</key>
 				<string>Confirmation</string>
 				<key>withspace</key>
 				<false/>
+			</dict>
+			<key>inboundconfig</key>
+			<dict>
+				<key>usecustominputarg</key>
+				<true/>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.input.keyword</string>
@@ -4622,21 +4673,23 @@ echo -n "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>externaltriggerid</key>
-				<string>_rerunSearch</string>
-				<key>passinputasargument</key>
-				<true/>
-				<key>passvariables</key>
+				<key>matchmode</key>
+				<integer>1</integer>
+				<key>matchstring</key>
+				<string>^([^;]*);</string>
+				<key>regexcaseinsensitive</key>
 				<false/>
-				<key>workflowbundleid</key>
-				<string>self</string>
+				<key>regexmultiline</key>
+				<false/>
+				<key>replacestring</key>
+				<string></string>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.output.callexternaltrigger</string>
+			<string>alfred.workflow.utility.replace</string>
 			<key>uid</key>
-			<string>EDFE14A5-9811-4C73-B2D1-14F471E1A74F</string>
+			<string>69CF353B-BD6F-45DD-867A-7401578A11EB</string>
 			<key>version</key>
-			<integer>1</integer>
+			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -4645,13 +4698,13 @@ echo -n "$1"</string>
 				<array>
 					<dict>
 						<key>inputstring</key>
-						<string>{var:post1}</string>
+						<string>{var:split5}</string>
 						<key>matchcasesensitive</key>
 						<false/>
 						<key>matchmode</key>
 						<integer>0</integer>
 						<key>matchstring</key>
-						<string>_delete</string>
+						<string>yes</string>
 						<key>outputlabel</key>
 						<string>delete</string>
 						<key>uid</key>
@@ -4659,13 +4712,13 @@ echo -n "$1"</string>
 					</dict>
 					<dict>
 						<key>inputstring</key>
-						<string>{var:post1}</string>
+						<string>{var:split5}</string>
 						<key>matchcasesensitive</key>
 						<false/>
 						<key>matchmode</key>
 						<integer>0</integer>
 						<key>matchstring</key>
-						<string>_rerun</string>
+						<string>false</string>
 						<key>outputlabel</key>
 						<string>rerun</string>
 						<key>uid</key>
@@ -4687,42 +4740,17 @@ echo -n "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>matchmode</key>
-				<integer>1</integer>
-				<key>matchstring</key>
-				<string>^([^;]*);</string>
-				<key>regexcaseinsensitive</key>
+				<key>argument</key>
+				<string>_delete;device;{var:split3};{var:split4};{var:split5};{query}</string>
+				<key>passthroughargument</key>
 				<false/>
-				<key>regexmultiline</key>
-				<false/>
-				<key>replacestring</key>
-				<string></string>
+				<key>variables</key>
+				<dict/>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.utility.replace</string>
+			<string>alfred.workflow.utility.argument</string>
 			<key>uid</key>
-			<string>DBB760CC-EADE-457E-8633-6B0E58AB67F5</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>delimiter</key>
-				<string>;</string>
-				<key>discardemptyarguments</key>
-				<false/>
-				<key>outputas</key>
-				<integer>0</integer>
-				<key>trimarguments</key>
-				<true/>
-				<key>variableprefix</key>
-				<string>post</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.split</string>
-			<key>uid</key>
-			<string>F9CE20B9-0E5B-4F94-A5AF-FFF4B4A0FF3B</string>
+			<string>1A746295-794F-46C7-B06C-79D901A43B49</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -4748,23 +4776,17 @@ echo -n "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>matchmode</key>
-				<integer>1</integer>
-				<key>matchstring</key>
-				<string>^([^;]*);</string>
-				<key>regexcaseinsensitive</key>
+				<key>argument</key>
+				<string>please wait...</string>
+				<key>leftcursor</key>
 				<false/>
-				<key>regexmultiline</key>
-				<false/>
-				<key>replacestring</key>
-				<string></string>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.utility.replace</string>
+			<string>alfred.workflow.utility.showalfred</string>
 			<key>uid</key>
-			<string>69CF353B-BD6F-45DD-867A-7401578A11EB</string>
+			<string>6600C753-B927-468D-A2A5-A563744BA0C2</string>
 			<key>version</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -4790,58 +4812,6 @@ echo -n "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>argument</key>
-				<string>please wait...</string>
-				<key>leftcursor</key>
-				<false/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.showalfred</string>
-			<key>uid</key>
-			<string>6600C753-B927-468D-A2A5-A563744BA0C2</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>conditions</key>
-				<array>
-					<dict>
-						<key>inputstring</key>
-						<string>{var:split5}</string>
-						<key>matchcasesensitive</key>
-						<false/>
-						<key>matchmode</key>
-						<integer>5</integer>
-						<key>matchstring</key>
-						<string></string>
-						<key>outputlabel</key>
-						<string>current</string>
-						<key>uid</key>
-						<string>B474E837-1DE2-409C-8287-AFB7AEC5F84B</string>
-					</dict>
-				</array>
-				<key>elselabel</key>
-				<string>else</string>
-				<key>hideelse</key>
-				<false/>
-			</dict>
-			<key>inboundconfig</key>
-			<dict>
-				<key>usecustominputarg</key>
-				<true/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.conditional</string>
-			<key>uid</key>
-			<string>793A141B-475E-464D-A55E-7DADF9D9F110</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
 				<key>externaltriggerid</key>
 				<string>_rerunSearch</string>
 				<key>passinputasargument</key>
@@ -4855,23 +4825,6 @@ echo -n "$1"</string>
 			<string>alfred.workflow.output.callexternaltrigger</string>
 			<key>uid</key>
 			<string>C65E86FD-80A6-4422-9B7B-64BC913DEC87</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>argument</key>
-				<string>_delete;device;{var:split3};{var:split4};{var:split5};{query}</string>
-				<key>passthroughargument</key>
-				<false/>
-				<key>variables</key>
-				<dict/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.argument</string>
-			<key>uid</key>
-			<string>1A746295-794F-46C7-B06C-79D901A43B49</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -4941,6 +4894,29 @@ echo -n "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>argument</key>
+				<string>please wait...</string>
+				<key>leftcursor</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.showalfred</string>
+			<key>uid</key>
+			<string>99607014-A16F-4CEC-A94C-3A9FEDC53D81</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.junction</string>
+			<key>uid</key>
+			<string>E2205941-57D8-42AE-BF01-CAB3EC9970A4</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>externaltriggerid</key>
 				<string>_rerunAccounts</string>
 				<key>passinputasargument</key>
@@ -4954,14 +4930,6 @@ echo -n "$1"</string>
 			<string>alfred.workflow.output.callexternaltrigger</string>
 			<key>uid</key>
 			<string>36047C11-3776-4F18-ACF4-5E0256F946DB</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.junction</string>
-			<key>uid</key>
-			<string>E2205941-57D8-42AE-BF01-CAB3EC9970A4</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -5114,7 +5082,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>01D310EE-F692-4EAF-BD13-763686E1F7C7</key>
 		<dict>
 			<key>xpos</key>
-			<real>4725</real>
+			<real>4735</real>
 			<key>ypos</key>
 			<real>1130</real>
 		</dict>
@@ -5137,7 +5105,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>057ADA99-E53C-4EFE-9B67-4B7E5852A188</key>
 		<dict>
 			<key>xpos</key>
-			<real>4660</real>
+			<real>4650</real>
 			<key>ypos</key>
 			<real>1160</real>
 		</dict>
@@ -5174,7 +5142,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>colorindex</key>
 			<integer>11</integer>
 			<key>xpos</key>
-			<real>1210</real>
+			<real>1205</real>
 			<key>ypos</key>
 			<real>1190</real>
 		</dict>
@@ -5188,9 +5156,9 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>1A746295-794F-46C7-B06C-79D901A43B49</key>
 		<dict>
 			<key>xpos</key>
-			<real>4575</real>
+			<real>4650</real>
 			<key>ypos</key>
-			<real>1540</real>
+			<real>1470</real>
 		</dict>
 		<key>1BC54BA6-3FA9-4D44-B71D-8805D9C65F7D</key>
 		<dict>
@@ -5245,7 +5213,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>5055</real>
 			<key>ypos</key>
-			<real>1450</real>
+			<real>1485</real>
 		</dict>
 		<key>2588DACF-301D-4BC8-860E-FDB437B9775C</key>
 		<dict>
@@ -5289,7 +5257,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>5055</real>
 			<key>ypos</key>
-			<real>1560</real>
+			<real>1600</real>
 		</dict>
 		<key>3BC3C875-DB4C-49ED-B5BD-46C692693C70</key>
 		<dict>
@@ -5433,14 +5401,14 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>5055</real>
 			<key>ypos</key>
-			<real>1780</real>
+			<real>1820</real>
 		</dict>
 		<key>62B3B40E-2B9A-40D1-BD7E-BF1325C2A44D</key>
 		<dict>
 			<key>colorindex</key>
 			<integer>3</integer>
 			<key>xpos</key>
-			<real>1210</real>
+			<real>1205</real>
 			<key>ypos</key>
 			<real>1545</real>
 		</dict>
@@ -5456,7 +5424,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>6600C753-B927-468D-A2A5-A563744BA0C2</key>
 		<dict>
 			<key>xpos</key>
-			<real>1250</real>
+			<real>1245</real>
 			<key>ypos</key>
 			<real>1500</real>
 		</dict>
@@ -5472,7 +5440,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>5055</real>
 			<key>ypos</key>
-			<real>1670</real>
+			<real>1710</real>
 		</dict>
 		<key>69CF353B-BD6F-45DD-867A-7401578A11EB</key>
 		<dict>
@@ -5520,19 +5488,12 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>ypos</key>
 			<real>1160</real>
 		</dict>
-		<key>793A141B-475E-464D-A55E-7DADF9D9F110</key>
-		<dict>
-			<key>xpos</key>
-			<real>4295</real>
-			<key>ypos</key>
-			<real>1515</real>
-		</dict>
 		<key>79BD2DBA-1BD7-49FD-8133-19BAAC5FD54A</key>
 		<dict>
 			<key>xpos</key>
 			<real>1365</real>
 			<key>ypos</key>
-			<real>840</real>
+			<real>835</real>
 		</dict>
 		<key>7A90FC13-C431-41A0-A20A-4BEB4C7E7FEA</key>
 		<dict>
@@ -5618,14 +5579,14 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>4180</real>
 			<key>ypos</key>
-			<real>1700</real>
+			<real>1740</real>
 		</dict>
 		<key>917E9B18-D7E3-4E95-BD21-CB8A392CF366</key>
 		<dict>
 			<key>xpos</key>
 			<real>4890</real>
 			<key>ypos</key>
-			<real>1425</real>
+			<real>1460</real>
 		</dict>
 		<key>9295128B-008F-4432-8035-899B94E54B04</key>
 		<dict>
@@ -5646,7 +5607,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>4995</real>
 			<key>ypos</key>
-			<real>1480</real>
+			<real>1515</real>
 		</dict>
 		<key>94FFC049-00C4-4C45-9779-88DA000D3C2D</key>
 		<dict>
@@ -5662,6 +5623,13 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>ypos</key>
 			<real>1220</real>
 		</dict>
+		<key>99607014-A16F-4CEC-A94C-3A9FEDC53D81</key>
+		<dict>
+			<key>xpos</key>
+			<real>4775</real>
+			<key>ypos</key>
+			<real>1560</real>
+		</dict>
 		<key>9BF08416-041A-4AF8-AF08-5F2A2FE25464</key>
 		<dict>
 			<key>xpos</key>
@@ -5674,7 +5642,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>4180</real>
 			<key>ypos</key>
-			<real>1590</real>
+			<real>1630</real>
 		</dict>
 		<key>A14F6873-02F2-4EE5-95A2-79A78D128596</key>
 		<dict>
@@ -5702,9 +5670,9 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>colorindex</key>
 			<integer>3</integer>
 			<key>xpos</key>
-			<real>4670</real>
+			<real>4735</real>
 			<key>ypos</key>
-			<real>1405</real>
+			<real>1440</real>
 		</dict>
 		<key>B09D6C7C-D196-4CD9-BF28-A036C738C9CD</key>
 		<dict>
@@ -5829,9 +5797,9 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		<key>C7BE0E6E-F058-4609-A0C8-BBC848C61B2A</key>
 		<dict>
 			<key>xpos</key>
-			<real>4390</real>
+			<real>4270</real>
 			<key>ypos</key>
-			<real>1405</real>
+			<real>1440</real>
 		</dict>
 		<key>C88EA175-4F40-4AD0-A86B-3ACB96DED3C7</key>
 		<dict>
@@ -5852,7 +5820,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>4180</real>
 			<key>ypos</key>
-			<real>1810</real>
+			<real>1850</real>
 		</dict>
 		<key>CEEAC24F-B2BA-4700-AB74-9CD406013A39</key>
 		<dict>
@@ -5866,7 +5834,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>xpos</key>
 			<real>1365</real>
 			<key>ypos</key>
-			<real>955</real>
+			<real>950</real>
 		</dict>
 		<key>D0408133-F5E3-4FCE-9567-ADF396FA7635</key>
 		<dict>
@@ -5994,12 +5962,12 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<key>ypos</key>
 			<real>180</real>
 		</dict>
-		<key>F9CE20B9-0E5B-4F94-A5AF-FFF4B4A0FF3B</key>
+		<key>FAB243B5-3821-446F-B1BA-DA33DC4AFC22</key>
 		<dict>
 			<key>xpos</key>
-			<real>4815</real>
+			<real>1245</real>
 			<key>ypos</key>
-			<real>1435</real>
+			<real>1100</real>
 		</dict>
 		<key>FFA31577-7AEF-4F9B-9382-20A2BE24BD8F</key>
 		<dict>
@@ -6837,7 +6805,7 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 		</dict>
 	</array>
 	<key>version</key>
-	<string>2.2.0</string>
+	<string>2.2.1</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>
