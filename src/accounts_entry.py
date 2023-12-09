@@ -22,9 +22,29 @@ new_account = {
     },
 }
 
+connect_array = [
+    {
+        'title': 'Connect with credentials',
+        'subtitle': 'Use your plex username + password and optionally an OTP to connect to your account',
+        'arg': '_new;classic',
+        'icon': {
+            'path': 'icons/base/lock.webp'
+        },
+    },
+    {
+        'title': 'Connect with an auth token',
+        'subtitle': 'Use your authentication token to connect to your account',
+        'arg': '_new;token',
+        'icon': {
+            'path': 'icons/base/key.webp'
+        },
+    }
+]
+
 try:
-    accountUUID, level, _type, _key = os.environ['_lib'].split(';')
-    level = int(level)
+    accountUUID, _level, _type, _key = os.environ['_lib'].split(';')
+    level = int(_level)
+    rArg = f'{accountUUID};{level - 1};{_type};{_key}'
 except:
     pass
 
@@ -54,9 +74,7 @@ if data.get('items'):
             })
     
     else:
-        rArg = f'{accountUUID};{level - 1};{_type};{_key}'
         addReturnbtn(rArg, items)
-
         if level == 1 and _type == 'delete':
             for account in data.get('items'):
                 items.append({
@@ -68,24 +86,7 @@ if data.get('items'):
                     },
                 })
         elif level == 1 and _type == 'new':
-            for elem in [
-                {
-                    'title': 'Connect with credentials',
-                    'subtitle': 'Use your plex username + password and optionally an OTP to connect to your account',
-                    'arg': '_new;classic',
-                    'icon': {
-                        'path': 'icons/base/lock.webp'
-                    },
-                },
-                {
-                    'title': 'Connect with an auth token',
-                    'subtitle': 'Use your authentication token to connect to your account',
-                    'arg': '_new;token',
-                    'icon': {
-                        'path': 'icons/base/key.webp'
-                    },
-                }
-            ]:
+            for elem in connect_array:
                 items.append(elem)
         else :
             for obj in data['items']:
@@ -247,7 +248,13 @@ if data.get('items'):
                     ]:
                         items.append(e)
 else:
-    addMenuBtn(items)
-    items.append(new_account)
+    if level == 0:
+        addMenuBtn(items)
+        items.append(new_account)
+    elif level == 1 and _type == 'new':
+        addReturnbtn(rArg, items)
+        for elem in connect_array:
+            items.append(elem)
+
     
 print(json.dumps({'items': items}))
