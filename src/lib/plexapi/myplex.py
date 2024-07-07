@@ -12,7 +12,7 @@ from plexapi import (BASE_HEADERS, CONFIG, TIMEOUT, X_PLEX_ENABLE_FAST_CONNECT, 
                      log, logfilter, utils)
 from plexapi.base import PlexObject
 from plexapi.client import PlexClient
-from plexapi.exceptions import BadRequest, NotFound, Unauthorized
+from plexapi.exceptions import BadRequest, NotFound, Unauthorized, TwoFactorRequired
 from plexapi.library import LibrarySection
 from plexapi.server import PlexServer
 from plexapi.sonos import PlexSonosClient
@@ -99,7 +99,7 @@ class MyPlexAccount(PlexObject):
     EXISTINGUSER = 'https://plex.tv/api/home/users?invitedEmail={username}'                     # post with data
     FRIENDSERVERS = 'https://plex.tv/api/servers/{machineId}/shared_servers/{serverId}'         # put with data
     PLEXSERVERS = 'https://plex.tv/api/servers/{machineId}'                                     # get
-    FRIENDUPDATE = 'https://plex.tv/api/friends/{userId}'                                       # put with args, delete
+    FRIENDUPDATE = 'https://plex.tv/api/v2/sharings/{userId}'                                   # put with args, delete
     HOMEUSER = 'https://plex.tv/api/home/users/{userId}'                                        # delete, put
     MANAGEDHOMEUSER = 'https://plex.tv/api/v2/home/users/restricted/{userId}'                   # put
     SIGNIN = 'https://plex.tv/api/v2/users/signin'                                              # post with auth
@@ -237,6 +237,8 @@ class MyPlexAccount(PlexObject):
             errtext = response.text.replace('\n', ' ')
             message = f'({response.status_code}) {codename}; {response.url} {errtext}'
             if response.status_code == 401:
+                if "verification code" in response.text:
+                    raise TwoFactorRequired(message)
                 raise Unauthorized(message)
             elif response.status_code == 404:
                 raise NotFound(message)
@@ -1047,7 +1049,7 @@ class MyPlexAccount(PlexObject):
         self.query(key, params=params)
         return self
 
-    def searchDiscover(self, query, limit=30, libtype=None):
+    def searchDiscover(self, query, limit=30, libtype=None, providers='discover'):
         """ Search for movies and TV shows in Discover.
             Returns a list of :class:`~plexapi.video.Movie` and :class:`~plexapi.video.Show` objects.
 
@@ -1055,6 +1057,9 @@ class MyPlexAccount(PlexObject):
                 query (str): Search query.
                 limit (int, optional): Limit to the specified number of results. Default 30.
                 libtype (str, optional): 'movie' or 'show' to only return movies or shows, otherwise return all items.
+                providers (str, optional): 'discover' for default behavior
+                    or 'discover,PLEXAVOD' to also include the Plex ad-suported video service
+                    or 'discover,PLEXAVOD,PLEXTVOD' to also include the Plex video rental service
         """
         libtypes = {'movie': 'movies', 'show': 'tv'}
         libtype = libtypes.get(libtype, 'movies,tv')
@@ -1066,6 +1071,7 @@ class MyPlexAccount(PlexObject):
             'query': query,
             'limit': limit,
             'searchTypes': libtype,
+            'searchProviders': providers,
             'includeMetadata': 1
         }
 
@@ -1704,7 +1710,9 @@ class MyPlexPinLogin:
 
     @property
     def pin(self):
-        """ Return the 4 character PIN used for linking a device at https://plex.tv/link. """
+        """ Return the 4 character PIN used for linking a device at
+            https://plex.tv/link.
+        """
         if self._oauth:
             raise BadRequest('Cannot use PIN for Plex OAuth login')
         return self._code
@@ -1736,6 +1744,7 @@ class MyPlexPinLogin:
 
     def run(self, callback=None, timeout=None):
         """ Starts the thread which monitors the PIN login state.
+
             Parameters:
                 callback (Callable[str]): Callback called with the received authentication token (optional).
                 timeout (int): Timeout in seconds waiting for the PIN login to succeed (optional).
@@ -1758,6 +1767,7 @@ class MyPlexPinLogin:
 
     def waitForLogin(self):
         """ Waits for the PIN login to succeed or expire.
+
             Parameters:
                 callback (Callable[str]): Callback called with the received authentication token (optional).
                 timeout (int): Timeout in seconds waiting for the PIN login to succeed (optional).

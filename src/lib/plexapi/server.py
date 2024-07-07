@@ -413,16 +413,17 @@ class PlexServer(PlexObject):
         return items
 
     def client(self, name):
-        """ Returns the :class:`~plexapi.client.PlexClient` that matches the specified name.
+        """ Returns the :class:`~plexapi.client.PlexClient` that matches the specified name
+            or machine identifier.
 
             Parameters:
-                name (str): Name of the client to return.
+                name (str): Name or machine identifier of the client to return.
 
             Raises:
                 :exc:`~plexapi.exceptions.NotFound`: Unknown client name.
         """
         for client in self.clients():
-            if client and client.title == name:
+            if client and (client.title == name or client.machineIdentifier == name):
                 return client
 
         raise NotFound(f'Unknown client name: {name}')
@@ -746,7 +747,7 @@ class PlexServer(PlexObject):
         """ Returns list of all :class:`~plexapi.media.TranscodeJob` objects running or paused on server. """
         return self.fetchItems('/status/sessions/background')
 
-    def query(self, key, method=None, headers=None, timeout=None, **kwargs):
+    def query(self, key, method=None, headers=None, params=None, timeout=None, **kwargs):
         """ Main method used to handle HTTPS requests to the Plex server. This method helps
             by encoding the response to utf-8 and parsing the returned XML into and
             ElementTree object. Returns None if no data exists in the response.
@@ -756,7 +757,7 @@ class PlexServer(PlexObject):
         timeout = timeout or self._timeout
         log.debug('%s %s', method.__name__.upper(), url)
         headers = self._headers(**headers or {})
-        response = method(url, headers=headers, timeout=timeout, **kwargs)
+        response = method(url, headers=headers, params=params, timeout=timeout, **kwargs)
         if response.status_code not in (200, 201, 204):
             codename = codes.get(response.status_code)[0]
             errtext = response.text.replace('\n', ' ')

@@ -4,6 +4,8 @@
 <dict>
 	<key>bundleid</key>
 	<string>com.benjamino.plex</string>
+	<key>category</key>
+	<string>Tools</string>
 	<key>connections</key>
 	<dict>
 		<key>00A685DE-615F-482A-A57A-1032861C396C</key>
@@ -3007,6 +3009,11 @@
 			<integer>1</integer>
 		</dict>
 		<dict>
+			<key>config</key>
+			<dict>
+				<key>unstackview</key>
+				<false/>
+			</dict>
 			<key>type</key>
 			<string>alfred.workflow.utility.hidealfred</string>
 			<key>uid</key>
@@ -6804,8 +6811,10 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<string>short_mtvsearch</string>
 		</dict>
 	</array>
+	<key>variablesdontexport</key>
+	<array/>
 	<key>version</key>
-	<string>2.2.2</string>
+	<string>2.2.3</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>

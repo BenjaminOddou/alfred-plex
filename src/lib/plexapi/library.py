@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
 import re
+from typing import Any, TYPE_CHECKING
+import warnings
+from collections import defaultdict
 from datetime import datetime
 from functools import cached_property
 from urllib.parse import parse_qs, quote_plus, urlencode, urlparse
@@ -13,6 +18,10 @@ from plexapi.mixins import (
 )
 from plexapi.settings import Setting
 from plexapi.utils import deprecated
+
+
+if TYPE_CHECKING:
+    from plexapi.audio import Track
 
 
 class Library(PlexObject):
@@ -41,14 +50,22 @@ class Library(PlexObject):
     def _loadSections(self):
         """ Loads and caches all the library sections. """
         key = '/library/sections'
-        self._sectionsByID = {}
-        self._sectionsByTitle = {}
+        sectionsByID = {}
+        sectionsByTitle = defaultdict(list)
+        libcls = {
+            'movie': MovieSection,
+            'show': ShowSection,
+            'artist': MusicSection,
+            'photo': PhotoSection,
+        }
+
         for elem in self._server.query(key):
-            for cls in (MovieSection, ShowSection, MusicSection, PhotoSection):
-                if elem.attrib.get('type') == cls.TYPE:
-                    section = cls(self._server, elem, key)
-                    self._sectionsByID[section.key] = section
-                    self._sectionsByTitle[section.title.lower().strip()] = section
+            section = libcls.get(elem.attrib.get('type'), LibrarySection)(self._server, elem, initpath=key)
+            sectionsByID[section.key] = section
+            sectionsByTitle[section.title.lower().strip()].append(section)
+
+        self._sectionsByID = sectionsByID
+        self._sectionsByTitle = dict(sectionsByTitle)
 
     def sections(self):
         """ Returns a list of all media sections in this library. Library sections may be any of
@@ -60,17 +77,29 @@ class Library(PlexObject):
 
     def section(self, title):
         """ Returns the :class:`~plexapi.library.LibrarySection` that matches the specified title.
+            Note: Multiple library sections with the same title is ambiguous.
+            Use :func:`~plexapi.library.Library.sectionByID` instead for an exact match.
 
             Parameters:
                 title (str): Title of the section to return.
+
+            Raises:
+                :exc:`~plexapi.exceptions.NotFound`: The library section title is not found on the server.
         """
         normalized_title = title.lower().strip()
         if not self._sectionsByTitle or normalized_title not in self._sectionsByTitle:
             self._loadSections()
         try:
-            return self._sectionsByTitle[normalized_title]
+            sections = self._sectionsByTitle[normalized_title]
         except KeyError:
             raise NotFound(f'Invalid library section: {title}') from None
+
+        if len(sections) > 1:
+            warnings.warn(
+                'Multiple library sections with the same title found, use "sectionByID" instead. '
+                'Returning the last section.'
+            )
+        return sections[-1]
 
     def sectionByID(self, sectionID):
         """ Returns the :class:`~plexapi.library.LibrarySection` that matches the specified sectionID.
@@ -197,7 +226,7 @@ class Library(PlexObject):
             section.deleteMediaPreviews()
         return self
 
-    def add(self, name='', type='', agent='', scanner='', location='', language='en', *args, **kwargs):
+    def add(self, name='', type='', agent='', scanner='', location='', language='en-US', *args, **kwargs):
         """ Simplified add for the most common options.
 
             Parameters:
@@ -205,7 +234,7 @@ class Library(PlexObject):
                 agent (str): Example com.plexapp.agents.imdb
                 type (str): movie, show, # check me
                 location (str or list): /path/to/files, ["/path/to/files", "/path/to/morefiles"]
-                language (str): Two letter language fx en
+                language (str): Four letter language code (e.g. en-US)
                 kwargs (dict): Advanced options should be passed as a dict. where the id is the key.
 
             **Photo Preferences**
@@ -354,7 +383,8 @@ class Library(PlexObject):
         part = (f'/library/sections?name={quote_plus(name)}&type={type}&agent={agent}'
                 f'&scanner={quote_plus(scanner)}&language={language}&{urlencode(locations, doseq=True)}')
         if kwargs:
-            part += urlencode(kwargs)
+            prefs_params = {f'prefs[{k}]': v for k, v in kwargs.items()}
+            part += f'&{urlencode(prefs_params)}'
         return self._server.query(part, method=self._server._session.post)
 
     def history(self, maxresults=None, mindate=None):
@@ -633,7 +663,7 @@ class LibrarySection(PlexObject):
                     guidLookup = {}
                     for item in library.all():
                         guidLookup[item.guid] = item
-                        guidLookup.update({guid.id: item for guid in item.guids}}
+                        guidLookup.update({guid.id: item for guid in item.guids})
 
                     result1 = guidLookup['plex://show/5d9c086c46115600200aa2fe']
                     result2 = guidLookup['imdb://tt0944947']
@@ -2011,6 +2041,31 @@ class MusicSection(LibrarySection, ArtistEditMixins, AlbumEditMixins, TrackEditM
         kwargs['policy'] = Policy.create(limit)
         return super(MusicSection, self).sync(**kwargs)
 
+    def sonicAdventure(
+            self,
+            start: Track | int,
+            end: Track | int,
+            **kwargs: Any,
+    ) -> list[Track]:
+        """ Returns a list of tracks from this library section that are part of a sonic adventure.
+            ID's should be of a track, other ID's will return an empty list or items itself or an error.
+
+            Parameters:
+                start (Track | int): The :class:`~plexapi.audio.Track` or ID of the first track in the sonic adventure.
+                end (Track | int): The :class:`~plexapi.audio.Track` or ID of the last track in the sonic adventure.
+                kwargs: Additional parameters to pass to :func:`~plexapi.base.PlexObject.fetchItems`.
+
+            Returns:
+                List[:class:`~plexapi.audio.Track`]: a list of tracks from this library section
+                that are part of a sonic adventure.
+        """
+        # can not use Track due to circular import
+        startID = start if isinstance(start, int) else start.ratingKey
+        endID = end if isinstance(end, int) else end.ratingKey
+
+        key = f"/library/sections/{self.key}/computePath?startID={startID}&endID={endID}"
+        return self.fetchItems(key, **kwargs)
+
 
 class PhotoSection(LibrarySection, PhotoalbumEditMixins, PhotoEditMixins):
     """ Represents a :class:`~plexapi.library.LibrarySection` section containing photos.
@@ -2926,6 +2981,10 @@ class FilterChoice(PlexObject):
         self.thumb = data.attrib.get('thumb')
         self.title = data.attrib.get('title')
         self.type = data.attrib.get('type')
+
+    def items(self):
+        """ Returns a list of items for this filter choice. """
+        return self.fetchItems(self.fastKey)
 
 
 class ManagedHub(PlexObject):

@@ -43,7 +43,8 @@ def searchDiscover(query=None, libtype=None, plex_uuid=None):
             'searchTypes': libtype,
             'includeMetadata': 1,
             'filterPeople': 1,
-            'X-Plex-Language': language
+            'X-Plex-Language': language,
+            'searchProviders': 'discover'
         }
         response = requests.get('https://discover.provider.plex.tv/library/search', params=params1, headers=headers) 
     else:

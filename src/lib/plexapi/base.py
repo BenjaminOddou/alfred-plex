@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 import re
+from typing import TYPE_CHECKING, Generic, Iterable, List, Optional, TypeVar, Union
 import weakref
 from functools import cached_property
 from urllib.parse import urlencode
 from xml.etree import ElementTree
+from xml.etree.ElementTree import Element
 
 from plexapi import CONFIG, X_PLEX_CONTAINER_SIZE, log, utils
 from plexapi.exceptions import BadRequest, NotFound, UnknownType, Unsupported
+
+if TYPE_CHECKING:
+    from plexapi.server import PlexServer
+
+PlexObjectT = TypeVar("PlexObjectT", bound='PlexObject')
+MediaContainerT = TypeVar("MediaContainerT", bound="MediaContainer")
 
 USER_DONT_RELOAD_FOR_KEYS = set()
 _DONT_RELOAD_FOR_KEYS = {'key'}
@@ -22,12 +30,12 @@ OPERATORS = {
     'lt': lambda v, q: v < q,
     'lte': lambda v, q: v <= q,
     'startswith': lambda v, q: v.startswith(q),
-    'istartswith': lambda v, q: v.lower().startswith(q),
+    'istartswith': lambda v, q: v.lower().startswith(q.lower()),
     'endswith': lambda v, q: v.endswith(q),
-    'iendswith': lambda v, q: v.lower().endswith(q),
+    'iendswith': lambda v, q: v.lower().endswith(q.lower()),
     'exists': lambda v, q: v is not None if q else v is None,
-    'regex': lambda v, q: re.match(q, v),
-    'iregex': lambda v, q: re.match(q, v, flags=re.IGNORECASE),
+    'regex': lambda v, q: bool(re.search(q, v)),
+    'iregex': lambda v, q: bool(re.search(q, v, flags=re.IGNORECASE)),
 }
 
 
@@ -95,10 +103,10 @@ class PlexObject:
             ehash = f"{ehash}.session"
         elif initpath.startswith('/status/sessions/history'):
             ehash = f"{ehash}.history"
-        ecls = utils.PLEXOBJECTS.get(ehash, utils.PLEXOBJECTS.get(elem.tag))
+        ecls = utils.getPlexObject(ehash, default=elem.tag)
         # log.debug('Building %s as %s', elem.tag, ecls.__name__)
         if ecls is not None:
-            return ecls(self._server, elem, initpath)
+            return ecls(self._server, elem, initpath, parent=self)
         raise UnknownType(f"Unknown library type <{elem.tag} type='{etype}'../>")
 
     def _buildItemOrNone(self, elem, cls=None, initpath=None):
@@ -116,14 +124,22 @@ class PlexObject:
             or disable each parameter individually by setting it to False or 0.
         """
         details_key = self.key
+        params = {}
+
         if details_key and hasattr(self, '_INCLUDES'):
-            includes = {}
             for k, v in self._INCLUDES.items():
-                value = kwargs.get(k, v)
+                value = kwargs.pop(k, v)
                 if value not in [False, 0, '0']:
-                    includes[k] = 1 if value is True else value
-            if includes:
-                details_key += '?' + urlencode(sorted(includes.items()))
+                    params[k] = 1 if value is True else value
+
+        if details_key and hasattr(self, '_EXCLUDES'):
+            for k, v in self._EXCLUDES.items():
+                value = kwargs.pop(k, None)
+                if value is not None:
+                    params[k] = 1 if value is True else value
+
+        if params:
+            details_key += '?' + urlencode(sorted(params.items()))
         return details_key
 
     def _isChildOf(self, **kwargs):
@@ -154,7 +170,16 @@ class PlexObject:
         elem = ElementTree.fromstring(xml)
         return self._buildItemOrNone(elem, cls)
 
-    def fetchItems(self, ekey, cls=None, container_start=None, container_size=None, maxresults=None, **kwargs):
+    def fetchItems(
+        self,
+        ekey,
+        cls=None,
+        container_start=None,
+        container_size=None,
+        maxresults=None,
+        params=None,
+        **kwargs,
+    ):
         """ Load the specified key to find and build all items with the specified tag
             and attrs.
 
@@ -170,6 +195,7 @@ class PlexObject:
                 container_start (None, int): offset to get a subset of the data
                 container_size (None, int): How many items in data
                 maxresults (int, optional): Only return the specified number of results.
+                params (dict, optional): Any additional params to add to the request.
                 **kwargs (dict): Optionally add XML attribute to filter the items.
                     See the details below for more info.
 
@@ -227,7 +253,8 @@ class PlexObject:
 
                     fetchItem(ekey, viewCount__gte=0)
                     fetchItem(ekey, Media__container__in=["mp4", "mkv"])
-                    fetchItem(ekey, guid__iregex=r"(imdb://|themoviedb://)")
+                    fetchItem(ekey, guid__regex=r"com\\.plexapp\\.agents\\.(imdb|themoviedb)://|tt\\d+")
+                    fetchItem(ekey, guid__id__regex=r"(imdb|tmdb|tvdb)://")
                     fetchItem(ekey, Media__Part__file__startswith="D:\\Movies")
 
         """
@@ -244,15 +271,14 @@ class PlexObject:
         if maxresults is not None:
             container_size = min(container_size, maxresults)
 
-        results = []
-        subresults = []
+        results = MediaContainer[cls](self._server, Element('MediaContainer'), initpath=ekey)
         headers = {}
 
         while True:
             headers['X-Plex-Container-Start'] = str(container_start)
             headers['X-Plex-Container-Size'] = str(container_size)
 
-            data = self._server.query(ekey, headers=headers)
+            data = self._server.query(ekey, headers=headers, params=params)
             subresults = self.findItems(data, cls, ekey, **kwargs)
             total_size = utils.cast(int, data.attrib.get('totalSize') or data.attrib.get('size')) or len(subresults)
 
@@ -267,17 +293,17 @@ class PlexObject:
 
             results.extend(subresults)
 
+            container_start += container_size
+
+            if container_start > total_size:
+                break
+
             wanted_number_of_items = total_size - offset
             if maxresults is not None:
                 wanted_number_of_items = min(maxresults, wanted_number_of_items)
                 container_size = min(container_size, wanted_number_of_items - len(results))
 
             if wanted_number_of_items <= len(results):
-                break
-
-            container_start += container_size
-
-            if container_start > total_size:
                 break
 
         return results
@@ -321,9 +347,9 @@ class PlexObject:
             kwargs['type'] = cls.TYPE
         # rtag to iter on a specific root tag using breadth-first search
         if rtag:
-            data = next(utils.iterXMLBFS(data, rtag), [])
+            data = next(utils.iterXMLBFS(data, rtag), Element('Empty'))
         # loop through all data elements to find matches
-        items = []
+        items = MediaContainer[cls](self._server, data, initpath=initpath) if data.tag == 'MediaContainer' else []
         for elem in data:
             if self._checkAttrs(elem, **kwargs):
                 item = self._buildItemOrNone(elem, cls, initpath)
@@ -439,7 +465,7 @@ class PlexObject:
         attrstr = parts[1] if len(parts) == 2 else None
         if attrstr:
             results = [] if results is None else results
-            for child in [c for c in elem if c.tag.lower() == attr.lower()]:
+            for child in (c for c in elem if c.tag.lower() == attr.lower()):
                 results += self._getAttrValue(child, attrstr, results)
             return [r for r in results if r is not None]
         # check were looking for the tag
@@ -497,7 +523,14 @@ class PlexPartialObject(PlexObject):
         'includeRelated': 1,
         'includeRelatedCount': 1,
         'includeReviews': 1,
-        'includeStations': 1
+        'includeStations': 1,
+    }
+    _EXCLUDES = {
+        'excludeElements': (
+            'Media,Genre,Country,Guid,Rating,Collection,Director,Writer,Role,Producer,Similar,Style,Mood,Format'
+        ),
+        'excludeFields': 'summary,tagline',
+        'skipRefresh': 1,
     }
 
     def __eq__(self, other):
@@ -771,6 +804,30 @@ class Playable:
             for part in item.parts:
                 yield part
 
+    def videoStreams(self):
+        """ Returns a list of :class:`~plexapi.media.videoStream` objects for all MediaParts. """
+        if self.isPartialObject():
+            self.reload()
+        return sum((part.videoStreams() for part in self.iterParts()), [])
+
+    def audioStreams(self):
+        """ Returns a list of :class:`~plexapi.media.AudioStream` objects for all MediaParts. """
+        if self.isPartialObject():
+            self.reload()
+        return sum((part.audioStreams() for part in self.iterParts()), [])
+
+    def subtitleStreams(self):
+        """ Returns a list of :class:`~plexapi.media.SubtitleStream` objects for all MediaParts. """
+        if self.isPartialObject():
+            self.reload()
+        return sum((part.subtitleStreams() for part in self.iterParts()), [])
+
+    def lyricStreams(self):
+        """ Returns a list of :class:`~plexapi.media.LyricStream` objects for all MediaParts. """
+        if self.isPartialObject():
+            self.reload()
+        return sum((part.lyricStreams() for part in self.iterParts()), [])
+
     def play(self, client):
         """ Start playback on the specified client.
 
@@ -809,6 +866,8 @@ class Playable:
 
             if kwargs:
                 # So this seems to be a a lot slower but allows transcode.
+                kwargs['mediaIndex'] = self.media.index(part._parent())
+                kwargs['partIndex'] = part._parent().parts.index(part)
                 download_url = self.getStreamURL(**kwargs)
             else:
                 download_url = self._server.url(f'{part.key}?download=1')
@@ -971,7 +1030,11 @@ class PlexHistory(object):
         return self._server.query(self.historyKey, method=self._server._session.delete)
 
 
-class MediaContainer(PlexObject):
+class MediaContainer(
+    Generic[PlexObjectT],
+    List[PlexObjectT],
+    PlexObject,
+):
     """ Represents a single MediaContainer.
 
         Attributes:
@@ -984,10 +1047,70 @@ class MediaContainer(PlexObject):
             librarySectionUUID (str): :class:`~plexapi.library.LibrarySection` UUID.
             mediaTagPrefix (str): "/system/bundle/media/flags/"
             mediaTagVersion (int): Unknown
+            offset (int): The offset of current results.
             size (int): The number of items in the hub.
+            totalSize (int): The total number of items for the query.
 
     """
     TAG = 'MediaContainer'
+
+    def __init__(
+        self,
+        server: "PlexServer",
+        data: Element,
+        *args: PlexObjectT,
+        initpath: Optional[str] = None,
+        parent: Optional[PlexObject] = None,
+    ) -> None:
+        # super calls Generic.__init__ which calls list.__init__ eventually
+        super().__init__(*args)
+        PlexObject.__init__(self, server, data, initpath, parent)
+
+    def extend(
+        self: MediaContainerT,
+        __iterable: Union[Iterable[PlexObjectT], MediaContainerT],
+    ) -> None:
+        curr_size = self.size if self.size is not None else len(self)
+        super().extend(__iterable)
+        # update size, totalSize, and offset
+        if not isinstance(__iterable, MediaContainer):
+            return
+
+        # prefer the totalSize of the new iterable even if it is smaller
+        self.totalSize = (
+            __iterable.totalSize
+            if __iterable.totalSize is not None
+            else self.totalSize
+        )  # ideally both should be equal
+
+        # the size of the new iterable is added to the current size
+        self.size = curr_size + (
+            __iterable.size if __iterable.size is not None else len(__iterable)
+        )
+
+        # the offset is the minimum of the two, prefering older values
+        if self.offset is not None and __iterable.offset is not None:
+            self.offset = min(self.offset, __iterable.offset)
+        else:
+            self.offset = (
+                self.offset if self.offset is not None else __iterable.offset
+            )
+
+        # for all other attributes, overwrite with the new iterable's values if previously None
+        for key in (
+            "allowSync",
+            "augmentationKey",
+            "identifier",
+            "librarySectionID",
+            "librarySectionTitle",
+            "librarySectionUUID",
+            "mediaTagPrefix",
+            "mediaTagVersion",
+        ):
+            if (not hasattr(self, key)) or (getattr(self, key) is None):
+                if not hasattr(__iterable, key):
+                    continue
+                setattr(self, key, getattr(__iterable, key))
 
     def _loadData(self, data):
         self._data = data
@@ -999,4 +1122,6 @@ class MediaContainer(PlexObject):
         self.librarySectionUUID = data.attrib.get('librarySectionUUID')
         self.mediaTagPrefix = data.attrib.get('mediaTagPrefix')
         self.mediaTagVersion = data.attrib.get('mediaTagVersion')
+        self.offset = utils.cast(int, data.attrib.get("offset"))
         self.size = utils.cast(int, data.attrib.get('size'))
+        self.totalSize = utils.cast(int, data.attrib.get("totalSize"))

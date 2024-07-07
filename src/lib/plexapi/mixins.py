@@ -316,19 +316,16 @@ class PlayedUnplayedMixin:
         return self
 
     @property
-    @deprecated('use "isPlayed" instead', stacklevel=3)
     def isWatched(self):
-        """ Returns True if the show is watched. """
+        """ Alias to self.isPlayed. """
         return self.isPlayed
 
-    @deprecated('use "markPlayed" instead')
     def markWatched(self):
-        """ Mark the video as played. """
+        """ Alias to :func:`~plexapi.mixins.PlayedUnplayedMixin.markPlayed`. """
         self.markPlayed()
 
-    @deprecated('use "markUnplayed" instead')
     def markUnwatched(self):
-        """ Mark the video as unplayed. """
+        """ Alias to :func:`~plexapi.mixins.PlayedUnplayedMixin.markUnplayed`. """
         self.markUnplayed()
 
 
@@ -570,6 +567,19 @@ class AddedAtMixin(EditFieldMixin):
         return self.editField('addedAt', addedAt, locked=locked)
 
 
+class AudienceRatingMixin(EditFieldMixin):
+    """ Mixin for Plex objects that can have an audience rating. """
+
+    def editAudienceRating(self, audienceRating, locked=True):
+        """ Edit the audience rating.
+
+            Parameters:
+                audienceRating (float): The new value.
+                locked (bool): True (default) to lock the field, False to unlock the field.
+        """
+        return self.editField('audienceRating', audienceRating, locked=locked)
+
+
 class ContentRatingMixin(EditFieldMixin):
     """ Mixin for Plex objects that can have a content rating. """
 
@@ -581,6 +591,19 @@ class ContentRatingMixin(EditFieldMixin):
                 locked (bool): True (default) to lock the field, False to unlock the field.
         """
         return self.editField('contentRating', contentRating, locked=locked)
+
+
+class CriticRatingMixin(EditFieldMixin):
+    """ Mixin for Plex objects that can have a critic rating. """
+
+    def editCriticRating(self, criticRating, locked=True):
+        """ Edit the critic rating.
+
+            Parameters:
+                criticRating (float): The new value.
+                locked (bool): True (default) to lock the field, False to unlock the field.
+        """
+        return self.editField('rating', criticRating, locked=locked)
 
 
 class EditionTitleMixin(EditFieldMixin):
@@ -754,7 +777,7 @@ class UserRatingMixin(EditFieldMixin):
         """ Edit the user rating.
 
             Parameters:
-                userRating (int): The new value.
+                userRating (float): The new value.
                 locked (bool): True (default) to lock the field, False to unlock the field.
         """
         return self.editField('userRating', userRating, locked=locked)
@@ -1148,7 +1171,8 @@ class WatchlistMixin:
 
 class MovieEditMixins(
     ArtLockMixin, PosterLockMixin, ThemeLockMixin,
-    AddedAtMixin, ContentRatingMixin, EditionTitleMixin, OriginallyAvailableMixin, OriginalTitleMixin, SortTitleMixin,
+    AddedAtMixin, AudienceRatingMixin, ContentRatingMixin, CriticRatingMixin, EditionTitleMixin,
+    OriginallyAvailableMixin, OriginalTitleMixin, SortTitleMixin,
     StudioMixin, SummaryMixin, TaglineMixin, TitleMixin, UserRatingMixin,
     CollectionMixin, CountryMixin, DirectorMixin, GenreMixin, LabelMixin, ProducerMixin, WriterMixin
 ):
@@ -1157,7 +1181,8 @@ class MovieEditMixins(
 
 class ShowEditMixins(
     ArtLockMixin, PosterLockMixin, ThemeLockMixin,
-    AddedAtMixin, ContentRatingMixin, OriginallyAvailableMixin, OriginalTitleMixin, SortTitleMixin, StudioMixin,
+    AddedAtMixin, AudienceRatingMixin, ContentRatingMixin, CriticRatingMixin,
+    OriginallyAvailableMixin, OriginalTitleMixin, SortTitleMixin, StudioMixin,
     SummaryMixin, TaglineMixin, TitleMixin, UserRatingMixin,
     CollectionMixin, GenreMixin, LabelMixin,
 ):
@@ -1166,7 +1191,8 @@ class ShowEditMixins(
 
 class SeasonEditMixins(
     ArtLockMixin, PosterLockMixin, ThemeLockMixin,
-    AddedAtMixin, SummaryMixin, TitleMixin, UserRatingMixin,
+    AddedAtMixin, AudienceRatingMixin, CriticRatingMixin,
+    SummaryMixin, TitleMixin, UserRatingMixin,
     CollectionMixin, LabelMixin
 ):
     pass
@@ -1174,7 +1200,8 @@ class SeasonEditMixins(
 
 class EpisodeEditMixins(
     ArtLockMixin, PosterLockMixin, ThemeLockMixin,
-    AddedAtMixin, ContentRatingMixin, OriginallyAvailableMixin, SortTitleMixin, SummaryMixin, TitleMixin, UserRatingMixin,
+    AddedAtMixin, AudienceRatingMixin, ContentRatingMixin, CriticRatingMixin,
+    OriginallyAvailableMixin, SortTitleMixin, SummaryMixin, TitleMixin, UserRatingMixin,
     CollectionMixin, DirectorMixin, LabelMixin, WriterMixin
 ):
     pass
@@ -1182,7 +1209,8 @@ class EpisodeEditMixins(
 
 class ArtistEditMixins(
     ArtLockMixin, PosterLockMixin, ThemeLockMixin,
-    AddedAtMixin, SortTitleMixin, SummaryMixin, TitleMixin, UserRatingMixin,
+    AddedAtMixin, AudienceRatingMixin, CriticRatingMixin,
+    SortTitleMixin, SummaryMixin, TitleMixin, UserRatingMixin,
     CollectionMixin, CountryMixin, GenreMixin, LabelMixin, MoodMixin, SimilarArtistMixin, StyleMixin
 ):
     pass
@@ -1190,7 +1218,8 @@ class ArtistEditMixins(
 
 class AlbumEditMixins(
     ArtLockMixin, PosterLockMixin, ThemeLockMixin,
-    AddedAtMixin, OriginallyAvailableMixin, SortTitleMixin, StudioMixin, SummaryMixin, TitleMixin, UserRatingMixin,
+    AddedAtMixin, AudienceRatingMixin, CriticRatingMixin,
+    OriginallyAvailableMixin, SortTitleMixin, StudioMixin, SummaryMixin, TitleMixin, UserRatingMixin,
     CollectionMixin, GenreMixin, LabelMixin, MoodMixin, StyleMixin
 ):
     pass
@@ -1198,8 +1227,9 @@ class AlbumEditMixins(
 
 class TrackEditMixins(
     ArtLockMixin, PosterLockMixin, ThemeLockMixin,
-    AddedAtMixin, TitleMixin, TrackArtistMixin, TrackNumberMixin, TrackDiscNumberMixin, UserRatingMixin,
-    CollectionMixin, LabelMixin, MoodMixin
+    AddedAtMixin, AudienceRatingMixin, CriticRatingMixin,
+    TitleMixin, TrackArtistMixin, TrackNumberMixin, TrackDiscNumberMixin, UserRatingMixin,
+    CollectionMixin, GenreMixin, LabelMixin, MoodMixin
 ):
     pass
 
@@ -1221,7 +1251,8 @@ class PhotoEditMixins(
 
 class CollectionEditMixins(
     ArtLockMixin, PosterLockMixin, ThemeLockMixin,
-    AddedAtMixin, ContentRatingMixin, SortTitleMixin, SummaryMixin, TitleMixin, UserRatingMixin,
+    AddedAtMixin, AudienceRatingMixin, ContentRatingMixin, CriticRatingMixin,
+    SortTitleMixin, SummaryMixin, TitleMixin, UserRatingMixin,
     LabelMixin
 ):
     pass
