@@ -28,7 +28,7 @@ if level == 0:
             'subtitle': 'Create a new preset with custom filters and/or sorts',
             'arg': '_new',
             'icon': {
-                'path': 'icons/base/new.webp',
+                'path': 'icons/base/add.webp',
             },
         },
         {

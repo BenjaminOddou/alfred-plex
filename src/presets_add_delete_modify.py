@@ -52,4 +52,4 @@ except Exception as e:
     exit()
 
 with open(presets_file_path, 'w') as file:
-    json.dump(data, file, indent=4)
+    json.dump(data, file, indent=4, ensure_ascii=False)

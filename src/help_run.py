@@ -8,7 +8,6 @@ _action, _categ, _pos, _query = sys.argv[1].split(';')
 _res = _query.lower()
 
 if _action in ['delete', 'reset']:
-    verb = f'deleted' if _action == 'delete' else _action
     if _res == 'yes':
         if os.path.exists(_pos):
             if os.path.isfile(_pos):
@@ -20,10 +19,10 @@ if _action in ['delete', 'reset']:
                     if os.path.isfile(file_path) and not filename.endswith(".app"):
                         os.remove(file_path)
                         custom_logger('info', f'{file_path} have been removed')
-            display_notification('✅ Sucess !', f'{_categ.capitalize()} have been {verb}')
+            display_notification('✅ Sucess !', f'{_categ.capitalize()} have been removed')
             print(f'1;{_categ.split(" ")[0]};0', end='')
         else:
-            display_notification('🚨 Error !', f'{_categ.capitalize()} doesn\'t exists or can\'t be {verb}')
+            display_notification('🚨 Error !', f'{_categ.capitalize()} doesn\'t exists or can\'t be removed')
             custom_logger('error', f'{_pos} doesn\'t exists or can\'t be removed')
     else:
         display_notification('⚠️ Warning !', 'Action canceled')
@@ -39,7 +38,7 @@ elif _action == 'modify':
                 item["short_key"] = _query
     try:
         with open(alias_file_path, 'w') as file:
-            json.dump(data, file, indent=4)
+            json.dump(data, file, indent=4, ensure_ascii=False)
         message = f'Alias of {_categ} have been modified to {_query}'
         display_notification('✅ Sucess !', message)
         custom_logger('info', message)

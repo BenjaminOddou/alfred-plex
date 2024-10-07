@@ -83,7 +83,8 @@ The following example `libtype=movie/decade=1980/country=france` returns `movies
 1. Nested search. Press <kbd>⏎</kbd> on one of the following media types: *actor, director, collection, artist, album, genre, show, season*, to trigger a nested search.
 2. Open the media on the web. Simply press <kbd>⌘</kbd><kbd>⏎</kbd> to open the media on plex. Not available for *genre* media type.
 3. Stream the media with VLC / IINA. This is only available for the following media types: *movie, episode, clip, track, album*. Press <kbd>⌥</kbd><kbd>⏎</kbd> to open the media in VLC / IINA. *It requires VLC 3.0+ or IINA 1.0.0+ and the corresponding cli. See below to know how to install the cli*. If you have multiple versions of the same *movie, episode, clip*, you'll be asked to choose the file you want to play.
-4. Get infos of movies and tv shows using the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow by [Tom McKnight](https://github.com/tmcknight). Press <kbd>⌃</kbd><kbd>⏎</kbd> to trigger the workflow. *It requires `Movie and TV Show Search` Alfred workflow 2.16.0 or above*. Only available for *movie, show* media types.
+4. Get infos of movies and tv shows using the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow by [Tom McKnight](https://github.com/tmcknight). Press <kbd>⌃</kbd><kbd>⏎</kbd> to trigger the workflow. *It requires [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow 2.16.0 or above*. Only available for *movie, show* media types.
+5. Add or remove the media from your plex watchlist. This is only available for the following media types: *movie, show*. Press <kbd>⇧</kbd><kbd>⏎</kbd> to add or remove the media.
 
 #### 4. VLC and IINA integration
 

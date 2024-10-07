@@ -9,8 +9,8 @@ except IndexError as e:
     custom_logger('error', e)
     exit()
 
+data = accounts_file() if accounts_file() else {'items': []}
 if _type == '_delete':
-    data = accounts_file()
     for item in data['items']:
         if item.get('uuid') == _input:
             data['items'].remove(item)
@@ -28,7 +28,6 @@ elif _type == '_new':
         plex_account = get_plex_account(uuid=_input)
     if not plex_account:
         exit()
-    data = accounts_file() if accounts_file() else {'items': []}
     replace = False
     json_obj = {
         'title': f'{plex_account.friendlyName}',
@@ -36,16 +35,15 @@ elif _type == '_new':
         'authToken': plex_account.authToken,
         'uuid': plex_account.uuid
     }
-    if data.get('items'):
-        for idx, obj in enumerate(data['items']):
-            if obj.get('uuid') == plex_account.uuid:
-                replace = True
-                data['items'][idx] = json_obj
-                print(f'_new;{_origin};{plex_account.uuid}', end='')
-                message = f'{plex_account.friendlyName} plex account informations were updated'
-                display_notification('✅ Sucess !', message)
-                custom_logger('info', message)
-                break
+    for idx, obj in enumerate(data['items']):
+        if obj.get('uuid') == plex_account.uuid:
+            replace = True
+            data['items'][idx] = json_obj
+            print(f'_new;{_origin};{plex_account.uuid}', end='')
+            message = f'{plex_account.friendlyName} plex account informations were updated'
+            display_notification('✅ Sucess !', message)
+            custom_logger('info', message)
+            break
     if not replace:
         data['items'].append(json_obj)
         print(f'_new;{_origin};{plex_account.uuid}', end='')
@@ -55,7 +53,7 @@ elif _type == '_new':
 
 try:
     with open(accounts_file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+        json.dump(data, file, indent=4, ensure_ascii=False)
 except Exception as e:
     display_notification('🚨 Error !', 'Data can\'t be written in accounts.json')
     custom_logger('error', e)

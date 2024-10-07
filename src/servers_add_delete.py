@@ -10,8 +10,8 @@ except IndexError as e:
     custom_logger('error', e)
     exit()
 
+data = servers_file() if servers_file() else {'items': []}
 if _type == '_delete':
-    data = servers_file()
     element = 'machineIdentifier' if _origin == 'server' else 'account_uuid'
     items_to_remove = []
     for item in data['items']:
@@ -25,7 +25,6 @@ if _type == '_delete':
         custom_logger('info', message)
 elif _type == '_new':
     plex_account = get_plex_account(uuid=_input)
-    data = servers_file() if servers_file() else {'items': []}
     for s in plex_account.resources():
         if not 'server' in s.provides:
             continue
@@ -63,7 +62,7 @@ elif _type == '_new':
 
 try:
     with open(servers_file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+        json.dump(data, file, indent=4, ensure_ascii=False)
 except Exception as e:
     display_notification('🚨 Error !', 'Data can\'t be written in servers.json')
     custom_logger('error', e)

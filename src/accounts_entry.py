@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import servers_file, accounts_file, addReturnbtn, addMenuBtn, get_plex_account, parse_time
+from utils import servers_file, accounts_file, addReturnbtn, addMenuBtn, get_plex_account, parse_time, parse_duration
 
 try:
     query = sys.argv[1]
@@ -18,7 +18,7 @@ new_account = {
     'subtitle': 'Add a plex account and the connected plex media servers',
     'arg': '_rerun;None;1;new;None',
     'icon': {
-        'path': 'icons/base/new.webp',
+        'path': 'icons/base/add.webp',
     },
 }
 
@@ -80,7 +80,7 @@ if data.get('items'):
                 items.append({
                     'title': account.get('title'),
                     'subtitle': account.get('subtitle'),
-                    'arg': f'_delete;account;{account.get("uuid")}',
+                    'arg': f'_run;_delete;account;{account.get("uuid")}',
                     'icon': {
                         'path': 'icons/base/person.webp'
                     },
@@ -194,14 +194,30 @@ if data.get('items'):
                             },
                         })
                 elif _type == 'watchlist':
-                    for media in plex_account.watchlist(sort='watchlistedAt:desc'):
+                    for media in plex_account.watchlist():
+                        media_type = media.type
+                        media_title = f'{media.title} ({media.year})'
+                        subtitle_funcs = {
+                            'movie': lambda: f'{parse_duration(media.duration) if media.duration else "Unknown"}',
+                            'show': lambda: f'{media.seasonCount} season(s)',
+                        }
+                        subtitle_func = subtitle_funcs.get(media_type, lambda: '')
                         items.append({
-                            'title': f'{media.title} ({media.year})',
-                            'subtitle': media.type,
+                            'title': media_title,
+                            'subtitle': f'{media_type}{" ǀ " if subtitle_func() else ""}{subtitle_func()}',
                             'valid': False,
                             'icon': {
-                                'path': f'icons/base/{media.type}_discover.webp',
+                                'path': f'icons/base/{media_type}_discover_bookmarked.webp',
                             },
+                            'mods':({
+                                'cmd': {
+                                    'subtitle': f'Press ⏎ to remove the {media_type} from watchlist',
+                                    'arg': f'_run;_watchlist;delete;{accountUUID};{media.guid};{media_title} was removed from watchlist of {plex_account.friendlyName};account',
+                                    'icon': {
+                                        'path': 'icons/base/delete.webp',
+                                    },
+                                },
+                            })
                         })
             
             elif level == 3:
@@ -216,7 +232,7 @@ if data.get('items'):
                         {
                             'title': 'Remove Device',
                             'subtitle': 'Revoke the access of the device to your plex account',
-                            'arg': f'_delete;device;{accountUUID};{_key};{isCurDevice};{device.name} - {device.platform} {device.platformVersion}',
+                            'arg': f'_run;_delete;device;{accountUUID};{_key};{isCurDevice};{device.name} - {device.platform} {device.platformVersion}',
                             'icon': {
                                 'path': 'icons/base/delete.webp',
                             },

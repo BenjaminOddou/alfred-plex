@@ -15,7 +15,8 @@ cache_folder = os.path.expanduser('~/Library/Caches/com.runningwithcrayons.Alfre
 downloads_folder = os.path.expanduser('~/Downloads')
 language = 'en'
 sound = 'Submarine'
-date_format = '%d-%m-%Y'
+log_level = 'INFO'
+date_format = '%Y-%m-%d'
 filters_bool = True if os.getenv('filters_bool') == '1' else False
 default_view = {"sort": "originallyAvailableAt:desc"}
 limit_number = 15
@@ -25,6 +26,7 @@ short_nested_search = 'arg'
 short_web = 'cmd'
 short_stream = 'alt'
 short_mtvsearch = 'ctrl'
+short_watchlist = 'shift'
 
 default_list = [
     {
@@ -55,6 +57,9 @@ default_list = [
         'func': int
     },
     {
+        'title': 'log_level',
+    },
+    {
         'title': 'short_nested_search',
     },
     {
@@ -68,7 +73,10 @@ default_list = [
     },
     {
         'title': 'short_mtvsearch',
-    }
+    },
+    {
+        'title': 'short_watchlist',
+    },
 ]
 
 for obj in default_list:
@@ -84,14 +92,57 @@ for obj in default_list:
 for folder in [cache_folder, data_folder]:
     os.makedirs(folder, exist_ok=True)
 
+# Init logger
+# Set up logging using basicConfig
+log_level_value = getattr(log, log_level, log.INFO)
+log.basicConfig(
+    level=log_level_value,  # Set the logging level
+    format="%(asctime)s - %(levelname)s - %(message)s",  # Log format
+    datefmt=f'{date_format} %H:%M:%S',  # Date and time format
+    handlers=[
+        log.FileHandler(os.path.join(cache_folder, 'plex.log')),  # Log to a file
+    ]
+)
+logger = log.getLogger('plex')
+
+def custom_logger(level: str, message: str):
+    if level == 'debug':
+        logger.debug(message)
+    elif level == 'info':
+        logger.info(message)
+    elif level == 'warning':
+        logger.warning(message)
+    elif level == 'error':
+        logger.error(message)
+
+def delete_files(element):
+    if os.path.exists(element):
+        for file in os.listdir(element):
+            if not file.endswith('.app') and file != 'presets.json':
+                file_path = os.path.join(element, file)
+                try:
+                    os.remove(file_path)
+                    custom_logger('info', f'{file_path} have been removed')
+                except Exception as e:
+                    custom_logger('error', f'Failed to delete {file_path}: {e}')
+    else:
+        custom_logger('error', f'Folder not found: {element}')
+
 accounts_file_path = os.path.join(data_folder, 'accounts.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.jso
 servers_file_path = os.path.join(data_folder, 'servers.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/servers.json
 alias_file_path = os.path.join(data_folder, 'alias.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/alias.json
 presets_file_path = os.path.join(data_folder, 'presets.json') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/presets.json
 config_file_path =  os.path.join(data_folder, 'config.ini') # default = ~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex/config.ini
+plex_app_version = os.getenv('alfred_workflow_version', '')
 
 # config file
 config = configparser.ConfigParser()
+if os.path.exists(config_file_path):
+    config.read(config_file_path)
+    if plex_app_version != config['header']['version']:
+        for folder in [data_folder, cache_folder]:
+            delete_files(folder)
+
 os.environ['PLEXAPI_CONFIG_PATH'] = config_file_path
 config['plexapi'] = {
     'container_size': limit_number,
@@ -107,22 +158,13 @@ config['header'] = {
     'platform_version': platform.mac_ver()[0],
     'product': 'Alfred Worklfow',
     'provides': 'controller',
-    'version': os.getenv('alfred_workflow_version', ''),
+    'version': plex_app_version,
 }
 
 with open(config_file_path, 'w') as configfile:
     config.write(configfile)
 
 from plexapi.myplex import MyPlexAccount
-
-# Init logger
-logger = log.getLogger('plex')
-logger.setLevel(log.DEBUG)
-log_file_handler = log.FileHandler(os.path.join(cache_folder, f'plex.log'))
-log_file_handler.setLevel(log.DEBUG)
-log_formatter = log.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-log_file_handler.setFormatter(log_formatter)
-logger.addHandler(log_file_handler)
 
 def display_notification(title: str, message: str):
     title = title.replace('"', '\\"')
@@ -278,14 +320,6 @@ def lst_idx(lst: list, index: int):
         return lst[index]
     else:
         return None
-
-def custom_logger(level: str, message: str):
-    if level == 'info':
-        logger.info(message)
-    elif level == 'warning':
-        logger.warning(message)
-    elif level == 'error':
-        logger.error(message)
 
 def get_plex_account(uuid=None, auth_token=None, username=None, password=None, otp=None):
     plex_account = None

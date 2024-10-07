@@ -124,6 +124,10 @@
     "long_key": "userRating"
   },
   {
+    "short_key": "wa",
+    "long_key": "watchlist"
+  },
+  {
     "short_key": "wr",
     "long_key": "writer"
   },

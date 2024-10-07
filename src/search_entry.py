@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import limit_number, parse_time, parse_duration, servers_file, alias_file, delist, default_element, display_notification, default_view, addReturnbtn, addMenuBtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player, custom_logger
+from utils import limit_number, parse_time, parse_duration, servers_file, alias_file, delist, default_element, display_notification, default_view, addReturnbtn, addMenuBtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player, custom_logger, get_plex_account, short_watchlist
 from plexapi import utils
 from plexapi.server import PlexServer
 
@@ -13,7 +13,8 @@ try:
     try:
         if '=' in query:
             new_query_items = []
-            for item in query.split('/'):
+            split_items = query.split('/')
+            for item in split_items:
                 key, value = item.split('=', 1)
                 test_key = alias_file(_testkey=key, _type='alias_and_long')
                 if not test_key:
@@ -30,26 +31,24 @@ try:
                     except ValueError:
                         pass
                 query_dict[test_key] = value
-                libtype = query_dict.get('libtype')
-                advancedFilters = query_dict.get('advancedFilters')
-                kwargs = {key: value for key, value in query_dict.items() if key not in ['advancedFilters', 'server', 'section']}
+                kwargs = {key: value for key, value in query_dict.items() if key not in ['advancedFilters', 'server', 'section', 'watchlist']}
     except:
         pass
 except IndexError:
     query = ''
 
-base_dict = {key: value for key, value in default_view.items() if key not in ['server', 'section']}
+base_dict = {key: value for key, value in default_view.items() if key not in ['server', 'section', 'watchlist']}
 query_dict = default_view if query == '' else query_dict
 
 _level = int(os.getenv('_lib1', 0))
 _type = os.getenv('_lib2')
 _keys = os.getenv('_lib3')
 if _keys and 'ǀ' in _keys:
-    _machineID, _media_type, _media_id =  _keys.split('ǀ')
+    _machineID, _media_type, _media_id, _msg =  _keys.split('ǀ')
 else:
-    _machineID = _media_type = _media_id = ''
+    _machineID = _media_type = _media_id = _msg = ''
 
-def register_elements(database: list):
+def register_elements(database: list, plex_uuid: str, watchlist: str):
     def get_title(media):
         title_funcs = {
             'movie': lambda: f'{media.title} ({media.year})',
@@ -109,8 +108,16 @@ def register_elements(database: list):
         'Director': ('director', 'person'),
         'Genre': ('genre', 'genre'),
     }
-    
-    for media in database:
+
+    plex_account = get_plex_account(uuid=plex_uuid)
+    watchlist_guids = set([elem.guid for elem in plex_account.watchlist()])
+    filter_database = database
+    if watchlist == 1:
+        filter_database = [media for media in database if media.guid in watchlist_guids]
+    elif watchlist == 0:
+        filter_database = [media for media in database if media.guid not in watchlist_guids]
+
+    for media in filter_database:
         
         media_type, image_type = class_media_map.get(type(media).__name__, (None, None))
     
@@ -166,7 +173,7 @@ def register_elements(database: list):
                     }
                 })
         if media_type in ['movie', 'episode', 'album', 'track', 'clip'] and short_stream:
-            sArg = f'_rerun;1;streams;{plex_instance.machineIdentifier}ǀ{media_type}ǀ{media.key}' if media_type not in ['album', 'track'] and len(media.media) > 1 else f'_stream;{plex_instance.machineIdentifier};{media_type};{media.key};0;0'
+            sArg = f'_rerun;1;streams;{plex_instance.machineIdentifier}ǀ{media_type}ǀ{media.key}ǀ' if media_type not in ['album', 'track'] and len(media.media) > 1 else f'_stream;{plex_instance.machineIdentifier};{media_type};{media.key};0;0'
             if short_stream == 'arg':
                 media_arg = sArg
             else:
@@ -179,30 +186,56 @@ def register_elements(database: list):
                         },
                     }
                 })
-        if media_type in ['movie', 'show'] and short_mtvsearch:
-            mtvArg = f'_mtvsearch;{plexUUID};{media_type};{media.guid.split("/")[-1]}'
-            if short_mtvsearch == 'arg':
-                media_arg = mtvArg
-            else:
-                media_mod.update({
-                    f'{short_mtvsearch}': {
-                        'subtitle': 'Press ⏎ to get media infos using Movie and TV Show Search workflow',
-                        'arg': mtvArg,
-                        'icon': {
-                            'path': 'icons/base/movie_and_tv_show_search.webp',
-                        },
-                    }
-                })
+
+        isInWatchlist = False
+        obj_title = get_title(media)
+        obj_subtitle = get_subtitle(media)
+
+        if media_type in ['movie', 'show']:
+    
+            if short_mtvsearch != '':
+                mtvArg = f'_mtvsearch;{plexUUID};{media_type};{media.guid.split("/")[-1]}'
+                if short_mtvsearch == 'arg':
+                    media_arg = mtvArg
+                else:
+                    media_mod.update({
+                        f'{short_mtvsearch}': {
+                            'subtitle': 'Press ⏎ to get media infos using Movie and TV Show Search workflow',
+                            'arg': mtvArg,
+                            'icon': {
+                                'path': 'icons/base/movie_and_tv_show_search.webp',
+                            },
+                        }
+                    })
+                    
+            if short_watchlist != '':
+                media_guid = media.guid
+                isInWatchlist = True if media_guid in watchlist_guids else False
+                action = "delete" if isInWatchlist else "add"
+                verb = "from" if isInWatchlist else "to"
+                watchArg = f'_run;_watchlist;{action};{plex_uuid};{media_guid};{obj_title} was {"removed" if isInWatchlist else "added"} {verb} watchlist of {plex_account.friendlyName};search'
+                if short_watchlist == 'arg':
+                    media_arg = watchArg
+                else:
+                    media_mod.update({
+                        f'{short_watchlist}': {
+                            'subtitle': f'Press ⏎ to {action} the {media_type} {verb} watchlist',
+                            'arg': watchArg,
+                            'icon': {
+                                'path': f'icons/base/{action}.webp',
+                            },
+                        }
+                    })
 
         json_obj = {
-            'title': get_title(media),
-            'subtitle': get_subtitle(media),
+            'title': obj_title,
+            'subtitle': obj_subtitle,
             'icon': {
-                'path': f'icons/base/{image_type}.webp',
+                'path': f'icons/base/{image_type}{"_bookmarked" if isInWatchlist else ""}.webp',
             },
             'mods': media_mod,
             'valid': False,
-            'key': f'{get_title(media)}&{get_subtitle(media)}'
+            'key': f'{obj_title}&{obj_subtitle}'
         }
 
         if media_arg:
@@ -215,8 +248,13 @@ def register_elements(database: list):
 
 data = servers_file()
 if data.get('items'):
+        libtype = query_dict.get('libtype')
+        advancedFilters = query_dict.get('advancedFilters')
+        watchlist = query_dict.get('watchlist')
+        if len(query_dict) == 1 and 'watchlist' in query_dict:
+            query = ''
         for obj in data['items']:
-            if (obj['machineIdentifier'] != _machineID and _level > 0) or (query_dict.get('server') and obj['friendlyName'].lower() not in query_dict.get('server', '').lower().split(',')):
+            if (obj['machineIdentifier'] != _machineID and _level > 0 and _machineID) or (query_dict.get('server') and obj['friendlyName'].lower() not in query_dict.get('server', '').lower().split(',')):
                 continue
             friendlyName = obj['friendlyName']
             baseURL = obj['baseURL']
@@ -245,7 +283,7 @@ if data.get('items'):
                             except:
                                 continue
                         database = [item for sublist in raw for item in sublist]
-                        register_elements(database)
+                        register_elements(database, plexUUID, watchlist)
                     except:
                         delist('invalid_FILTERS', items)
                 else:
@@ -264,7 +302,7 @@ if data.get('items'):
                             database = plex_instance.search(query, limit=limit_number)
                         else:
                             database = plex_instance.search(query.split('/')[0], mediatype=query.split('/')[1], limit=limit_number)
-                        register_elements(database)
+                        register_elements(database, plexUUID, watchlist)
                     except:
                         delist('no_ELEM', items)
             else:
@@ -285,7 +323,18 @@ if data.get('items'):
                                         'path': f'icons/base/{_media_type}.webp',
                                     },
                                 })
-
+                    elif _type == 'guid':
+                        sections = [section for section in plex_instance.library.sections() if section.type == _media_type]
+                        database = []
+                        for section in sections:
+                            try:
+                                database.append(section.getGuid(_media_id))
+                            except:
+                                continue
+                        if len(database) == 1:
+                            register_elements(database, plexUUID, watchlist)
+                        else:
+                            default_element('no_ELEM', items, _msg)
         if not items:
             if not '=' in query:
                 delist('no_ELEM', items)
