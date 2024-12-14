@@ -1,4 +1,4 @@
-#!/opt/homebrew/opt/python@3.12/bin/python3.12
+#!/opt/homebrew/opt/python@3.13/bin/python3.13
 # -*- coding: utf-8 -*-
 import re
 import sys

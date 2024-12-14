@@ -6588,6 +6588,10 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 						<string>IINA</string>
 						<string>iina</string>
 					</array>
+					<array>
+						<string>INFUSE</string>
+						<string>infuse</string>
+					</array>
 				</array>
 			</dict>
 			<key>description</key>
@@ -7356,10 +7360,8 @@ Go to the dedicated [GitHub repository](https://github.com/BenjaminOddou/alfred-
 			<string>short_watchlist</string>
 		</dict>
 	</array>
-	<key>variablesdontexport</key>
-	<array/>
 	<key>version</key>
-	<string>2.3.0</string>
+	<string>2.4.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>

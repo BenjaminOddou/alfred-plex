@@ -6,7 +6,7 @@ from plexapi.server import PlexServer
 result = subprocess.Popen(['mdfind', f'kMDItemContentType == "com.apple.application-bundle" && kMDItemFSName == "{media_player.upper()}.app"'], stdout=subprocess.PIPE)
 output = result.stdout.read().decode().strip()
 
-if output:
+if output or media_player == 'infuse':
     try:
         _machineID, _type, _key, _media_index, _part_index = sys.argv[1].split(';')[1:]
     except IndexError as e:
@@ -48,6 +48,9 @@ if output:
                 mp_args.extend(['--music-mode']) if _type in ['track', 'album'] else None
                 for url, title in zip(streamURLs, streamTitles):
                     mp_args.extend([url, f'--mpv-force-media-title={title}', '--no-stdin'])
+            elif media_player == 'infuse':
+                mp_args = ['open', f'infuse://x-callback-url/play?url={streamURLs[0]}']
+            custom_logger('debug', f'Starting streams: "{' '.join(mp_args)}"')
             mp_instance = subprocess.Popen(mp_args)
             break
 else:

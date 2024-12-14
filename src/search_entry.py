@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from utils import limit_number, parse_time, parse_duration, servers_file, alias_file, delist, default_element, display_notification, default_view, addReturnbtn, addMenuBtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player, custom_logger, get_plex_account, short_watchlist
+from utils import limit_number, parse_time, parse_duration, servers_file, alias_file, delist, default_element, display_notification, default_view, addReturnbtn, addMenuBtn, short_nested_search, short_web, short_stream, short_mtvsearch, media_player, custom_logger, get_plex_account, short_watchlist, media_player
 from plexapi import utils
 from plexapi.server import PlexServer
 
@@ -172,7 +172,7 @@ def register_elements(database: list, plex_uuid: str, watchlist: str):
                         },
                     }
                 })
-        if media_type in ['movie', 'episode', 'album', 'track', 'clip'] and short_stream:
+        if short_stream and (media_type in ['movie', 'episode', 'clip'] or (media_type in ['album', 'track'] and media_player != 'infuse')):
             sArg = f'_rerun;1;streams;{plex_instance.machineIdentifier}ǀ{media_type}ǀ{media.key}ǀ' if media_type not in ['album', 'track'] and len(media.media) > 1 else f'_stream;{plex_instance.machineIdentifier};{media_type};{media.key};0;0'
             if short_stream == 'arg':
                 media_arg = sArg
