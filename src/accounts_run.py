@@ -26,12 +26,12 @@ try:
             print(_query, end="")
         if _subtype == "delete":
             plex_account.query(
-                f"{plex_account.METADATA}/actions/removeFromWatchlist?ratingKey={ratingKey}",
+                f"{plex_account.DISCOVER}/actions/removeFromWatchlist?ratingKey={ratingKey}",
                 method=plex_account._session.put,
             )
         elif _subtype == "add":
             plex_account.query(
-                f"{plex_account.METADATA}/actions/addToWatchlist?ratingKey={ratingKey}",
+                f"{plex_account.DISCOVER}/actions/addToWatchlist?ratingKey={ratingKey}",
                 method=plex_account._session.put,
             )
         display_notification("✅ Success !", _msg)
