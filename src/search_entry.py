@@ -140,7 +140,15 @@ def register_elements(database: list, plex_uuid: str, watchlist: str):
     }
 
     plex_account = get_plex_account(uuid=plex_uuid)
-    watchlist_guids = set([elem.guid for elem in plex_account.watchlist()])
+    if plex_account is None:
+        # Auth failed - still show results but skip watchlist features
+        watchlist_guids = set()
+    else:
+        try:
+            watchlist_guids = set([elem.guid for elem in plex_account.watchlist()])
+        except Exception as e:
+            custom_logger("warning", f"Failed to fetch watchlist: {e}")
+            watchlist_guids = set()
     filter_database = database
     if watchlist == 1:
         filter_database = [media for media in database if media.guid in watchlist_guids]
@@ -279,7 +287,7 @@ def register_elements(database: list, plex_uuid: str, watchlist: str):
                         }
                     )
 
-            if short_watchlist != "":
+            if short_watchlist != "" and plex_account is not None:
                 media_guid = media.guid
                 isInWatchlist = True if media_guid in watchlist_guids else False
                 action = "delete" if isInWatchlist else "add"

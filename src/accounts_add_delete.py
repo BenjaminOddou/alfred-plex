@@ -42,6 +42,8 @@ elif _type == "_new":
     elif _origin == "sync":
         plex_account = get_plex_account(uuid=_input)
     if not plex_account:
+        # Auth failed - get_plex_account already shows notification, but log for debugging
+        custom_logger("error", f"Failed to authenticate via {_origin}")
         exit()
     replace = False
     json_obj = {

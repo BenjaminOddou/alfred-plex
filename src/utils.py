@@ -113,9 +113,11 @@ def custom_logger(level: str, message: str):
 
 
 def delete_files(element):
+    # Files to preserve across version upgrades (user authentication data)
+    preserve_files = {"presets.json", "accounts.json", "servers.json"}
     if os.path.exists(element):
         for file in os.listdir(element):
-            if not file.endswith(".app") and file != "presets.json":
+            if not file.endswith(".app") and file not in preserve_files:
                 file_path = os.path.join(element, file)
                 try:
                     os.remove(file_path)
@@ -147,7 +149,9 @@ plex_app_version = os.getenv("alfred_workflow_version", "")
 config = configparser.ConfigParser()
 if os.path.exists(config_file_path):
     config.read(config_file_path)
-    if plex_app_version != config["header"]["version"]:
+    # Only check version if running from Alfred (env var is set)
+    # This prevents accidental cleanup when running scripts from terminal
+    if plex_app_version and plex_app_version != config["header"]["version"]:
         for folder in [data_folder, cache_folder]:
             delete_files(folder)
 
