@@ -92,7 +92,7 @@ if output or media_player == "infuse":
                     )
             elif media_player == "infuse":
                 mp_args = ["open", f"infuse://x-callback-url/play?url={streamURLs[0]}"]
-            custom_logger("debug", f'Starting streams: "{' '.join(mp_args)}"')
+            custom_logger("debug", f'Starting streams: "{ " ".join(mp_args)}"')
             mp_instance = subprocess.Popen(mp_args)
             break
 else:
