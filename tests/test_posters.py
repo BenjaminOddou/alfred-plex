@@ -82,7 +82,8 @@ def test_grid_library_posters(env, plex_online):
     config, items = grid({**env, "grid_columns": "7"}, nav.join("grid", "library", fakes.MID, 1),
                          state=json.dumps({"view": "grid"}))
     assert config == {"columncount": 7}
-    assert titles(items)[:4] == ["Return", "↕️ Date Added ↓", "➕ Filter", "☰ List view"]
+    assert titles(items)[:6] == ["Return", "↕️ Date Added ↓", "➕ Filter", "☰ List view", "🔍 Open in Plex Search",
+                                 "💾 Save as a preset"]
     assert items[0]["variables"]["action"] == "search"  # no history: Plex Search (where libraries live)
     matrix = by_title(items, "The Matrix (1999)")
     poster = Path(matrix["icon"]["path"])
@@ -91,7 +92,13 @@ def test_grid_library_posters(env, plex_online):
     assert matrix["variables"]["action"] == "browse"
     assert nav.split(matrix["variables"]["nav"]) == ["media", fakes.MID, "10"]
     assert came_from(matrix["variables"]).action == "grid"  # Return comes back to the posters
-    assert matrix["mods"]["alt"]["variables"]["cmd"] == "media.details"
+    # same shortcuts as the list: ⌘ web, ⌥ stream, ⌃ Movie and TV Show Search, ⇧ watchlist, fn actions, ⌘⇧ played
+    assert matrix["mods"]["alt"]["variables"]["cmd"] == "stream"
+    assert matrix["mods"]["cmd"]["variables"]["action"] == "open"
+    assert matrix["mods"]["ctrl"]["variables"]["action"] == "mtv"
+    assert matrix["mods"]["shift"]["variables"]["cmd"] == "watchlist"
+    assert matrix["mods"]["fn"]["variables"]["nav"] == matrix["variables"]["nav"]
+    assert matrix["mods"]["cmd+shift"]["variables"]["cmd"] == "media.played"
     transcodes = [q for _, path, q in plex_online.calls if path == "/photo/:/transcode"]
     assert len(transcodes) == 1 and transcodes[0]["width"] == "300" and transcodes[0]["height"] == "450"
     assert by_title(items, "Inception (2010)")["icon"]["path"] == "icons/base/movie.webp"  # no artwork
@@ -101,14 +108,23 @@ def test_grid_library_posters(env, plex_online):
     assert "/photo/:/transcode" not in plex_online.paths()  # posters come from the cache now
 
 
-def test_list_rows_reuse_cached_posters(env, plex_online):
+def test_list_view_has_no_images_by_default(env, plex_online):
     from alfred_plex.views.search import render_search
 
-    before = render_search(make_ctx(env, query="matrix", nav="search")).to_dict()["items"]
-    assert by_title(before, "The Matrix (1999)")["icon"]["path"] == "icons/base/movie_bookmarked.webp"
-    grid(env, nav.join("grid", "library", fakes.MID, 1))
-    after = render_search(make_ctx(env, query="matrix", nav="search")).to_dict()["items"]
-    assert by_title(after, "The Matrix (1999)")["icon"]["path"].endswith(".jpg")
+    grid(env, nav.join("grid", "library", fakes.MID, 1))  # poster in the cache
+    items = render_search(make_ctx(env, query="matrix", nav="search")).to_dict()["items"]
+    assert by_title(items, "The Matrix (1999)")["icon"]["path"] == "icons/base/movie_bookmarked.webp"
+
+
+def test_list_with_posters_downloads_them(env, plex_online):
+    from alfred_plex.views.search import render_search
+
+    env = {**env, "search_view": "list_posters"}
+    items = render_search(make_ctx(env, query="matrix", nav="search")).to_dict()["items"]
+    poster = Path(by_title(items, "The Matrix (1999)")["icon"]["path"])
+    assert poster.read_bytes() == b"JPEG-BYTES" and poster.parent == Path(env["alfred_workflow_cache"]) / "posters"
+    index = posters.read_index(make_ctx(env).settings)
+    assert index[poster.name]["title"] == "The Matrix (1999)" and index[poster.name]["source"] == "Home Server"
 
 
 def test_grid_details_footer(env, plex_online):
@@ -119,29 +135,38 @@ def test_grid_details_footer(env, plex_online):
 
 def test_grid_children_of_a_show(env, plex_online):
     _, items = grid(env, nav.join("grid", "children", fakes.MID, 20))
-    assert titles(items) == ["Return", "Dark (2017)", "Dark ǀ Season 1", "Dark ǀ Season 2"]
+    assert titles(items) == ["Return", "Dark (2017)", "☰ List view", "Dark ǀ Season 1", "Dark ǀ Season 2"]
     assert items[0]["variables"]["nav"] == nav.join("servers", fakes.MID)
-    season = items[2]
-    assert season["variables"]["action"] == "grid"  # a season opens its episodes
+    assert items[2]["variables"]["action"] == "search"  # the same content as a list
+    season = items[3]
+    # ⏎ = nested search like the list, shown as posters: a season opens its episodes
+    assert season["variables"]["action"] == "grid" and season["variables"]["nav"] == "grid/search"
+    assert "season.index" in json.loads(season["variables"]["state"])["query"]
     assert season["subtitle"] == "10 episodes"
 
 
 def test_grid_search_discover_and_watchlist(env, plex_online, account):
     _, items = grid(env, "grid/search", state=json.dumps({"query": "matrix"}))
-    assert {"The Matrix (1999)", "The Matrix OST (1999)"} <= set(titles(items))
+    assert {"The Matrix (1999)", "The Matrix OST (1999)", "Keanu Reeves"} <= set(titles(items))
     assert items[0]["arg"] == "matrix"  # Return to Plex Search with the query
+    assert titles(items)[1:3] == ["🔍 Edit the search", "💾 Save this search as a preset"]
+    assert items[1]["variables"]["action"] == "search" and items[1]["arg"] == "matrix"
+    then = json.loads(items[2]["variables"]["payload"])["_then"]
+    assert then["action"] == "grid" and then["variables"]["nav"] == "grid/search"  # the posters come back
 
     account.discover_payload = fakes.discover_search_payload()
     _, items = grid(env, "grid/discover", state=json.dumps({"query": "matrix"}))
-    assert titles(items) == ["Return", "The Matrix (1999)", "Dark (2017)", "Keanu Reeves"]
-    assert Path(items[1]["icon"]["path"]).read_bytes() == b"DISCOVER-POSTER"
-    assert items[1]["variables"]["action"] == "search"
-    assert items[1]["mods"]["cmd"]["variables"]["action"] == "open"  # same shortcuts as the Discover list
-    assert items[1]["mods"]["shift"]["variables"]["cmd"] == "watchlist"
+    assert titles(items) == ["Return", "🔍 Edit the search", "The Matrix (1999)", "Dark (2017)", "Keanu Reeves"]
+    assert items[1]["variables"]["action"] == "discover" and items[1]["arg"] == "matrix"
+    assert Path(items[2]["icon"]["path"]).read_bytes() == b"DISCOVER-POSTER"
+    assert items[2]["variables"]["action"] == "search"
+    assert items[2]["mods"]["cmd"]["variables"]["action"] == "open"  # same shortcuts as the Discover list
+    assert items[2]["mods"]["shift"]["variables"]["cmd"] == "watchlist"
 
     _, items = grid(env, nav.join("grid", "watchlist", fakes.ACCOUNT_UUID))
-    assert Path(items[1]["icon"]["path"]).read_bytes() == b"WATCHLIST-POSTER"
-    assert json.loads(items[1]["mods"]["cmd"]["variables"]["payload"])["add"] is False
+    assert items[1]["title"] == "☰ List view"
+    assert Path(items[2]["icon"]["path"]).read_bytes() == b"WATCHLIST-POSTER"
+    assert json.loads(items[2]["mods"]["cmd"]["variables"]["payload"])["add"] is False
 
 
 def test_unknown_grid_page(env):
@@ -169,12 +194,13 @@ def test_media_details_sheet(env, plex_online):
     assert poster.startswith("![Poster](../posters/") and (path.parent / poster[10:-1]).exists()
     for expected in ("# The Matrix (1999)", "*Welcome to the Real World*", "**Movie** · 2h 16m · R · Warner Bros.",
                      "⭐ Audience 8.5/10 Rotten Tomatoes", "Your rating 8.0/10", "✓ Played", "A hacker learns",
-                     "- **Keanu Reeves** as Neo", "| **Directors** | Lana Wachowski |",
-                     "| **Writers** | Lilly Wachowski |", "| **Genres** | Action, Science Fiction |",
-                     "| **Collections** | Keanu |", "| **IDs** | TMDB 603 |", "### 📄 The Matrix (1999).mkv",
-                     "| **Audio** | English (AAC 5.1) |", "| **Subtitles** | French (SRT) |",
-                     "| **Path** | `/movies/The Matrix (1999).mkv` |"):
+                     "- **Keanu Reeves** as Neo", "- **Directors:** Lana Wachowski",
+                     "- **Writers:** Lilly Wachowski", "- **Genres:** Action, Science Fiction",
+                     "- **Collections:** Keanu", "- **IDs:** TMDB 603", "### 📄 The Matrix (1999).mkv",
+                     "- **Audio:** English (AAC 5.1)", "- **Subtitles:** French (SRT)",
+                     "- **Path:** `/movies/The Matrix (1999).mkv`"):
         assert expected in text, expected
+    assert "|---|" not in text  # Alfred's Text View does not render Markdown tables
 
 
 def test_media_page_offers_details_and_children_posters(env, plex_online):
@@ -190,4 +216,4 @@ def test_human_duration_and_escaping():
     assert details.human_duration(8160000) == "2h 16m"
     assert details.human_duration(1500000) == "25 min"
     assert details.human_duration(None) == ""
-    assert details._escape("a|b\nc") == "a\\|b c"
+    assert details._escape("a|b\nc") == "a|b c"

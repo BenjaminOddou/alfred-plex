@@ -8,7 +8,7 @@ from .. import alfred, fmt, nav
 from ..alfred import Intent, Item, Mod
 from ..context import Context
 from ..library import BOOLEAN, LibraryState, filter_label, libtype, results, search_text, total
-from ..media import Source, to_item
+from ..media import Source, prefetch_posters, to_item
 from ..plex import parallel
 from . import error_item, page
 
@@ -56,15 +56,19 @@ def libraries(ctx: Context) -> list[Item]:
             continue
         server, sections = result
         mid = server["machineIdentifier"]
+        grid_first = ctx.settings.grid_view
         for section in sections:
             list_state, grid_state = LibraryState(), LibraryState(view="grid")
+            first, other = (grid_state, list_state) if grid_first else (list_state, grid_state)
             items.append(Item(
                 section.title,
-                fmt.join(server.get("friendlyName"), section.type, "⏎ browse ǀ ⌘⏎ posters"),
-                intent=open_library(mid, section.key, list_state),
+                fmt.join(server.get("friendlyName"), section.type,
+                         "⏎ posters ǀ ⌘⏎ list" if grid_first else "⏎ browse ǀ ⌘⏎ posters"),
+                intent=open_library(mid, section.key, first),
                 icon=alfred.icon(section.type if section.type in {"movie", "show", "artist", "photo"} else "library"),
-                mods={"cmd": Mod("Show this library as posters", open_library(mid, section.key, grid_state),
-                                 alfred.icon("photo"))},
+                mods={"cmd": Mod("Show this library as a list" if grid_first else "Show this library as posters",
+                                 open_library(mid, section.key, other),
+                                 alfred.icon("library" if grid_first else "photo"))},
             ))
     return items
 
@@ -104,7 +108,9 @@ def library(ctx: Context, mid: str, key: str) -> list[Item]:
     ]
     src = Source(ctx.store.server(mid) or {}, plex)
     watchlist = ctx.watchlist(src.account_uuid) if src.account_uuid else set()
-    for media in results(section, state, ctx.settings.limit * 2):
+    medias = results(section, state, ctx.settings.limit * 2)
+    prefetch_posters(ctx, [(src, media) for media in medias])
+    for media in medias:
         row = to_item(ctx, src, media, watchlist, here)
         if row:
             items.append(row)

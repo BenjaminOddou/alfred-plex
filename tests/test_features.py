@@ -39,7 +39,7 @@ def test_media_page_lists_every_action(env, plex_online):
     assert header["quicklookurl"].endswith("thumb/1?X-Plex-Token=server-token")
     names = titles(items)
     for expected in ("▶️ Play with VLC", "🌐 Open in Plex Web", "⭕ Mark as unplayed", "⭐ Rate",
-                     "🔖 Remove from watchlist", "🎬 Movie and TV Show Search", "➕ Add to a playlist",
+                     "🔖 Remove from watchlist", "🎬 Movie and TV Show Search", "➕ Playlists",
                      "🗂️ Collections", "📄 The Matrix (1999).mkv", "⬇️ Download", "🔄 Refresh metadata",
                      "🔍 Analyze", "ℹ️ Infos", "🗑️ Delete from the server"):
         assert expected in names, expected
@@ -65,15 +65,42 @@ def test_media_page_without_back_returns_to_menu(env, plex_online):
 
 def test_playlists_page(env, plex_online):
     items = page(env, nav.join("media", fakes.MID, 10, "playlists"))
-    assert titles(items) == ["Return", "➕ New playlist", "Favorites"]  # smart playlists can't be edited
-    payload = json.loads(items[2]["variables"]["payload"])
+    # smart playlists can't be edited; the media is in no playlist: a message, then the others
+    assert titles(items) == ["Return", "➕ New playlist", "The Matrix (1999) is in no playlist yet", "Favorites"]
+    payload = json.loads(items[3]["variables"]["payload"])
     assert payload["playlist"] == 500 and payload["key"] == "10"
     assert items[1]["variables"]["action"] == "ask"
 
 
+def test_playlists_of_the_media_come_first(env, plex_online):
+    plex_online.routes["/playlists/500/items"] = (
+        '<MediaContainer size="2"><Video ratingKey="11" playlistItemID="1"/>'
+        '<Video ratingKey="10" playlistItemID="2"/></MediaContainer>')
+    plex_online.routes["/playlists"] = fakes.PLAYLISTS.replace('size="2">', 'size="3">\n'
+        '<Playlist ratingKey="502" key="/playlists/502/items" type="playlist" title="Another" playlistType="video" '
+        'smart="0" leafCount="1"/>')
+    plex_online.routes["/playlists/502/items"] = fakes.EMPTY
+    items = page(env, nav.join("media", fakes.MID, 10, "playlists"))
+    assert titles(items) == ["Return", "➕ New playlist", "✓ Favorites", "Another"]
+    member = json.loads(items[2]["variables"]["payload"])
+    assert items[2]["variables"]["cmd"] == "media.playlist_remove" and member["playlist"] == 500
+    assert items[3]["variables"]["cmd"] == "media.playlist"
+
+
+def test_remove_from_playlist(env, plex_online, notifications):
+    plex_online.routes["/playlists/500/items"] = (
+        '<MediaContainer size="2"><Video ratingKey="11" key="/library/metadata/11" type="movie" title="Inception" '
+        'playlistItemID="1"/><Video ratingKey="10" key="/library/metadata/10" type="movie" title="The Matrix" '
+        'playlistItemID="2"/></MediaContainer>')
+    plex_online.routes["/playlists/500/items/2"] = fakes.EMPTY
+    run(env, alfred.run("media.playlist_remove", mid=fakes.MID, key=10, title="The Matrix", playlist=500))
+    assert ("DELETE", "/playlists/500/items/2", {}) in [(m, p, {}) for m, p, _ in plex_online.calls]
+    assert "removed from the playlist Favorites" in notifications[-1]["message"]
+
+
 def test_collections_page(env, plex_online):
     items = page(env, nav.join("media", fakes.MID, 10, "collections"))
-    assert titles(items)[1:] == ["➕ New collection", "Classics", "✓ Keanu"]
+    assert titles(items)[1:] == ["➕ New collection", "✓ Keanu", "Classics"]  # its collections first
     assert json.loads(by_title(items, "✓ Keanu")["variables"]["payload"])["add"] is False
     assert json.loads(by_title(items, "Classics")["variables"]["payload"])["add"] is True
 

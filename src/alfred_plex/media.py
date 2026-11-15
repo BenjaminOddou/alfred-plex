@@ -193,6 +193,28 @@ def played_intent(src: Source, media: Any, label: str, then: Intent) -> tuple[In
     return intent, f"Press ⏎ to mark as {'unplayed' if played else 'played'}", "ok" if not played else "return"
 
 
+MORE_PREFIX = "alfred-plex:"
+
+
+def more_marker(path: str) -> str:
+    """Raw form of a → target (still accepted by ``main.py more``)."""
+    return f"{MORE_PREFIX}{path}"
+
+
+def prefetch_posters(ctx: Context, found: list[tuple[Source, Any]]) -> None:
+    """Download the posters of a list when the "List with posters" view is chosen (in parallel)."""
+    if not ctx.settings.list_posters:
+        return
+    by_source: dict[str, tuple[Source, list[Any]]] = {}
+    for src, media in found:
+        kind = CLASSES.get(type(media).__name__, (None, None))[0]
+        if kind and kind not in TAGS:
+            by_source.setdefault(src.machine_id, (src, []))[1].append(media)
+    from .plex import parallel
+
+    parallel(lambda job: posters.server_posters(ctx.settings, job[0].plex, job[1]), list(by_source.values()))
+
+
 def attach(item: Item, key: str, intent: Intent | None, subtitle: str, icon_name: str) -> None:
     """Bind an action to ⏎ (``key == "arg"``) or to a modifier key."""
     if not key or intent is None:
@@ -223,10 +245,13 @@ def to_item(ctx: Context, src: Source, media: Any, watchlist: set[str], here: In
     thumb = getattr(media, "thumb", None)
     if thumb and kind not in TAGS:
         item.quicklook = src.plex.url(thumb, includeToken=True)
-        poster = posters.cached(ctx.settings, src.machine_id, thumb)
-        if poster:  # already downloaded by a Grid View: free nicer icon
-            item.icon = str(poster)
+        if ctx.settings.list_posters:  # "List with posters" view: prefetched by prefetch_posters()
+            poster = posters.cached(ctx.settings, src.machine_id, thumb)
+            if poster:
+                item.icon = str(poster)
     if kind not in TAGS:
+        item.action = f"{label} · {src.server.get('friendlyName') or 'Plex'}"
+        item.arrow = nav.join("more", src.machine_id, media.ratingKey)
         attach(item, keys.actions, page_intent(src, media),
                "Press ⏎ to see all the actions on this media", MOD_ICONS["actions"])
         if getattr(media, "isPlayed", None) is not None and kind in PLAYABLE_STATE:

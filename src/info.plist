@@ -18,7 +18,7 @@
 				<key>modifiersubtext</key>
 				<string></string>
 				<key>vitoclose</key>
-				<false/>
+				<true/>
 			</dict>
 		</array>
 		<key>1F5F4AA3-4DE4-5ADD-8A88-6DF4228AF0F7</key>
@@ -57,7 +57,7 @@
 				<key>modifiersubtext</key>
 				<string></string>
 				<key>vitoclose</key>
-				<false/>
+				<true/>
 			</dict>
 		</array>
 		<key>2FCB6CF4-B265-5F68-BEA0-BBEB5EECD479</key>
@@ -65,6 +65,19 @@
 			<dict>
 				<key>destinationuid</key>
 				<string>CCCCB44E-670E-5A95-B0DB-8B1086BC9ED9</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>4E620DE0-46A0-5505-BA06-A1CFBB9AD891</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>C3A7E2F0-7D2D-5C70-BFAE-8F2A9C3B4D53</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -83,7 +96,7 @@
 				<key>modifiersubtext</key>
 				<string></string>
 				<key>vitoclose</key>
-				<false/>
+				<true/>
 			</dict>
 		</array>
 		<key>7EC90905-1827-5804-B57F-2E12D8ACEA53</key>
@@ -109,7 +122,7 @@
 				<key>modifiersubtext</key>
 				<string></string>
 				<key>vitoclose</key>
-				<false/>
+				<true/>
 			</dict>
 		</array>
 		<key>9E85DAD3-2C27-5915-ACD8-35BBAE1AB96D</key>
@@ -247,11 +260,50 @@
 				<false/>
 			</dict>
 		</array>
+		<key>A1E5C0DE-5B0B-5A5E-9D8C-6D0E7A1F2B31</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>B2F6D1EF-6C1C-5B6F-AE9D-7E1F8B2A3C42</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<true/>
+			</dict>
+		</array>
 		<key>B03BBDA3-0179-57B2-9E67-96DF9B736700</key>
 		<array>
 			<dict>
 				<key>destinationuid</key>
 				<string>2F0D39B5-DC32-5EB3-8513-94A99DBC1438</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>B2F6D1EF-6C1C-5B6F-AE9D-7E1F8B2A3C42</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>4A9323C2-207A-5C70-AA46-C22432CE7C57</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>C3A7E2F0-7D2D-5C70-BFAE-8F2A9C3B4D53</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>4A9323C2-207A-5C70-AA46-C22432CE7C57</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -283,7 +335,7 @@
 				<key>modifiersubtext</key>
 				<string></string>
 				<key>vitoclose</key>
-				<false/>
+				<true/>
 			</dict>
 		</array>
 		<key>E17097EF-0A4D-5C3B-B52B-BA5A85349CE8</key>
@@ -995,7 +1047,7 @@ python3 main.py run "$1"</string>
 				<key>fontsizing</key>
 				<integer>0</integer>
 				<key>footertext</key>
-				<string>⎋ Back</string>
+				<string>⎋ or ↩ Back</string>
 				<key>inputfile</key>
 				<string>{var:details_file}</string>
 				<key>inputtype</key>
@@ -1071,6 +1123,75 @@ python3 main.py run "$1"</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>acceptsfiles</key>
+				<false/>
+				<key>acceptsmulti</key>
+				<integer>0</integer>
+				<key>acceptstext</key>
+				<true/>
+				<key>acceptsurls</key>
+				<false/>
+				<key>name</key>
+				<string>Plex</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.universalaction</string>
+			<key>uid</key>
+			<string>A1E5C0DE-5B0B-5A5E-9D8C-6D0E7A1F2B31</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+python3 main.py more "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>11</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>B2F6D1EF-6C1C-5B6F-AE9D-7E1F8B2A3C42</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+python3 main.py back "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>11</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>C3A7E2F0-7D2D-5C70-BFAE-8F2A9C3B4D53</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string># 🎩 Alfred Plex
@@ -1097,6 +1218,13 @@ python3 main.py run "$1"</string>
 6. 🛟 **Plex Help**: shortcuts, filters &amp; sorts, alias, cache, logs export.
 
 📤 CSV exports (libraries, history, plays, bandwidth, devices, watchlist, settings...) go to your downloads folder.
+
+**Results view** (configuration): ☰ list without images (default), 🖼️ list with posters, or ▦ grid
+(same search and shortcuts, results as posters).
+Posters stay in the Alfred cache: **Plex Help › Workflow Cache &amp; Logs › 🖼️ Posters** purges them all or one by one.
+
+**→ on a media**, then ↩ on **Plex**: full details by default (configurable: more details, actions page, play,
+Plex Web). ⎋ or Return goes back.
 
 **Navigation**: every screen has a *Return* row that goes back to the screen you came from (⌘⏎ main menu).
 Alfred stays open on a ⏳ loading page while an action runs.
@@ -1299,6 +1427,16 @@ Page = {var:nav}</string>
 			<key>ypos</key>
 			<real>155.0</real>
 		</dict>
+		<key>A1E5C0DE-5B0B-5A5E-9D8C-6D0E7A1F2B31</key>
+		<dict>
+			<key>note</key>
+			<string>→ on a media, ↩ on "Plex":
+the action chosen in the configuration</string>
+			<key>xpos</key>
+			<real>30.0</real>
+			<key>ypos</key>
+			<real>1030.0</real>
+		</dict>
 		<key>B03BBDA3-0179-57B2-9E67-96DF9B736700</key>
 		<dict>
 			<key>note</key>
@@ -1307,6 +1445,30 @@ Page = {var:nav}</string>
 			<real>30.0</real>
 			<key>ypos</key>
 			<real>155.0</real>
+		</dict>
+		<key>B2F6D1EF-6C1C-5B6F-AE9D-7E1F8B2A3C42</key>
+		<dict>
+			<key>colorindex</key>
+			<integer>3</integer>
+			<key>note</key>
+			<string>More details page of the media
+(other text: Plex Search)</string>
+			<key>xpos</key>
+			<real>230.0</real>
+			<key>ypos</key>
+			<real>1030.0</real>
+		</dict>
+		<key>C3A7E2F0-7D2D-5C70-BFAE-8F2A9C3B4D53</key>
+		<dict>
+			<key>colorindex</key>
+			<integer>3</integer>
+			<key>note</key>
+			<string>↩ in the media sheet:
+back to the page below</string>
+			<key>xpos</key>
+			<real>1160.0</real>
+			<key>ypos</key>
+			<real>905.0</real>
 		</dict>
 		<key>C5FCC189-EFF8-5E2C-907E-52DEE49D7D8B</key>
 		<dict>
@@ -1492,6 +1654,74 @@ Page = {var:nav}</string>
 			<string>textfield</string>
 			<key>variable</key>
 			<string>limit_number</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>list</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>☰ List (no images)</string>
+						<string>list</string>
+					</array>
+					<array>
+						<string>🖼️ List with posters</string>
+						<string>list_posters</string>
+					</array>
+					<array>
+						<string>▦ Grid (posters)</string>
+						<string>grid</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string>how results are shown. List: no images (fastest). List with posters: posters as icons (kept in the Alfred cache). Grid: the same live list with posters, ⏎ on the first row shows the results in the Grid View, with the same shortcuts.</string>
+			<key>label</key>
+			<string>🔎 Results view</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>search_view</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>sheet</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>📖 Full details (Markdown sheet)</string>
+						<string>sheet</string>
+					</array>
+					<array>
+						<string>🔎 More details (list)</string>
+						<string>more</string>
+					</array>
+					<array>
+						<string>⚙️ Media actions page</string>
+						<string>actions</string>
+					</array>
+					<array>
+						<string>▶️ Play</string>
+						<string>play</string>
+					</array>
+					<array>
+						<string>🌐 Open in Plex Web</string>
+						<string>web</string>
+					</array>
+				</array>
+			</dict>
+			<key>description</key>
+			<string>what → on a media does: Alfred shows its actions, ↩ on "Plex" (first once used) runs this action.</string>
+			<key>label</key>
+			<string>➡️ Right arrow</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>variable</key>
+			<string>right_arrow</string>
 		</dict>
 		<dict>
 			<key>config</key>
@@ -2658,7 +2888,7 @@ Page = {var:nav}</string>
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>3.3.0</string>
+	<string>3.1.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>

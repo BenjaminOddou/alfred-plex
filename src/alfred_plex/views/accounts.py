@@ -18,13 +18,45 @@ NEW_ACCOUNT = Item(
 )
 
 
-def _account_item(account: dict, intent) -> Item:
-    return Item(account.get("title", ""), account.get("subtitle", ""), intent=intent, icon=alfred.icon("person"))
+def account_avatars(ctx: Context, saved: list[dict]) -> dict[str, str]:
+    """{account uuid: avatar path}, downloaded once in the Alfred cache (with the posters).
+
+    Accounts saved before 3.1 have no avatar link: it is read from the cached account and kept.
+    """
+    from .. import posters
+
+    wanted, missing = {}, False
+    for record in saved:
+        thumb = record.get("thumb")
+        if not thumb:
+            try:
+                thumb = getattr(ctx.account(record["uuid"]), "thumb", None) or ""
+            except Exception:  # noqa: BLE001 - an avatar is a nice-to-have
+                continue
+            if thumb:
+                ctx.store.accounts.upsert({**record, "thumb": thumb})
+                missing = True
+        if thumb:
+            wanted[record["uuid"]] = (record.get("title", ""), thumb)
+    if missing:
+        ctx.store.accounts.save()
+    if not wanted:
+        return {}
+    try:
+        return {k: str(v) for k, v in posters.avatars(ctx.settings, posters.web_session(), wanted).items()}
+    except Exception:  # noqa: BLE001 - an avatar is a nice-to-have
+        return {}
+
+
+def _account_item(account: dict, intent, avatar: str | None = None) -> Item:
+    return Item(account.get("title", ""), account.get("subtitle", ""), intent=intent,
+                icon=avatar or alfred.icon("person"))
 
 
 @page("accounts")
 def accounts(ctx: Context) -> list[Item]:
     saved = ctx.store.accounts.items
+    avatars = account_avatars(ctx, saved)
     items = [NEW_ACCOUNT]
     if saved:
         items.append(Item(
@@ -33,7 +65,7 @@ def accounts(ctx: Context) -> list[Item]:
             intent=alfred.browse("accounts/remove"),
             icon=alfred.icon("delete"),
         ))
-    items += [_account_item(a, alfred.browse(nav.join("accounts", a["uuid"]))) for a in saved]
+    items += [_account_item(a, alfred.browse(nav.join("accounts", a["uuid"])), avatars.get(a["uuid"])) for a in saved]
     return items
 
 
@@ -58,12 +90,13 @@ def connect(ctx: Context) -> list[Item]:
 
 @page("accounts/remove")
 def remove(ctx: Context) -> list[Item]:
+    avatars = account_avatars(ctx, ctx.store.accounts.items)
     return [
         _account_item(a, alfred.confirm(
             f"Remove {a.get('title')}?",
             "The account and all its plex media servers will be removed from the workflow",
             alfred.run("account.remove", then=alfred.browse("accounts"), uuid=a["uuid"]),
-        ))
+        ), avatars.get(a["uuid"]))
         for a in ctx.store.accounts.items
     ]
 
@@ -71,7 +104,12 @@ def remove(ctx: Context) -> list[Item]:
 @page("accounts/<uuid>")
 def account(ctx: Context, uuid: str) -> list[Item]:
     here = nav.join("accounts", uuid)
-    items = [Item(
+    saved = ctx.store.account(uuid)
+    items = []
+    if saved:
+        avatar = account_avatars(ctx, [saved]).get(uuid)
+        items.append(_account_item(saved, None, avatar))
+    items += [Item(
         "Sync",
         "Refresh data from your plex account and reconnect your servers",
         intent=alfred.run("account.sync", then=alfred.browse(here), uuid=uuid),
@@ -79,7 +117,7 @@ def account(ctx: Context, uuid: str) -> list[Item]:
     )]
     for title, subtitle, sub, icon in (
         ("Servers", "Plex media servers connected to your account", "servers", "servers"),
-        ("Users", "Plex users connected to your account", "users", "people"),
+        ("Users", "Your friends and the users sharing your servers, with their avatar", "users", "people"),
         ("Devices", "Manage connected devices to your account", "devices", "device"),
         ("Watchlist", "Manage your plex watchlist", "watchlist", "watchlist"),
     ):
@@ -114,16 +152,40 @@ def servers(ctx: Context, uuid: str) -> list[Item]:
 
 @page("accounts/<uuid>/users")
 def users(ctx: Context, uuid: str) -> list[Item]:
-    found = ctx.account(uuid).users()
+    """You and your friends, with their avatar (kept in the Alfred cache)."""
+    from .. import posters
+
+    plex_account = ctx.account(uuid)
+    found = plex_account.users()
+    owner = plex_account.friendlyName or plex_account.username
+    people = {"__owner__": (owner, getattr(plex_account, "thumb", None))}
+    people.update({str(getattr(u, "id", "") or u.title): (u.title, getattr(u, "thumb", None)) for u in found})
+    try:
+        images = posters.avatars(ctx.settings, plex_account._session, people)
+    except Exception:  # noqa: BLE001 - an avatar is a nice-to-have
+        images = {}
     items = [export_item("users", f"{fmt.plural(len(found), 'user')} to a CSV file", uuid=uuid)]
+    owner_item = alfred.message(owner, fmt.join("You (account owner)", getattr(plex_account, "email", None)),
+                                icon_name="person")
+    if "__owner__" in images:
+        owner_item.icon = str(images["__owner__"])
+    items.append(owner_item)
     for user in found:
+        key = str(getattr(user, "id", "") or user.title)
         libraries = sum(s.numLibraries or 0 for s in user.servers)
-        items.append(alfred.message(
+        row = alfred.message(
             user.title,
             fmt.join(f"Email: {user.email}",
                      f"{user.title} has access to {fmt.plural(libraries, 'library', 'libraries')}"),
             icon_name="person",
-        ))
+        )
+        if key in images:
+            row.icon = str(images[key])
+        row.text = user.email or user.title
+        thumb = getattr(user, "thumb", None)
+        if thumb:
+            row.quicklook = thumb
+        items.append(row)
     return items
 
 
@@ -253,17 +315,25 @@ def watchlist(ctx: Context, uuid: str) -> list[Item]:
              intent=alfred.grid(nav.join("grid", "watchlist", uuid)), icon=alfred.icon("photo")),
         export_item("watchlist", f"{fmt.plural(len(found), 'media', 'medias')} to a CSV file", uuid=uuid),
     ]
+    images = {}
+    if ctx.settings.list_posters:
+        from .. import posters
+
+        images = posters.url_posters(
+            ctx.settings, plex_account._session, {m.guid: getattr(m, "thumb", "") for m in found},
+            {m.guid: {"title": f"{m.title}{fmt.year(m.year)}", "kind": m.type} for m in found})
     for media in found:
         label = f"{media.title}{fmt.year(media.year)}"
         detail = fmt.duration(media.duration) if media.type == "movie" else fmt.plural(
             getattr(media, "childCount", 0), "season")
+        poster = images.get(media.guid)
         items.append(Item(
             label,
             fmt.join(media.type, detail, "⏎ find it on your servers"),
             intent=alfred.search(
                 nav=nav.join("search", "guid", media.type, media.guid, label)
             ),
-            icon=alfred.icon(f"{media.type}_discover_bookmarked"),
+            icon=str(poster) if poster else alfred.icon(f"{media.type}_discover_bookmarked"),
             mods={"cmd": Mod(
                 f"Press ⏎ to remove the {media.type} from watchlist",
                 alfred.run("watchlist", then=here, uuid=uuid, guid=media.guid, title=label, add=False),

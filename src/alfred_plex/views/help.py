@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import time
 from urllib.parse import unquote
 
-from .. import alfred, fmt, nav
+from .. import alfred, fmt, nav, posters
 from ..alfred import Item
 from ..context import Context
 from ..filters import to_text
@@ -59,6 +60,12 @@ def getting_started(ctx: Context) -> list[Item]:
     return [Item(t, s, intent=i, icon=alfred.icon(icon)) for t, s, i, icon in steps]
 
 
+def arrow_label(ctx: Context) -> str:
+    from .arrow import label
+
+    return label(ctx)
+
+
 @page("help/shortcuts")
 def shortcuts(ctx: Context) -> list[Item]:
     keys = ctx.settings.shortcuts
@@ -69,6 +76,7 @@ def shortcuts(ctx: Context) -> list[Item]:
                                     icon_name="key"))
     fixed = (
         ("⏎ on a media", "Opens its actions page when ⏎ has no other action"),
+        ("→ then ↩ on Plex", f"On a media: {arrow_label(ctx)} (➡️ Right arrow setting)"),
         ("⌘⏎ on Return", "Back to the main menu"),
         ("⇧ / ⌘Y", "Quick Look: poster of a media, web pages"),
         ("⌘C / ⌘L", "Copy / show in large type the title, value or path of a row"),
@@ -216,6 +224,11 @@ def _folder(ctx: Context, kind: str) -> list[Item]:
                                    alfred.run("folder.clear", then=here, kind=kind)) if exists else None,
              icon=alfred.icon("delete")),
     ]
+    if kind == "cache":
+        count, size = posters.usage(ctx.settings)
+        items.append(Item("🖼️ Posters & avatars", f"{fmt.plural(count, 'image')}, {fmt.size(size)} in the Alfred "
+                                                     "cache ǀ ⏎ see them, purge all or one by one",
+                             intent=alfred.browse("help/cache/posters"), icon=alfred.icon("photo")))
     log_file = ctx.settings.cache_dir / "plex.log"
     if kind == "cache" and log_file.exists():
         items += [
@@ -230,6 +243,43 @@ def _folder(ctx: Context, kind: str) -> list[Item]:
 @page("help/cache")
 def cache(ctx: Context) -> list[Item]:
     return _folder(ctx, "cache")
+
+
+@page("help/cache/posters")
+def poster_cache(ctx: Context) -> list[Item]:
+    """Every cached poster (type to find one): ⏎ removes it, ⌘⏎ shows it in Finder."""
+    here = alfred.browse("help/cache/posters")
+    found = posters.entries(ctx.settings)
+    size = sum(path.stat().st_size for path, _ in found)
+    folder = posters.folder(ctx.settings)
+    items = [
+        Item("🧹 Purge all posters", f"{fmt.plural(len(found), 'image')}, {fmt.size(size)} (posters and user "
+                                     "avatars) ǀ they are downloaded again when needed",
+             intent=alfred.confirm("Purge every poster?", f"{fmt.plural(len(found), 'image')}, {fmt.size(size)}",
+                                   alfred.run("posters.purge", then=here)) if found else None,
+             icon=alfred.icon("delete")),
+        Item("Display Posters Folder", str(folder).replace(str(folder.home()), "~", 1),
+             intent=alfred.reveal(str(folder)), icon=alfred.icon("finder")),
+    ]
+    now = time.time()
+    for path, meta in found:
+        label = meta.get("title") or path.stem
+        days = int((now - path.stat().st_mtime) // 86400)
+        cached = "today" if days == 0 else ("yesterday" if days == 1 else f"{days} days ago")
+        items.append(Item(
+            label,
+            fmt.join(meta.get("kind"), meta.get("source"), fmt.size(path.stat().st_size), f"cached {cached}",
+                     "⏎ remove from the cache ǀ ⌘⏎ show in Finder"),
+            intent=alfred.run("posters.remove", then=here, name=path.name, title=label),
+            icon=str(path),
+            quicklook=str(path),
+            match=fmt.join(label, meta.get("kind"), meta.get("source")),
+            mods={"cmd": alfred.Mod("Show the file in Finder", alfred.reveal(str(path)), alfred.icon("finder"))},
+        ))
+    if not found:
+        items.append(alfred.message("No poster in the cache", "Posters and avatars are downloaded when you show them",
+                                    icon_name="photo"))
+    return items
 
 
 @page("help/data")

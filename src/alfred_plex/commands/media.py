@@ -241,3 +241,22 @@ def media_details(ctx: Context, text: str) -> Intent:
 
     server, media = _media(ctx)
     return alfred.details(str(details.prepare(ctx, server, media, ctx.payload["mid"])))
+
+
+@command("media.playlist_remove")
+def remove_from_playlist(ctx: Context, text: str) -> None:
+    """Remove the media (or the episodes / tracks of a show, season, album) from a playlist."""
+    server, media = _media(ctx)
+    playlist = server.fetchItem(f"/playlists/{ctx.payload['playlist']}")
+    key = str(media.ratingKey)
+    removed = 0
+    for item in playlist.items():
+        keys = {str(getattr(item, name, None)) for name in ("ratingKey", "parentRatingKey", "grandparentRatingKey")}
+        if key in keys and getattr(item, "playlistItemID", None):
+            server.query(f"{playlist.key}/items/{item.playlistItemID}", method=server._session.delete)
+            removed += 1
+    title = ctx.payload.get("title", media.title)
+    if removed:
+        success(ctx.settings, f"{title} removed from the playlist {playlist.title}")
+    else:
+        warning(ctx.settings, f"{title} is not in the playlist {playlist.title} anymore")

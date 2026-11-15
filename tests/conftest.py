@@ -121,4 +121,7 @@ def plex_online(monkeypatch, session, account, saved):
 
     monkeypatch.setattr(plex, "connect", lambda s: PlexServer(s["baseURL"], s["plexToken"], session=session))
     monkeypatch.setattr(plex, "load_account", lambda settings, token, uuid, fresh=False: account)
+    from alfred_plex import posters
+
+    monkeypatch.setattr(posters, "web_session", lambda: account._session)  # plex.tv avatars
     return session

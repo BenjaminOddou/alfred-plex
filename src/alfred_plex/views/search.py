@@ -7,9 +7,9 @@ from typing import Any
 from .. import alfred, filters, fmt, nav
 from ..alfred import Feedback, Intent, Item
 from ..context import Context
-from ..media import Source, to_item
+from ..media import Source, prefetch_posters, to_item
 from ..plex import parallel
-from . import back_item, error_item
+from . import back_item, error_item, remember_page
 
 
 def _sources(ctx: Context, query: filters.SearchQuery) -> tuple[list[Source], list[Item]]:
@@ -64,6 +64,7 @@ def collect(ctx: Context, query: filters.SearchQuery, finder) -> tuple[list[tupl
 
 def run_search(ctx: Context, query: filters.SearchQuery, finder, here: Intent) -> list[Item]:
     found, items = collect(ctx, query, finder)
+    prefetch_posters(ctx, [(src, media) for src, media, _ in found])
     for src, media, watchlist in found:
         item = to_item(ctx, src, media, watchlist, here)
         if item:
@@ -130,6 +131,9 @@ def render_search(ctx: Context) -> Feedback:
             feedback.extend(_guid(ctx, parts[2], parts[3], parts[4], here))
         elif not ctx.query:
             feedback.add(back_item(ctx))
+            if ctx.settings.grid_view:  # "Grid" view: the posters first
+                feedback.add(Item("🖼️ Default view as posters", "⏎ Grid View ǀ or type to search",
+                                  intent=alfred.grid("grid/search", state={"query": ""}), icon=alfred.icon("photo")))
             feedback.extend(libraries(ctx))
             query = filters.default_view(ctx.settings.default_view)
             feedback.extend(run_search(ctx, query, _library_search, here)).dedupe()
@@ -144,6 +148,7 @@ def render_search(ctx: Context) -> Feedback:
         feedback.add(_invalid(ctx, f"Invalid filters: {error}") if "=" in ctx.query else error_item(error),
                      back_item(ctx))
     alfred.link(feedback.items, here, ctx.history)
+    remember_page(ctx, here, feedback.items)
     return feedback
 
 
@@ -158,18 +163,23 @@ def _typed(ctx: Context, feedback: Feedback, here: Intent) -> None:
         feedback.add(_invalid(ctx, "No media found for these filters") if query.is_filter
                      else alfred.message(f"No media found for '{ctx.query}'", "Try to search something else"))
         return
-    feedback.add(Item("🖼️ Show as posters", f"These results in Alfred's Grid View ǀ {ctx.query}",
-                      intent=alfred.grid("grid/search", state={"query": ctx.query}), icon=alfred.icon("photo")),
-                 save_preset_item(ctx.query))
+    posters_row = Item("🖼️ Show as posters", f"{fmt.plural(len(feedback.items), 'result')} in Alfred's Grid View "
+                                             f"ǀ {ctx.query}",
+                       intent=alfred.grid("grid/search", state={"query": ctx.query}), icon=alfred.icon("photo"))
+    if ctx.settings.grid_view:  # "Grid" view: ⏎ shows the results as posters, the list is the live preview
+        feedback.items.insert(0, posters_row)
+        feedback.add(save_preset_item(ctx.query))
+    else:
+        feedback.add(posters_row, save_preset_item(ctx.query))
 
 
-def save_preset_item(query: str) -> Item:
+def save_preset_item(query: str, then: Intent | None = None) -> Item:
     """Last row of the results: keep this search for later in Plex Presets."""
     return Item(
         "💾 Save this search as a preset",
         f"{query} ǀ ⏎ then type a title (and an optional '/subtitle')",
         intent=alfred.ask("Preset Title/Subtitle", f"Save '{query}' ǀ Example: My movies/Some description",
-                          "preset.save", then=alfred.search(query), value=query),
+                          "preset.save", then=then or alfred.search(query), value=query),
         icon=alfred.icon("preset"),
     )
 

@@ -59,7 +59,7 @@ def test_objects_do_not_overlap():
 
 def test_small_diagram():
     # v2 had 133 objects and 95 connections
-    assert len(OBJECTS) <= 25
+    assert len(OBJECTS) <= 28  # 3.1: + Universal Action "More details" and its script, + Text View ↩ back
 
 
 def test_self_triggers_exist():
@@ -152,6 +152,21 @@ def test_commands_keep_alfred_open_on_the_loading_page():
 def test_text_view_is_stacked():
     (text,) = of_type("userinterface.text")
     assert text["config"]["stackview"] is True  # ⎋ goes back to the Alfred page below
+
+
+def test_alfred_stays_open_when_a_row_is_actioned():
+    # "Don't close" on the links to the Router: the Text View stacks on the visible page, so ⎋ comes back to it
+    for source in [*of_type("input.scriptfilter"), *of_type("userinterface.grid")]:
+        links = [c for c in CONNECTIONS[source["uid"]] if c["destinationuid"] == router()["uid"]]
+        assert links and all(c["vitoclose"] for c in links), source["uid"]
+
+
+def test_text_view_return_goes_back():
+    (text,) = of_type("userinterface.text")
+    (script,) = targets(text["uid"])
+    assert 'main.py back "$1"' in script["config"]["script"]
+    (then,) = targets(script["uid"])
+    assert then["config"]["externaltriggerid"] == "dispatch"
 
 
 # ------------------------------------------------------------------- scripts

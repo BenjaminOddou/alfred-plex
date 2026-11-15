@@ -5,12 +5,12 @@ from __future__ import annotations
 from typing import Any
 from urllib.parse import quote
 
-from .. import alfred, fmt, nav
+from .. import alfred, fmt, nav, posters
 from ..alfred import Feedback, Intent, Item
 from ..context import Context
 from ..media import attach
 from ..plex import discover_json
-from . import back_item, error_item
+from . import back_item, error_item, remember_page
 
 SEARCH_TYPES = {"movie": "movies", "show": "tv", "people": "people", "person": "people"}
 WEB_URL = "https://app.plex.tv/desktop/#!/provider/tv.plex.provider.discover/details?key={key}&context=search"
@@ -49,9 +49,11 @@ def to_item(ctx: Context, uuid: str, meta: dict, watchlist: set[str], here: Inte
     guid = meta.get("guid", "")
     on_list = guid in watchlist
     item = Item(label, _subtitle(meta), icon=alfred.icon(f"{kind}_discover{'_bookmarked' if on_list else ''}"),
-                text=label)
-    if meta.get("thumb", "").startswith("http"):
-        item.quicklook = meta["thumb"]
+                text=label, action=f"{label} · Plex Discover",
+                arrow=nav.join("more", "discover", uuid, kind, rating_key, label))
+    thumb = posters.absolute(meta.get("thumb"))
+    if thumb:
+        item.quicklook = thumb
 
     folder = "people" if kind == "person" else "metadata"
     url = WEB_URL.format(key=quote(f"/library/{folder}/{rating_key}", safe=""))
@@ -112,6 +114,17 @@ def posters_item(query: str) -> Item:
                 intent=alfred.grid("grid/discover", state={"query": query}), icon=alfred.icon("photo"))
 
 
+def meta_key(meta: dict) -> str:
+    return str(meta.get("guid") or meta.get("ratingKey") or meta.get("title"))
+
+
+def poster_icons(ctx: Context, account: Any, metas: list[dict]) -> dict[str, Any]:
+    """{meta_key: poster path} downloaded in parallel in the cache."""
+    urls = {meta_key(m): posters.absolute(m.get("thumb")) for m in metas}
+    labels = {meta_key(m): {"title": _title(m), "kind": m.get("type", "")} for m in metas}
+    return posters.url_posters(ctx.settings, account._session, {k: v for k, v in urls.items() if v}, labels)
+
+
 def render_discover(ctx: Context) -> Feedback:
     feedback = Feedback()
     here = alfred.discover(ctx.query)
@@ -126,6 +139,7 @@ def render_discover(ctx: Context) -> Feedback:
     if ctx.query:
         feedback.add(back_item(ctx))
     alfred.link(feedback.items, here, ctx.history)
+    remember_page(ctx, here, feedback.items)
     return feedback.dedupe()
 
 
@@ -134,9 +148,14 @@ def _results_rows(ctx: Context, feedback: Feedback, uuid: str, here: Intent) -> 
     try:
         account = ctx.account(uuid)
         watchlist = ctx.watchlist(uuid)
-        for meta in _results(ctx, account, ctx.query):
+        metas = _results(ctx, account, ctx.query)
+        images = poster_icons(ctx, account, metas) if ctx.settings.list_posters else {}
+        for meta in metas:
             item = to_item(ctx, uuid, meta, watchlist, here)
             if item:
+                poster = images.get(meta_key(meta))
+                if poster:
+                    item.icon = str(poster)
                 rows.append(item)
     except Exception as error:  # noqa: BLE001 - always answer Alfred
         from ..system import log
@@ -146,6 +165,8 @@ def _results_rows(ctx: Context, feedback: Feedback, uuid: str, here: Intent) -> 
         return
     if not rows:
         feedback.add(alfred.message(f"No media found for '{ctx.query}'", "Try to search something else"))
+    elif ctx.settings.grid_view:  # "Grid" view: ⏎ shows the results as posters, the list is the live preview
+        feedback.add(posters_item(ctx.query)).extend(rows)
     elif ctx.query:
         feedback.extend(rows).add(posters_item(ctx.query))
     else:  # trending: posters are the nicest way to look at it

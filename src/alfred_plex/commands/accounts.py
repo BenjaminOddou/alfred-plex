@@ -20,6 +20,7 @@ def account_record(account: Any) -> dict:
         "subtitle": f"Mail: {account.email} ǀ Plex Pass: {plex_pass}",
         "authToken": account.authToken,
         "uuid": account.uuid,
+        "thumb": getattr(account, "thumb", None) or "",
     }
 
 
@@ -149,3 +150,4 @@ def cleanup_devices(ctx: Context, text: str) -> None:
     success(ctx.settings, f"{len(removed)} old device(s) removed")
     if failed:
         warning(ctx.settings, f"Failed to remove: {', '.join(failed)}")
+

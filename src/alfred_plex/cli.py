@@ -6,6 +6,8 @@
     python3 main.py grid               # Grid View: posters ({var:nav})
     python3 main.py prompt   [text]    # Script Filter "Plex Prompt": text input with a Return row
     python3 main.py run      [input]   # Run Script: executes {var:cmd} with {var:payload}
+    python3 main.py more     [text]    # Universal Action "Plex" (→ on a row): the configured action
+    python3 main.py back     [text]    # ↩ in the Text View (media sheet): the page it was opened from
 """
 
 from __future__ import annotations
@@ -18,7 +20,7 @@ from . import alfred, plex
 from .context import Context
 from .system import failure, log, setup_logging
 
-MODES = ("browse", "search", "discover", "grid", "prompt", "run")
+MODES = ("browse", "search", "discover", "grid", "prompt", "run", "more", "back")
 
 
 def build_context(query: str, env: Mapping[str, str] | None = None) -> Context:
@@ -92,6 +94,42 @@ def run_command(ctx: Context, text: str) -> str:
     return alfred.run_output(intent)
 
 
+def more_output(ctx: Context, text: str) -> str:
+    """→ on a row, then ↩ on "Plex" (Alfred's actions panel): the action chosen in the configuration.
+
+    The text is the row's title: the media is found back in the rows of the last page shown. Any other text
+    (the action is offered for every text in Alfred) is searched in Plex Search.
+    """
+    from .media import MORE_PREFIX
+    from .system import log
+    from .views import last_arrows, last_page
+
+    text = text.strip()
+    path = last_arrows(ctx).get(text)
+    if path is None and text.startswith(MORE_PREFIX):
+        path = text[len(MORE_PREFIX):]
+    log.info("Right arrow on %r → %s (%s)", text, path or "Plex Search", ctx.settings.right_arrow)
+    if path is None:
+        intent = alfred.search(text)
+        intent.variables["back"] = "[]"
+        return alfred.run_output(intent)
+    from .views.arrow import intent_for
+
+    intent = intent_for(ctx, path)
+    # Return (or ⎋ / ↩ in the media sheet) comes back to the results the row came from
+    intent.variables["back"] = alfred.history_json(last_page(ctx))
+    return alfred.run_output(intent)
+
+
+def back_output(ctx: Context) -> str:
+    """Leave the media sheet (Text View) for the page it was opened from (top of the history)."""
+    intent = alfred.pop(ctx.history)
+    if intent is None:
+        intent = alfred.browse("")
+        intent.variables["back"] = "[]"
+    return alfred.run_output(intent)
+
+
 def main(argv: Sequence[str] | None = None, env: Mapping[str, str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     mode = argv[0] if argv else "browse"
@@ -99,8 +137,15 @@ def main(argv: Sequence[str] | None = None, env: Mapping[str, str] | None = None
         print(f"Unknown mode {mode!r}, expected one of {', '.join(MODES)}", file=sys.stderr)
         return 2
     text = argv[1] if len(argv) > 1 else ""
-    ctx = build_context(text.strip() if mode != "run" else "", env)
+    ctx = build_context(text.strip() if mode not in {"run", "more", "back"} else "", env)
     log.debug("%s nav=%r cmd=%r query=%r", mode, ctx.nav, ctx.var("cmd"), ctx.query)
-    output = run_command(ctx, text) if mode == "run" else render(mode, ctx)
+    if mode == "run":
+        output = run_command(ctx, text)
+    elif mode == "more":
+        output = more_output(ctx, text)
+    elif mode == "back":
+        output = back_output(ctx)
+    else:
+        output = render(mode, ctx)
     sys.stdout.write(output)
     return 0

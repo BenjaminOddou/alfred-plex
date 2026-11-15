@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 
+import json
+
 from .. import alfred, nav
 from ..alfred import Feedback, Intent, Item
 from ..context import Context
@@ -46,6 +48,8 @@ LABELS = {
     "start": "Getting Started",
     "shortcuts": "Shortcuts",
     "library": "Plex Libraries",
+    "more": "More details",
+    "posters": "Posters",
 }
 
 
@@ -124,9 +128,54 @@ def error_item(error: Exception) -> Item:
     return alfred.message(f"🚨 {text}", "See plex.log in Plex Help › Workflow Cache")
 
 
+LAST_PAGE = "last_page.json"
+
+
+def remember_page(ctx: Context, here: Intent | None, items: list[Item] | None = None) -> None:
+    """Keep the page on screen and the → targets of its rows.
+
+    → on a row opens Alfred's actions panel with the row's text (its title): the "Plex" action finds the media
+    back from that text, and Return comes back to this page. Universal Actions don't carry the workflow
+    variables, so both are kept in the cache.
+    """
+    if here is None:
+        return
+    arrows = {item.action: item.arrow for item in items or [] if item.action and item.arrow}
+    try:
+        ctx.settings.cache_dir.mkdir(parents=True, exist_ok=True)
+        (ctx.settings.cache_dir / LAST_PAGE).write_text(
+            json.dumps({"page": here.page(), "history": ctx.history, "arrows": arrows}, ensure_ascii=False),
+            encoding="utf-8")
+    except OSError:  # best effort
+        pass
+
+
+def _last(ctx: Context) -> dict:
+    try:
+        data = json.loads((ctx.settings.cache_dir / LAST_PAGE).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def last_page(ctx: Context) -> list[dict]:
+    """History stack ending with the last page shown by the workflow (see :func:`remember_page`)."""
+    data = _last(ctx)
+    try:
+        return alfred.parse_history(json.dumps([*data.get("history", []), data["page"]]))
+    except (KeyError, TypeError):
+        return []
+
+
+def last_arrows(ctx: Context) -> dict[str, str]:
+    """{row text: → target} of the last page shown."""
+    arrows = _last(ctx).get("arrows")
+    return arrows if isinstance(arrows, dict) else {}
+
+
 def render_browse(ctx: Context) -> Feedback:
     # Importing the sections registers their pages on the router.
-    from . import accounts, confirm, library, loading, media_page, menu, presets, servers, stats  # noqa: F401
+    from . import accounts, confirm, library, loading, media_page, menu, more, presets, servers, stats  # noqa: F401
     from . import help as _help  # noqa: F401
 
     path = ctx.nav
@@ -151,4 +200,6 @@ def render_browse(ctx: Context) -> Feedback:
         feedback.extend(result or [])
     here = None if path in TRANSIENT else alfred.browse(path, state=ctx.state or None)
     alfred.link(feedback.items, here, ctx.history)
+    if any(item.arrow for item in feedback.items):
+        remember_page(ctx, here, feedback.items)
     return feedback

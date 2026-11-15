@@ -14,9 +14,9 @@ from .. import alfred, filters, fmt, nav, posters
 from ..alfred import Feedback, Intent, Item, Mod
 from ..context import Context
 from ..details import human_duration
-from ..library import LibraryState, libtype, results
-from ..media import CLASSES, Source, title
-from . import error_item
+from ..library import LibraryState, libtype, results, search_text
+from ..media import CLASSES, PLAYABLE_STATE, TAGS, Source, nested_search, title, to_item
+from . import error_item, remember_page
 
 router = nav.Router()
 page = router.page
@@ -43,32 +43,45 @@ def grid_details(media: Any, kind: str) -> str:
                     rating and f"⭐ {rating}", g("contentRating"), resolution, played)
 
 
-def tile(ctx: Context, src: Source, media: Any, poster: Any, here: Intent) -> Item | None:
-    kind = CLASSES.get(type(media).__name__, (None, None))[0]
-    if kind is None or kind in {"actor", "director", "genre"}:
+def as_grid(intent: Intent | None) -> Intent | None:
+    """A Plex Search with a query opens its results as posters too (same action as the list, in the grid)."""
+    if intent is None or intent.action != "search" or not intent.arg or intent.variables.get("nav") != "search":
+        return intent
+    return alfred.grid("grid/search", state={"query": intent.arg})
+
+
+def tile(ctx: Context, src: Source, media: Any, poster: Any, here: Intent, watchlist: set[str]) -> Item | None:
+    """Same row as the list (every shortcut, the → action, Quick Look), with the poster and a footer."""
+    kind, image = CLASSES.get(type(media).__name__, (None, None))
+    if kind is None:
         return None
-    mid, key = src.machine_id, media.ratingKey
-    actions = alfred.browse(nav.join("media", mid, key))
-    intent = alfred.grid(nav.join("grid", "children", mid, key)) if kind in CONTAINERS else actions
-    label = title(media, kind)
-    item = Item(label, grid_details(media, kind), intent=intent,
-                icon=str(poster) if poster else alfred.icon(CLASSES[type(media).__name__][1]), text=label)
-    thumb = getattr(media, "thumb", None)
-    if thumb:
-        item.quicklook = src.plex.url(thumb, includeToken=True)
-    item.mods = {
-        "cmd": Mod("All the actions on this media", actions, alfred.icon("setting")),
-        "alt": Mod("Full details: cast, crew, ratings, files",
-                   alfred.run("media.details", mid=mid, key=key), alfred.icon("info")),
-    }
+    item = to_item(ctx, src, media, watchlist, here)
+    if item is None:
+        return None
+    if kind not in TAGS:
+        item.subtitle = grid_details(media, kind)
+        if getattr(media, "isPlayed", None) and kind in PLAYABLE_STATE and "✓" not in item.subtitle:
+            item.subtitle = fmt.join(item.subtitle, "✓ played")
+    item.icon = str(poster) if poster else alfred.icon(image)
+    item.intent = as_grid(item.intent)
+    for mod in item.mods.values():
+        mod.intent = as_grid(mod.intent)
+    item.match = fmt.join(item.title, kind, getattr(media, "year", None), src.server.get("friendlyName"),
+                          *(t.tag for t in (getattr(media, "genres", None) or [])[:4]))
     return item
 
 
-def tiles(ctx: Context, src: Source, medias: list[Any], here: Intent) -> list[Item]:
-    medias = [m for m in medias if getattr(m, "ratingKey", None)]  # tags (actors, genres) have no poster
-    found = posters.server_posters(ctx.settings, src.plex, medias)
-    rows = [tile(ctx, src, media, found.get(str(media.ratingKey)), here) for media in medias]
+def tiles(ctx: Context, src: Source, medias: list[Any], here: Intent, watchlist: set[str] | None = None) -> list[Item]:
+    if watchlist is None:
+        watchlist = ctx.watchlist(src.account_uuid) if src.account_uuid else set()
+    found = posters.server_posters(ctx.settings, src.plex, [m for m in medias if getattr(m, "ratingKey", None)])
+    rows = [tile(ctx, src, media, found.get(str(getattr(media, "ratingKey", ""))), here, watchlist)
+            for media in medias]
     return [row for row in rows if row]
+
+
+def list_tile(target: Intent, subtitle: str) -> Item:
+    return Item("☰ List view", subtitle, intent=target, icon=alfred.icon("library"))
 
 
 def return_tile(target: Intent, where: str) -> Item:
@@ -108,22 +121,30 @@ def library(ctx: Context, mid: str, key: str) -> list[Item]:
     items += [Item(f"✖ {state.labels.get(name, name)}", "Remove this filter",
                    intent=open_library(mid, key, state.without(name), ctx.history), icon=alfred.icon("delete"))
               for name in state.filters]
-    items.append(Item("☰ List view", "Same library as a list (with every shortcut)",
-                      intent=open_library(mid, key, state.replace(view="list"), ctx.history),
-                      icon=alfred.icon("library")))
+    items.append(list_tile(open_library(mid, key, state.replace(view="list"), ctx.history),
+                           "Same library as a list"))
+    query = search_text(ctx.store.alias, section, state)
+    items += [
+        Item("🔍 Open in Plex Search", query, intent=alfred.search(query), icon=alfred.icon("folder"), text=query),
+        Item("💾 Save as a preset", f"{query} ǀ ⏎ then type a title",
+             intent=alfred.ask("Preset Title/Subtitle", f"Save '{query}'", "preset.save", then=here, value=query),
+             icon=alfred.icon("preset")),
+    ]
     return items + tiles(ctx, src, results(section, state, _limit(ctx)), here)
 
 
 @page("grid/recent/<mid>")
 def recent(ctx: Context, mid: str) -> list[Item]:
     src = _source(ctx, mid)
-    return tiles(ctx, src, src.plex.library.recentlyAdded()[: _limit(ctx)], _here(ctx))
+    return [list_tile(alfred.browse(nav.join("servers", mid, "recent")), "Recently added as a list"),
+            *tiles(ctx, src, src.plex.library.recentlyAdded()[: _limit(ctx)], _here(ctx))]
 
 
 @page("grid/continue/<mid>")
 def continue_watching(ctx: Context, mid: str) -> list[Item]:
     src = _source(ctx, mid)
-    return tiles(ctx, src, src.plex.continueWatching(), _here(ctx))
+    return [list_tile(alfred.browse(nav.join("servers", mid, "continue")), "Continue watching as a list"),
+            *tiles(ctx, src, src.plex.continueWatching(), _here(ctx))]
 
 
 @page("grid/children/<mid>/<key>")
@@ -136,12 +157,16 @@ def children(ctx: Context, mid: str, key: str) -> list[Item]:
     header = Item(title(parent, kind), "⏎ all the actions on it",
                   intent=alfred.browse(nav.join("media", mid, key)),
                   icon=alfred.icon("setting"))
-    return [header, *tiles(ctx, src, medias, _here(ctx))]
+    items = [header]
+    nested = nested_search(ctx, parent, kind)
+    if nested:
+        items.append(list_tile(nested, "The same content as a list (Plex Search)"))
+    return [*items, *tiles(ctx, src, medias, _here(ctx))]
 
 
 @page("grid/search")
 def search(ctx: Context) -> list[Item]:
-    from .search import _library_search, collect, finder_for
+    from .search import _library_search, collect, finder_for, save_preset_item
 
     text = ctx.state.get("query", "")
     if text:
@@ -150,18 +175,25 @@ def search(ctx: Context) -> list[Item]:
     else:
         found, items = collect(ctx, filters.default_view(ctx.settings.default_view), _library_search)
     here = _here(ctx)
-    by_source: dict[str, tuple[Source, list[Any]]] = {}
-    for src, media, _ in found:
-        by_source.setdefault(src.machine_id, (src, []))[1].append(media)
-    for src, medias in by_source.values():
-        items += tiles(ctx, src, medias, here)
+    items = [
+        Item(f"🔍 {'Edit the search' if text else 'Search'}",
+             f"{text} ǀ type, live results as a list" if text else "Type, live results as a list",
+             intent=alfred.search(text), icon=alfred.icon("folder"), text=text or None),
+        *([save_preset_item(text, then=here)] if text else []),
+        *items,
+    ]
+    by_source: dict[str, tuple[Source, list[Any], set[str]]] = {}
+    for src, media, watchlist in found:
+        by_source.setdefault(src.machine_id, (src, [], watchlist))[1].append(media)
+    for src, medias, watchlist in by_source.values():
+        items += tiles(ctx, src, medias, here, watchlist)
     return items
 
 
 @page("grid/discover")
 def discover(ctx: Context) -> list[Item]:
     """Discover as posters: same shortcuts as the list (⌘ web, ⌃ infos, ⇧ watchlist...)."""
-    from .discover import _results
+    from .discover import _results, meta_key, poster_icons
     from .discover import to_item as discover_item
 
     saved = ctx.default_account()
@@ -170,16 +202,18 @@ def discover(ctx: Context) -> list[Item]:
     uuid = saved["uuid"]
     account = ctx.account(uuid)
     metas = _results(ctx, account, ctx.state.get("query", ""))
-    images = posters.url_posters(ctx.settings, account._session,
-                                 {_key(m): m["thumb"] for m in metas if str(m.get("thumb", "")).startswith("http")})
+    images = poster_icons(ctx, account, metas)
     watchlist = ctx.watchlist(uuid)
     here = _here(ctx)
-    items = []
+    text = ctx.state.get("query", "")
+    items = [Item(f"🔍 {'Edit the search' if text else 'Search'}",
+                  f"{text} ǀ type, live results as a list" if text else "Type, live results as a list",
+                  intent=alfred.discover(text), icon=alfred.icon("discover"), text=text or None)]
     for meta in metas:
         item = discover_item(ctx, uuid, meta, watchlist, here)
         if item is None:
             continue
-        poster = images.get(_key(meta))
+        poster = images.get(meta_key(meta))
         if poster:
             item.icon = str(poster)
         item.subtitle = fmt.join(meta.get("type"), meta.get("year"), meta.get("contentRating"),
@@ -188,17 +222,14 @@ def discover(ctx: Context) -> list[Item]:
     return items
 
 
-def _key(meta: dict) -> str:
-    return str(meta.get("guid") or meta.get("ratingKey") or meta.get("title"))
-
-
 @page("grid/watchlist/<uuid>")
 def watchlist(ctx: Context, uuid: str) -> list[Item]:
     account = ctx.account(uuid)
     medias = account.watchlist()
-    images = posters.url_posters(ctx.settings, account._session, {m.guid: getattr(m, "thumb", "") for m in medias})
+    images = posters.url_posters(ctx.settings, account._session, {m.guid: getattr(m, "thumb", "") for m in medias},
+                                 {m.guid: {"title": f"{m.title}{fmt.year(m.year)}", "kind": m.type} for m in medias})
     here = _here(ctx)
-    items = []
+    items = [list_tile(alfred.browse(nav.join("accounts", uuid, "watchlist")), "Your watchlist as a list")]
     for media in medias:
         label = f"{media.title}{fmt.year(media.year)}"
         poster = images.get(media.guid)
@@ -251,4 +282,5 @@ def render_grid(ctx: Context) -> Feedback:
     if len(feedback.items) == 1:
         feedback.add(alfred.message("Nothing to show", "No media here yet"))
     alfred.link(feedback.items, _here(ctx), ctx.history)
+    remember_page(ctx, _here(ctx), feedback.items)
     return feedback.dedupe()

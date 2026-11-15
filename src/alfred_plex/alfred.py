@@ -125,6 +125,9 @@ LABELS = {
     "media.played": "Updating the played state",
     "media.rate": "Saving the rating",
     "media.delete": "Deleting from the server",
+    "media.playlist_remove": "Removing from the playlist",
+    "posters.purge": "Purging the poster cache",
+    "posters.remove": "Removing the poster from the cache",
     "server.logs": "Downloading the server logs",
     "server.databases": "Downloading the databases",
     "stream": "Starting the player",
@@ -211,6 +214,10 @@ def link(items: list, here: Intent | None, history: list[dict]) -> None:
     """
     stack = (history + [here.page()]) if here is not None else list(history)
     for intent in _intents(items):
+        if intent.action == "details" and "back" not in intent.variables:
+            # the media sheet: ↩ in the Text View comes back to this page (main.py back)
+            intent.variables["back"] = history_json(stack)
+            continue
         if intent.action not in NAV_ACTIONS or "back" in intent.variables:
             continue
         intent.variables["back"] = history_json(stack)
@@ -272,6 +279,8 @@ class Item:
     autocomplete: str | None = None
     match: str | None = None
     key: str | None = None  # used to de-duplicate results (not sent to Alfred)
+    action: str | None = None  # Universal Actions text (→ on the row): the title, readable in Alfred's panel
+    arrow: str | None = None  # page path the → action runs on (found back from ``action``, see views.last_arrows)
 
     @property
     def valid(self) -> bool:
@@ -294,6 +303,11 @@ class Item:
             data["autocomplete"] = self.autocomplete
         if self.match:
             data["match"] = self.match
+        if self.action:
+            data["action"] = {"text": self.action}
+            # Alfred ignores "action" when "arg" is empty: pages opened with browse / grid don't read it.
+            if not data.get("arg") and (self.intent is None or self.intent.action in {"browse", "grid"}):
+                data["arg"] = self.action
         return data
 
 

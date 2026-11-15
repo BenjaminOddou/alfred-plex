@@ -5,7 +5,7 @@ from __future__ import annotations
 from .. import alfred, fmt, nav, stats
 from ..alfred import Feedback, Item, Mod
 from ..context import Context
-from ..media import Source, to_item
+from ..media import Source, prefetch_posters, to_item
 from . import export_item, page
 
 SECTION_SUBTYPES = {"show": ("season", "episode"), "artist": ("album", "track")}
@@ -88,8 +88,12 @@ def server(ctx: Context, mid: str) -> list[Item]:
     for title, subtitle, sub, icon in pages:
         items.append(Item(title, subtitle, intent=alfred.browse(nav.join("servers", mid, sub)), icon=alfred.icon(icon)))
     if account:
+        from .accounts import account_avatars
+
+        avatar = account_avatars(ctx, [account]).get(account["uuid"])
         items.append(Item(account.get("title", ""), account.get("subtitle", ""),
-                          intent=alfred.browse(nav.join("accounts", account["uuid"])), icon=alfred.icon("person")))
+                          intent=alfred.browse(nav.join("accounts", account["uuid"])),
+                          icon=avatar or alfred.icon("person")))
     return items
 
 
@@ -97,6 +101,7 @@ def server(ctx: Context, mid: str) -> list[Item]:
 def media_rows(ctx: Context, mid: str, medias, here) -> list[Item]:
     src = Source(ctx.store.server(mid) or {}, ctx.server(mid))
     watchlist = ctx.watchlist(src.account_uuid) if src.account_uuid else set()
+    prefetch_posters(ctx, [(src, media) for media in medias])
     rows = [to_item(ctx, src, media, watchlist, here) for media in medias]
     return [row for row in rows if row] or [alfred.message("Nothing here yet", icon_name="info")]
 
@@ -140,6 +145,24 @@ def session_quality(session) -> str:
     return fmt.join(mode, link and link.bandwidth and f"{link.bandwidth} kbps", link and link.location)
 
 
+def session_avatars(ctx: Context, found) -> dict[str, str]:
+    """{user name: avatar path} of the users watching (cached: the page refreshes every 5 seconds)."""
+    from .. import posters
+
+    wanted = {}
+    for session in found:
+        user = session._data.find("User") if getattr(session, "_data", None) is not None else None
+        name = getattr(session, "_username", None)
+        if user is not None and name and user.attrib.get("thumb", "").startswith("http"):
+            wanted[name] = (name, user.attrib["thumb"])
+    if not wanted:
+        return {}
+    try:
+        return {k: str(v) for k, v in posters.avatars(ctx.settings, posters.web_session(), wanted).items()}
+    except Exception:  # noqa: BLE001 - an avatar is a nice-to-have
+        return {}
+
+
 @page("servers/<mid>/sessions")
 def sessions(ctx: Context, mid: str) -> Feedback:
     saved = ctx.store.server(mid) or {}
@@ -153,6 +176,7 @@ def sessions(ctx: Context, mid: str) -> Feedback:
                               mid=mid),
             icon=alfred.icon("delete"),
         ))
+    avatars = session_avatars(ctx, found)
     for session in found:
         name = session_title(session)
         player = session.player
@@ -163,7 +187,7 @@ def sessions(ctx: Context, mid: str) -> Feedback:
             name,
             fmt.join(", ".join(session.usernames), where, f"{progress} {player.state if player else ''}".strip(),
                      session_quality(session)),
-            icon=alfred.icon("watch"),
+            icon=avatars.get(getattr(session, "_username", None) or "", alfred.icon("watch")),
             text=name,
             mods={
                 "cmd": Mod(

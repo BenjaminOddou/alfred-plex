@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from .. import alfred, fmt, nav
+from .. import alfred, fmt, nav, posters
 from .. import details as sheets
 from ..alfred import Intent, Item, Mod
 from ..context import Context
@@ -116,6 +116,8 @@ def media_page(ctx: Context, mid: str, key: str) -> list[Item]:
         sheet = alfred.run("media.details", mid=mid, key=key)
     items.append(Item("📖 Full details", "Poster, summary, cast, crew, ratings, files and streams ǀ ⎋ to come back",
                       intent=sheet, icon=alfred.icon("info")))
+    items.append(Item("🔎 More details", "Summary, cast, crew, ratings, files as a list",
+                      intent=alfred.browse(nav.join("more", mid, key)), icon=alfred.icon("info")))
     if kind in {"show", "season", "artist", "album", "collection", "playlist"}:
         items.append(Item("🖼️ Show its content as posters", "Seasons, episodes, albums, tracks or items",
                           intent=alfred.grid(nav.join("grid", "children", mid, key)),
@@ -164,11 +166,13 @@ def media_page(ctx: Context, mid: str, key: str) -> list[Item]:
                               intent=alfred.mtv(f"{'m' if kind == 'movie' else 't'}:{tmdb}"),
                               icon=alfred.icon("movie_and_tv_show_search")))
     if kind not in {"playlist", "collection", "photoalbum", "photo"}:
-        items.append(Item("➕ Add to a playlist", "Choose or create a playlist",
+        items.append(Item("➕ Playlists", "Its playlists first (⏎ remove), then the others (⏎ add) or a new one",
                           intent=alfred.browse(nav.join("media", mid, key, "playlists")),
                           icon=alfred.icon("playlist")))
     if kind not in {"playlist", "collection", "episode", "track", "season"}:
-        items.append(Item("🗂️ Collections", "Add to or remove from a collection",
+        names = sorted((t.tag for t in getattr(media, "collections", None) or []), key=str.lower)
+        items.append(Item("🗂️ Collections", fmt.join(f"In: {', '.join(names)}" if names else "In no collection",
+                                                      "add or remove"),
                           intent=alfred.browse(nav.join("media", mid, key, "collections")),
                           icon=alfred.icon("collection")))
     items += _files(ctx, src, media, label)
@@ -176,6 +180,11 @@ def media_page(ctx: Context, mid: str, key: str) -> list[Item]:
         items.append(Item("⬇️ Download", f"Save the file(s) in {ctx.settings.downloads_dir}",
                           intent=alfred.run("media.download", mid=mid, key=key, title=label),
                           icon=alfred.icon("download")))
+    poster = posters.server_poster(ctx.settings, src.plex, media)
+    if poster:
+        items.append(Item("🧹 Remove the cached poster", "Downloaded again the next time it is shown",
+                          intent=alfred.run("posters.remove", then=here, name=poster.name, title=label),
+                          icon=str(poster)))
     items += [
         Item("🔄 Refresh metadata", "Download fresh infos and artwork from the internet",
              intent=alfred.run("media.refresh", then=here, mid=mid, key=key, title=label), icon=alfred.icon("refresh")),
@@ -191,8 +200,22 @@ def media_page(ctx: Context, mid: str, key: str) -> list[Item]:
     return items
 
 
+def _playlist_members(src: Source, playlists: list[Any], key: str) -> dict[str, int]:
+    """{playlist ratingKey: items of the media in it} (a show / season counts its episodes)."""
+    from ..plex import parallel
+
+    def count(playlist) -> tuple[str, int]:
+        data = src.plex.query(f"/playlists/{playlist.ratingKey}/items")
+        found = sum(1 for element in data if key in {element.attrib.get(name) for name in (
+            "ratingKey", "parentRatingKey", "grandparentRatingKey")})
+        return str(playlist.ratingKey), found
+
+    return {r[0]: r[1] for r in parallel(count, playlists) if not isinstance(r, Exception) and r[1]}
+
+
 @page("media/<mid>/<key>/playlists")
 def playlists(ctx: Context, mid: str, key: str) -> list[Item]:
+    """The playlists of the media first (⏎ removes it), then the others (⏎ adds it)."""
     src, media, kind = _load(ctx, mid, key)
     label = title(media, kind)
     wanted = "video" if kind in VIDEO_KINDS else "audio" if kind in AUDIO | {"artist"} else "photo"
@@ -201,9 +224,22 @@ def playlists(ctx: Context, mid: str, key: str) -> list[Item]:
                   intent=alfred.ask("Playlist name", f"New playlist with {label}", "media.playlist_new",
                                     then=back, mid=mid, key=key, title=label),
                   icon=alfred.icon("add"))]
-    for playlist in src.plex.playlists(playlistType=wanted):
-        if getattr(playlist, "smart", False):
-            continue
+    found = [p for p in src.plex.playlists(playlistType=wanted) if not getattr(p, "smart", False)]
+    members = _playlist_members(src, found, str(key))
+    inside = [p for p in found if str(p.ratingKey) in members]
+    others = [p for p in found if str(p.ratingKey) not in members]
+    for playlist in inside:
+        count = members[str(playlist.ratingKey)]
+        what = "this media" if count == 1 else f"{count} of its items"
+        items.append(Item(f"✓ {playlist.title}",
+                          fmt.join(f"Contains {what}", fmt.plural(playlist.leafCount, "item"), "⏎ remove it"),
+                          intent=alfred.run("media.playlist_remove", then=back, mid=mid, key=key, title=label,
+                                            playlist=playlist.ratingKey, name=playlist.title),
+                          icon=alfred.icon("ok")))
+    if not inside:
+        items.append(alfred.message(f"{label} is in no playlist yet", "Pick one below or create a new one",
+                                    icon_name="playlist"))
+    for playlist in others:
         items.append(Item(playlist.title, fmt.join(fmt.plural(playlist.leafCount, "item"), "⏎ add the media"),
                           intent=alfred.run("media.playlist", then=back, mid=mid, key=key, title=label,
                                             playlist=playlist.ratingKey, name=playlist.title),
@@ -213,6 +249,7 @@ def playlists(ctx: Context, mid: str, key: str) -> list[Item]:
 
 @page("media/<mid>/<key>/collections")
 def collections(ctx: Context, mid: str, key: str) -> list[Item]:
+    """The collections of the media first (⏎ removes it), then the others (⏎ adds it)."""
     src, media, kind = _load(ctx, mid, key)
     label = title(media, kind)
     current = {t.tag for t in getattr(media, "collections", None) or []}
@@ -222,13 +259,18 @@ def collections(ctx: Context, mid: str, key: str) -> list[Item]:
                                     then=here, mid=mid, key=key, title=label, add=True),
                   icon=alfred.icon("add"))]
     section = src.plex.library.sectionByID(media.librarySectionID)
-    names = sorted({c.title for c in section.collections()} | current)
-    for name in names:
-        member = name in current
-        items.append(Item(
-            f"{'✓ ' if member else ''}{name}",
-            "⏎ remove the media from this collection" if member else "⏎ add the media to this collection",
-            intent=alfred.run("media.collection", then=here, mid=mid, key=key, title=label, name=name, add=not member),
-            icon=alfred.icon("collection"),
-        ))
+    names = {c.title for c in section.collections()} | current
+    for name in sorted(current, key=str.lower):
+        items.append(Item(f"✓ {name}", "The media is in this collection ǀ ⏎ remove it",
+                          intent=alfred.run("media.collection", then=here, mid=mid, key=key, title=label, name=name,
+                                            add=False),
+                          icon=alfred.icon("ok")))
+    if not current:
+        items.append(alfred.message(f"{label} is in no collection yet", "Pick one below or create a new one",
+                                    icon_name="collection"))
+    for name in sorted(names - current, key=str.lower):
+        items.append(Item(name, "⏎ add the media to this collection",
+                          intent=alfred.run("media.collection", then=here, mid=mid, key=key, title=label, name=name,
+                                            add=True),
+                          icon=alfred.icon("collection")))
     return items

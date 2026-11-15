@@ -16,6 +16,10 @@ DEFAULT_DATA_DIR = f"~/Library/Application Support/Alfred/Workflow Data/{BUNDLE_
 DEFAULT_CACHE_DIR = f"~/Library/Caches/com.runningwithcrayons.Alfred/Workflow Data/{BUNDLE_ID}"
 DISABLED = {"", "false", "none", "0", "off"}
 MEDIA_PLAYERS = ("vlc", "iina", "infuse")
+# How Plex Search / Plex Discover show their results (``search_view`` setting).
+SEARCH_VIEWS = ("list", "list_posters", "grid")
+# What → then ↩ on "Plex" (Alfred's actions panel) does on a media (``right_arrow`` setting).
+RIGHT_ARROW_ACTIONS = ("sheet", "more", "actions", "play", "web")
 
 
 def _text(env: Mapping[str, str], key: str, default: str) -> str:
@@ -41,6 +45,12 @@ def _shortcut(env: Mapping[str, str], key: str, default: str) -> str:
     """Return a modifier key ("cmd", "alt+shift"...), "arg" for ⏎ or "" when disabled."""
     value = env.get(key, default)
     return "" if value is None or value.strip().lower() in DISABLED else value.strip()
+
+
+def _choice(env: Mapping[str, str], key: str, choices: tuple[str, ...]) -> str:
+    """One of ``choices`` (the first one is the default)."""
+    value = _text(env, key, choices[0]).lower()
+    return value if value in choices else choices[0]
 
 
 def parse_literal(text: str):
@@ -113,6 +123,8 @@ class Settings:
     stale_days: int = 90
     grid_columns: int = 5
     media_player: str = "vlc"
+    search_view: str = "list"
+    right_arrow: str = "sheet"
     shortcuts: Shortcuts = field(default_factory=Shortcuts)
 
     @classmethod
@@ -138,10 +150,22 @@ class Settings:
             stale_days=_int(env, "days_devices", 90),
             grid_columns=min(10, _int(env, "grid_columns", 5, minimum=2)),
             media_player=player if player in MEDIA_PLAYERS else "vlc",
+            search_view=_choice(env, "search_view", SEARCH_VIEWS),
+            right_arrow=_choice(env, "right_arrow", RIGHT_ARROW_ACTIONS),
             shortcuts=Shortcuts(**{
                 name: _shortcut(env, variable, default) for variable, name, default, _ in Shortcuts.FIELDS
             }),
         )
+
+    @property
+    def list_posters(self) -> bool:
+        """Lists show posters as icons (downloaded in the cache): "List with posters" and "Grid" views."""
+        return self.search_view in {"list_posters", "grid"}
+
+    @property
+    def grid_view(self) -> bool:
+        """Plex Search / Discover results open in the Grid View."""
+        return self.search_view == "grid"
 
     def ensure_dirs(self) -> None:
         for folder in (self.data_dir, self.cache_dir):

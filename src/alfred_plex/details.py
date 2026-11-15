@@ -40,14 +40,15 @@ def _source(image: str | None) -> str:
 
 
 def _escape(text: object) -> str:
-    return str(text).replace("|", "\\|").replace("\n", " ")
+    return str(text).replace("\n", " ")
 
 
 def _table(rows: list[tuple[str, Any]]) -> list[str]:
+    """``- **Name:** value`` lines (Alfred's Text View doesn't render Markdown tables)."""
     rows = [(k, v) for k, v in rows if v not in (None, "", [], ())]
     if not rows:
         return []
-    return ["| | |", "|---|---|", *[f"| **{k}** | {_escape(v)} |" for k, v in rows], ""]
+    return [*[f"- **{k}:** {_escape(v)}" for k, v in rows], ""]
 
 
 def _ids(media: Any) -> str:
@@ -162,3 +163,50 @@ def prepare(ctx: Any, server: Any, media: Any, mid: str) -> Path:
     saved = ctx.store.server(mid) or {}
     text = sheet(media, kind, title(media, kind), saved.get("friendlyName", ""), relative, ctx.settings.date_format)
     return write(ctx.settings.cache_dir, f"{mid}-{media.ratingKey}", text)
+
+
+# ---------------------------------------------------------------- discover
+def discover_sheet(element: Any, kind: str, label: str, poster: str | None) -> str:
+    """Markdown sheet of a Plex Discover movie / show (XML metadata from metadata.provider.plex.tv)."""
+    a = (element.attrib if element is not None else {}).get
+    tags = lambda tag: ", ".join(e.attrib.get("tag", "") for e in (element.iter(tag) if element is not None else [])
+                                 if e.attrib.get("tag"))  # noqa: E731
+    lines: list[str] = []
+    if poster:
+        lines += [f"![Poster]({poster})", ""]
+    lines += [f"# {label}", ""]
+    if a("tagline"):
+        lines += [f"*{a('tagline')}*", ""]
+    duration = human_duration(int(a("duration"))) if str(a("duration") or "").isdigit() else ""
+    seasons = fmt.plural(a("childCount"), "season") if kind == "show" and a("childCount") else ""
+    lines.append(" · ".join(p for p in (
+        f"**{kind.capitalize()}**", duration, seasons, a("contentRating"), a("studio"),
+        a("originallyAvailableAt") and f"Released {a('originallyAvailableAt')}", "Plex Discover",
+    ) if p))
+    ratings = [a("audienceRating") and f"⭐ Audience {a('audienceRating')}/10",
+               a("rating") and f"Critics {a('rating')}/10"]
+    if any(ratings):
+        lines += ["", " · ".join(r for r in ratings if r)]
+    lines.append("")
+    if a("summary"):
+        lines += [a("summary").strip(), ""]
+    roles = list(element.iter("Role")) if element is not None else []
+    if roles:
+        lines += ["## 🎭 Cast", ""]
+        for role in roles[:MAX_CAST]:
+            character = role.attrib.get("role")
+            lines.append(f"- **{role.attrib.get('tag', '')}**" + (f" as {character}" if character else ""))
+        if len(roles) > MAX_CAST:
+            lines.append(f"- … and {len(roles) - MAX_CAST} more")
+        lines.append("")
+    crew = _table([("Directors", tags("Director")), ("Writers", tags("Writer"))])
+    if crew:
+        lines += ["## 🎬 Crew", "", *crew]
+    ids = " · ".join(
+        f"{name} {value}" for provider, name in (("tmdb", "TMDB"), ("imdb", "IMDb"), ("tvdb", "TVDB"))
+        for guid in (element.iter("Guid") if element is not None else [])
+        for p, _, value in [str(guid.attrib.get("id", "")).partition("://")] if p == provider)
+    info = _table([("Genres", tags("Genre")), ("Countries", tags("Country")), ("IDs", ids)])
+    if info:
+        lines += ["## ℹ️ Details", "", *info]
+    return "\n".join(lines).rstrip() + "\n"

@@ -115,7 +115,7 @@ STREAMS = """<MediaContainer size="1">
 SESSIONS = """<MediaContainer size="1">
 <Video ratingKey="10" key="/library/metadata/10" type="movie" title="The Matrix" year="1999" sessionKey="42"
        viewOffset="600000">
-  <User id="1" title="neo"/>
+  <User id="1" title="neo" thumb="https://img/neo.png"/>
   <Player machineIdentifier="tv-1" product="Plex for LG" device="OLED" platform="webOS" state="playing"/>
   <Session id="abc123" bandwidth="1000" location="lan"/>
 </Video></MediaContainer>"""
@@ -351,7 +351,9 @@ class FakeAccount:
             SimpleNamespace(guid="plex://movie/5d7768", title="The Matrix", type="movie", year=1999,
                             duration=8160000, childCount=None, thumb="https://img/w1.jpg", contentRating="R"),
         ]
-        self._session = FakeSession({"/w1.jpg": "WATCHLIST-POSTER", "/1.jpg": "DISCOVER-POSTER"})
+        self.thumb = "https://img/neo.png"
+        self._session = FakeSession({"/w1.jpg": "WATCHLIST-POSTER", "/1.jpg": "DISCOVER-POSTER",
+                                     "/neo.png": "\x89PNG-NEO", "/trinity.png": "\x89PNG-TRINITY"})
         self.added: list[str] = []
         self.removed: list[str] = []
         self.queries: list[tuple[str, dict]] = []
@@ -396,7 +398,8 @@ class FakeAccount:
     def users(self):
         server = SimpleNamespace(numLibraries=3, name="Home Server")
         return [SimpleNamespace(title="trinity", username="trinity", email="trinity@example.com", home=False,
-                                restricted=False, servers=[server, server])]
+                                restricted=False, servers=[server, server], id=2,
+                                thumb="https://img/trinity.png")]
 
     def query(self, url, method=None, headers=None, params=None, **_):
         self.queries.append((url, dict(params or {})))

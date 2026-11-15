@@ -70,7 +70,7 @@ The menu subtitles show what is configured (servers, accounts, presets).
 - **Alfred stays open**: while an action runs (rating, played state, sync, export...), a **⏳ loading page**
   shows what is happening, then the page you were on comes back with a ✅ / 🚨 banner. Long actions (exports,
   downloads, sign in) also send a notification, you can close Alfred meanwhile.
-- **Full details** open on top of the current page: <kbd>⎋</kbd> brings you back to it.
+- **Full details** open on top of the current page: <kbd>⎋</kbd> (or <kbd>↩</kbd>) brings you back to it.
 - Pages are filtered by Alfred while you type (type `set` in a server page to only see `Settings`).
 - After an action (watchlist, preset, alias...) you come back to the page you were on, **with your search
   query**, instead of an empty search.
@@ -93,14 +93,62 @@ chosen in lists, nothing to type:
   duration, rating, content rating, resolution and ✓ played; type to filter the posters by title.
 - **🔍 Open in Plex Search** / **💾 Save as a preset**: the selection becomes a regular filter query.
 
-In the Grid View: <kbd>⏎</kbd> opens the media actions page (or the seasons / episodes / albums / tracks / items
-of a show, season, artist, album or collection), <kbd>⌘</kbd><kbd>⏎</kbd> the actions page,
-<kbd>⌥</kbd><kbd>⏎</kbd> the **full details sheet**. Posters are also available for Plex Search results, Plex
+In the Grid View, **a poster does exactly what its row does in the list**: same keys, same shortcuts (⏎, ⌘⏎,
+⌥⏎, ⌃⏎, ⇧⏎, fn⏎, ⌘⇧⏎ as configured), the → action, ⇧ / ⌘Y Quick Look. A nested search (seasons of a show,
+tracks of an album, medias of an actor...) opens as posters too. Every grid also has the rows of its list:
+*🔍 Edit the search*, *💾 Save as a preset*, *☰ List view*, sort and filters for a library. Type in the grid to
+filter the posters (title, year, type, server, genres). Posters are available for Plex Search results, Plex
 Discover results, your watchlist, recently added, continue watching and the content of any show / collection
 (*🖼️ Show as posters* rows). The number of columns is the `🖼️ Poster columns` setting.
 
 Posters are resized by your server (300×450) and cached: they are downloaded once, then also used as icons in
 the list views.
+
+### 🖼️ Results view: list, list with posters or grid
+
+Choose how **Plex Search** and **Plex Discover** show their results with the `🔎 Results view` setting
+([Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/)):
+
+| Setting | What you get |
+| --- | --- |
+| **☰ List (no images)** *(default)* | the classic list with type icons: the fastest. |
+| **🖼️ List with posters** | the same list, each row shows the poster (Plex Search, Plex Discover, libraries, recently added, continue watching, watchlist). |
+| **▦ Grid (posters)** | you search exactly like in the list (live results with posters while you type), the first row **🖼️ Show as posters** (<kbd>⏎</kbd>) shows them in Alfred's Grid View, with the same shortcuts. Empty Plex Search: <kbd>⏎</kbd> on a library opens its posters (<kbd>⌘</kbd><kbd>⏎</kbd> as a list). |
+
+> Alfred's Grid View can't run a search on each keystroke (its script runs once, typing only filters the
+> posters already shown). So the search is typed in Plex Search / Plex Discover, and *🔍 Edit the search* in the
+> grid brings you back to it with your query.
+
+### 🧹 Poster cache
+
+Posters are kept in **Alfred's cache folder** (`~/Library/Caches/com.runningwithcrayons.Alfred/Workflow
+Data/com.benjamino.plex/posters`), with the user avatars. **Plex Help › Workflow Cache & Logs › 🖼️ Posters &
+avatars** lists them (type to find one) with their size:
+
+- **🧹 Purge all posters** removes them all (with a confirmation).
+- <kbd>⏎</kbd> on a poster removes only this one, <kbd>⌘</kbd><kbd>⏎</kbd> shows it in Finder.
+- The media actions page also has **🧹 Remove the cached poster**.
+
+A removed poster is downloaded again the next time it is shown.
+
+### ➡️ Right arrow: an action of your choice
+
+Press <kbd>→</kbd> on a media (Plex Search, Plex Discover, libraries, recently added, posters...): Alfred shows its
+actions panel for the media title (`The Matrix (1999) · Home Server`). Type `plex` (or pick **Plex**, Alfred puts it
+first once you used it) and <kbd>↩</kbd>: the action chosen in the `➡️ Right arrow` setting runs:
+
+| Setting | Action |
+| --- | --- |
+| **📖 Full details** *(default)* | the media sheet (Text View): poster, summary, ratings, cast, crew, files. <kbd>⎋</kbd> or <kbd>↩</kbd> goes back to your results. |
+| **🔎 More details** | the same as a list: summary, cast (⏎ their medias), crew, files, ids... **Return** goes back. |
+| **⚙️ Media actions page** | play, mark played, rate, playlists, collections, download... |
+| **▶️ Play** | streams with your media player (Plex Discover: More details). |
+| **🌐 Open in Plex Web** | app.plex.tv. |
+
+> Alfred always opens its actions panel on <kbd>→</kbd> (Universal Actions): a workflow can't skip it, hence
+> the <kbd>↩</kbd> on **Plex**. The other actions of the panel (Copy, Large Type...) use the title.
+> <kbd>←</kbd> closes the panel. *Plex* on any other text in Alfred searches it in Plex Search. The media actions
+> page also has a *🔎 More details* row.
 
 ### 📖 Full details sheet
 
@@ -168,7 +216,8 @@ The last row, **💾 Save this search as a preset**, keeps the current query in 
 
 The **media actions page** gathers everything in one place: play, browse children (seasons, episodes,
 tracks...), go to the show / season / album, open on the web, mark played / unplayed, ⭐ rate (0-10), watchlist,
-Movie and TV Show Search, ➕ add to a playlist (or create one), 🗂️ add to / remove from collections, 📄 file(s)
+Movie and TV Show Search, ➕ playlists and 🗂️ collections (**the ones the media is in come first**, ⏎ removes it
+from them, then the others, ⏎ adds it, or create a new one), 📄 file(s)
 details (size, container, resolution, codecs, bitrate; ⏎ shows the file in Finder when it's on this Mac or copies
 its path, ⌘⏎ copies the direct stream link), ⬇️ download, 🔄 refresh metadata, 🔍 analyze, ℹ️ infos (⌘L for the
 summary) and 🗑️ delete from the server (needs *Allow media deletion* in the server settings). **Return** brings you
@@ -235,7 +284,9 @@ In this section you can:
 - **Sync** the account (refresh its data and reconnect its servers).
 - See the list of your servers. Servers that aren't added to the workflow are greyed out: press <kbd>⏎</kbd>
   to sync them.
-- See connected users (and export them to CSV).
+- See your friends and connected users **with their avatar** (and export them to CSV). Avatars are also shown on
+  your connected accounts and on the server sessions. They stay in the Alfred cache with the posters (no download
+  to your folders).
 - Manage devices, sorted by last activity (`Last seen 3 days ago`):
   - **Clean up old devices**: removes in one go the devices not seen for 90+ days (`🧹 Old devices` setting).
     Servers and this workflow are never removed.

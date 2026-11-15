@@ -134,7 +134,7 @@ def test_device_removal_of_current_device_warns(env, plex_online):
 def test_account_users(env, plex_online):
     items = page(env, nav.join("accounts", fakes.ACCOUNT_UUID, "users"))
     assert json.loads(items[1]["variables"]["payload"])["kind"] == "users"
-    assert "trinity has access to 6 libraries" in items[2]["subtitle"]
+    assert "trinity has access to 6 libraries" in by_title(items, "trinity")["subtitle"]
 
 
 def test_account_watchlist_rows(env, plex_online):

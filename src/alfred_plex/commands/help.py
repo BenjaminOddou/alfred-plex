@@ -39,3 +39,22 @@ def clear(ctx: Context, text: str) -> None:
         # Presets are personal work: they survive a data cleanup (same as v2).
         count = clear_folder(ctx.settings.data_dir, keep=("presets.json",))
     success(ctx.settings, f"{kind.capitalize()} folder cleared ({count} file(s) removed)")
+
+
+@command("posters.purge")
+def purge_posters(ctx: Context, text: str) -> None:
+    from .. import fmt, posters
+
+    count, size = posters.purge(ctx.settings)
+    success(ctx.settings, f"Poster cache purged ({count} poster(s), {fmt.size(size)})")
+
+
+@command("posters.remove")
+def remove_poster(ctx: Context, text: str) -> None:
+    from .. import posters
+
+    name = ctx.payload.get("title") or "The poster"
+    if posters.remove(ctx.settings, ctx.payload.get("name", "")):
+        success(ctx.settings, f"Poster of {name} removed from the cache")
+    else:
+        warning(ctx.settings, f"Poster of {name} is not in the cache anymore")
