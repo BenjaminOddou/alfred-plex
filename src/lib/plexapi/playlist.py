@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 from itertools import groupby
 from pathlib import Path
@@ -8,16 +7,12 @@ from plexapi import media, utils
 from plexapi.base import Playable, PlexPartialObject, cached_data_property
 from plexapi.exceptions import BadRequest, NotFound, Unsupported
 from plexapi.library import LibrarySection, MusicSection
-from plexapi.mixins import SmartFilterMixin, ArtMixin, PosterMixin, PlaylistEditMixins
-from plexapi.utils import deprecated
+from plexapi.mixins import PlaylistMixins
 
 
 @utils.registerPlexObject
 class Playlist(
-    PlexPartialObject, Playable,
-    SmartFilterMixin,
-    ArtMixin, PosterMixin,
-    PlaylistEditMixins
+    PlexPartialObject, Playable, PlaylistMixins
 ):
     """ Represents a single Playlist.
 
@@ -26,6 +21,8 @@ class Playlist(
             TYPE (str): 'playlist'
             addedAt (datetime): Datetime the playlist was added to the server.
             allowSync (bool): True if you allow syncing playlists.
+            centroid (:class:`~plexapi.audio.Artist`): The centroid artist a personalized
+                'Mix For You' playlist is built around, or None for regular playlists.
             composite (str): URL to composite image (/playlist/<ratingKey>/composite/<compositeid>)
             content (str): The filter URI string for smart playlists.
             duration (int): Duration of the playlist in milliseconds.
@@ -80,6 +77,11 @@ class Playlist(
     @cached_data_property
     def fields(self):
         return self.findItems(self._data, media.Field)
+
+    @cached_data_property
+    def centroid(self):
+        from plexapi.audio import Artist
+        return self.findItem(self._data, cls=Artist, centroid='1')
 
     def __len__(self):  # pragma: no cover
         return len(self.items())
@@ -189,17 +191,22 @@ class Playlist(
     @cached_data_property
     def _items(self):
         """ Cache for items. """
+        return self._fetchItems()
+
+    def _fetchItems(self, libtype=None):
+        """ Returns a list of all items in the playlist, optionally filtered by library type. """
         if self.radio:
             return []
 
-        key = f'{self.key}/items'
+        params = {'type': utils.searchType(libtype)} if libtype else {}
+        key = self._buildQueryKey(f'{self.key}/items', **params)
         items = self.fetchItems(key)
 
         # Cache server connections to avoid reconnecting for each item
         _servers = {}
         for item in items:
-            if item.sourceURI:
-                serverID = item.sourceURI.split('/')[2]
+            if sourceURI := getattr(item, 'sourceURI', None):
+                serverID = sourceURI.split('/')[2]
                 if serverID not in _servers:
                     try:
                         _servers[serverID] = self._server.myPlexAccount().resource(serverID).connect()
@@ -210,8 +217,16 @@ class Playlist(
 
         return items
 
-    def items(self):
-        """ Returns a list of all items in the playlist. """
+    def items(self, libtype=None):
+        """ Returns a list of all items in the playlist.
+
+            Parameters:
+                libtype (str): Optional filter to return items grouped by a specific library type
+                    (movie, show, season, episode, artist, album, track, photoalbum, photo).
+                    (e.g. shows in a playlist, or albums in a playlist)
+        """
+        if libtype:
+            return self._fetchItems(libtype=libtype)
         return self._items
 
     def get(self, title):
@@ -252,10 +267,6 @@ class Playlist(
             self._server.query(key, method=self._server._session.put)
 
         return self
-
-    @deprecated('use "removeItems" instead')
-    def removeItem(self, item):
-        self.removeItems(item)
 
     def removeItems(self, items):
         """ Remove items from the playlist.
@@ -344,21 +355,6 @@ class Playlist(
         key = f'{self.key}{utils.joinArgs(kwargs)}'
         self._server.query(key, method=self._server._session.put)
         return self
-
-    @deprecated('use "editTitle" and "editSummary" instead')
-    def edit(self, title=None, summary=None):
-        """ Edit the playlist.
-
-            Parameters:
-                title (str, optional): The title of the playlist.
-                summary (str, optional): The summary of the playlist.
-        """
-        args = {}
-        if title:
-            args['title'] = title
-        if summary:
-            args['summary'] = summary
-        return self._edit(**args)
 
     def delete(self):
         """ Delete the playlist. """

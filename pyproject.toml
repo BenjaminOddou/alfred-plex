@@ -1,0 +1,27 @@
+# Development tooling only: the workflow itself ships its dependencies in src/lib.
+[project]
+name = "alfred-plex"
+version = "3.0.0"
+description = "Alfred workflow to browse and manage Plex Media Servers"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -p no:cacheprovider"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["src/lib"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP", "SIM", "I"]
+ignore = ["E731", "SIM108", "UP007", "UP045"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/fakes.py" = ["E501"]
+"src/main.py" = ["UP031"]  # must stay parseable by old Pythons to print a nice error

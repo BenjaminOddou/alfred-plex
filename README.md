@@ -3,7 +3,8 @@
 
 [![made with heart by Benjamin Oddou](https://img.shields.io/badge/made%20with%20%E2%99%A5%20by-benjamin%20oddou-DBA33A.svg?style=flat)](https://github.com/BenjaminOddou)
 [![saythanks](https://img.shields.io/badge/say-thanks-000000.svg?style=flat)](https://saythanks.io/to/BenjaminOddou)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-986821.svg)](https://www.python.org/downloads/macos/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-986821.svg)](https://www.python.org/downloads/macos/)
+[![python-plexapi 4.18](https://img.shields.io/badge/python--plexapi-4.18.3-e5a00d.svg)](https://github.com/pkkid/python-plexapi)
 
 ✨ Welcome to the Alfred Plex repository: **An Alfred Workflow** ✨
 
@@ -11,190 +12,331 @@
 
 ## ✅ Prerequisites
 
-- MacOS.
-- Alfred 5. Note that the [Alfred Powerpack](https://www.alfredapp.com/powerpack/) is required to use workflows.
+- macOS.
+- **Alfred 5.5 or above** (Grid View and Text View) with the [Alfred Powerpack](https://www.alfredapp.com/powerpack/).
 - An access to a plex media server.
-- Requires **python 3.9** or above.
+- **Python 3.10 or above** (required by python-plexapi 4.18). The Python shipped with the Xcode command line tools
+  is 3.9: install a recent one with [Homebrew](https://brew.sh) (`brew install python`) or from
+  [python.org](https://www.python.org/downloads/macos/). The workflow looks for `python3` in `/opt/homebrew/bin`,
+  `/usr/local/bin` then in the system `PATH`, and tells you when the version is too old.
+
+```shell
+python3 --version
+```
 
 ## ⬇️ Installation
 
 1. [Download the workflow](https://github.com/BenjaminOddou/alfred-plex/releases/latest).
 2. Double click the `.alfredworkflow` file to install.
 
+Upgrading from 2.x keeps your accounts, servers, presets and aliases (2.x removed them at every update).
+
 ## 🏎️ Plex API
 
-This workflow uses the [Python-PlexAPI](https://github.com/pkkid/python-plexapi) but doesn't cover all capabilities of this tool. If you see a good feature from the Python-PlexAPI that can be incorporated in this workflow, please let me know by opening an issue or sending a pull request.
-
-## 🧰 Setup the workflow
-
-Install Python. Check your version with:
-
-```shell
-python --version
-```
+This workflow uses [Python-PlexAPI](https://github.com/pkkid/python-plexapi) **4.18.3** and doesn't cover all
+capabilities of this tool. If you see a good feature from the Python-PlexAPI that can be incorporated in this
+workflow, please let me know by opening an issue or sending a pull request.
 
 ## 🧙‍♂️ Invoke the workflow
 
-Launch the menu with `plex`. You can edit this trigger in the [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/) panel.
+Launch the menu with `plex` (the keyword can be changed in the
+[Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/) panel). **New here?** The menu shows *Sign in with Plex* and *Getting started*: one press on ⏎ and your servers
+are added.
 
-The workflow is divided in 6 parts :
+The workflow is divided in 6 parts:
 
-1. Search medias throughout your servers.
-2. Search medias using discover.
-3. Manage your plex accounts.
-4. Manage servers and perform actions.
-5. Manage presets to rapidly search medias.
-6. Workflow configuration + filter & sort options.
+1. 🔎 **Plex Search**: type to search your servers; **empty, it lists your libraries** to browse them as a list or
+   **as posters**, sorted and filtered by picking. ⏎ on a media opens all its actions.
+2. 🧭 **Plex Discover**: search movies, shows and people on Plex Discover (also as posters).
+3. 👥 **Plex Accounts**: sign in with Plex, users, devices (clean up old ones), watchlist.
+4. 🖥️ **Plex Media Servers**: sessions, recently added, continue watching, libraries, statistics, settings,
+   maintenance, activities.
+5. 🎛️ **Plex Presets**: saved searches (save one from the last row of Plex Search).
+6. 🛟 **Plex Help**: getting started, shortcuts, filters & sorts, alias, cache, logs export.
+
+The menu subtitles show what is configured (servers, accounts, presets).
 
 ![menu](public/menu.webp)
 
-To use this workflow, you need to add server(s).In order to do so, you must connect to an account that have access to a plex media server with your credentials. **If you're not the owner of the server, you won't have access to the server settings**.
+**If you're not the owner of a server, you only see its medias (no management).**
 
-Go to the `Plex Account` section to know more on how to manage your accounts.
+### 🧭 Navigation
+
+- **Every screen has a Return row**, prompts included, and **Return goes back to the screen you came from** (a
+  real history: server → account → Return brings you back to the server, with your search query when you came
+  from a search). Its subtitle tells where you go. In live searches it's the last row, so ⏎ still opens the
+  first result.
+- <kbd>⌘</kbd><kbd>⏎</kbd> on **Return** jumps straight back to the main menu.
+- **Alfred stays open**: while an action runs (rating, played state, sync, export...), a **⏳ loading page**
+  shows what is happening, then the page you were on comes back with a ✅ / 🚨 banner. Long actions (exports,
+  downloads, sign in) also send a notification, you can close Alfred meanwhile.
+- **Full details** open on top of the current page: <kbd>⎋</kbd> brings you back to it.
+- Pages are filtered by Alfred while you type (type `set` in a server page to only see `Settings`).
+- After an action (watchlist, preset, alias...) you come back to the page you were on, **with your search
+  query**, instead of an empty search.
+- Destructive actions (remove an account, a device, clear a folder...) show a **Yes / Cancel** page instead of
+  asking you to type `yes`.
 
 ## 🤖 Usage of the workflow
 
-### Plex Search : Search medias throughout your servers
+### 📚 Libraries (Plex Search, empty): posters, sort and filters without syntax
+
+Open Plex Search without typing: your library sections are listed first (⏎ list, ⌘⏎ posters). Everything is
+chosen in lists, nothing to type:
+
+- **↕️ Sort**: every sort of the section (date added, release date, title, rating, duration, last viewed...):
+  <kbd>⏎</kbd> natural direction, <kbd>⌘</kbd><kbd>⏎</kbd> the other one. The current one has a ✓.
+- **➕ Filter**: genre, year, decade, resolution, collection, actor, studio, content rating... (choose a
+  value), or on / off filters such as *Unplayed*, *In progress*, *HDR* (one ⏎). Each active filter has a
+  **✖** row to remove it, *Clear all filters* removes them all.
+- **🖼️ Posters**: the same selection in Alfred's **Grid View**. The footer of the selected poster shows year,
+  duration, rating, content rating, resolution and ✓ played; type to filter the posters by title.
+- **🔍 Open in Plex Search** / **💾 Save as a preset**: the selection becomes a regular filter query.
+
+In the Grid View: <kbd>⏎</kbd> opens the media actions page (or the seasons / episodes / albums / tracks / items
+of a show, season, artist, album or collection), <kbd>⌘</kbd><kbd>⏎</kbd> the actions page,
+<kbd>⌥</kbd><kbd>⏎</kbd> the **full details sheet**. Posters are also available for Plex Search results, Plex
+Discover results, your watchlist, recently added, continue watching and the content of any show / collection
+(*🖼️ Show as posters* rows). The number of columns is the `🖼️ Poster columns` setting.
+
+Posters are resized by your server (300×450) and cached: they are downloaded once, then also used as icons in
+the list views.
+
+### 📖 Full details sheet
+
+From the media actions page (*📖 Full details*) or <kbd>⌥</kbd><kbd>⏎</kbd> on a poster, Alfred's **Text View**
+shows a Markdown sheet: poster, tagline, release date, duration, content rating, studio, ratings with their
+source (Rotten Tomatoes, IMDb, TMDB), your rating, played state, summary, **cast with characters**, directors /
+writers / producers, genres, countries, collections, labels, edition, library, TMDB / IMDb / TVDB ids and every
+file with its video, audio and subtitle streams.
+
+### Plex Search: search medias throughout your servers
+
+Servers are searched **in parallel**, so adding servers doesn't make the search slower.
 
 #### 1. Simple search
 
-In this mode, you search medias on your servers directly by typing your request. You can optionally add a `/` followed by one of the following media types: _track, album, artist, collection, actor, director, genre, movie, photo, photoalbum, playlist, show, episode, clip_.
+Type your request. You can optionally add a `/` followed by one of the following media types: _track, album,
+artist, collection, actor, director, genre, movie, photo, photoalbum, playlist, show, episode, clip_.
+Titles containing a `/` (`AC/DC`) are searched as is.
 
 Link to the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io/en/latest/modules/server.html#plexapi.server.PlexServer.search).
 
 ![simple_search](public/simple_search.webp)
 
-#### 2. Advance search
+#### 2. Advanced search
 
-In this mode, you search medias on your library sections. To enter this mode, you can use `filters` and/or `advanced filters`.
-
-To know how to use them, go to the section : `Plex Help`.
+Search your library sections with `filters` and/or `advanced filters` separated by `/`. A `/` only starts a
+new filter when it's followed by `name=`, so values may contain `/`. Only the sections that can answer the
+`libtype` are queried.
 
 Link to the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io/en/latest/modules/library.html#plexapi.library.LibrarySection.search).
 
-The following example `libtype=movie/decade=1980/country=france` returns `movies` released between `1980` and `1990` in the country `France`.
+The following example `libtype=movie/decade=1980/country=france` returns `movies` released between `1980` and
+`1990` in the country `France`.
 
 ![filters_full_1](public/filters_full_1.webp)
 
+Workflow specific filters:
+
+| Filter | Alias | Example | Description |
+| --- | --- | --- | --- |
+| `server` | `sv` | `sv=home,nas` | only search these servers |
+| `section` | `sc` | `sc=movies` | only search these library sections |
+| `watchlist` | `wa` | `wa=1` | only medias on (`1`) / not on (`0`) your watchlist |
+
+When the search is empty, the `👀 Default view` of the configuration is displayed (python dict or JSON, for
+example `{"sort": "addedAt:desc"}`).
+
+The last row, **💾 Save this search as a preset**, keeps the current query in Plex Presets.
+
 #### 3. Actions on medias
 
-> The following actions can be configured in the user configuration panel
+> Every shortcut can be changed (or disabled) in the user configuration panel. **Plex Help › Keyboard
+> Shortcuts** lists your current ones.
 
-1. Nested search. Press <kbd>⏎</kbd> on one of the following media types: _actor, director, collection, artist, album, genre, show, season_, to trigger a nested search.
-2. Open the media on the web. Simply press <kbd>⌘</kbd><kbd>⏎</kbd> to open the media on plex. Not available for _genre_ media type.
-3. Stream the media with VLC / IINA. This is only available for the following media types: _movie, episode, clip, track*, album*_. Press <kbd>⌥</kbd><kbd>⏎</kbd> to open the media in VLC / IINA / INFUSE. _It requires VLC 3.0+ or IINA 1.0.0+ and the corresponding cli. See below to know how to install the cli_. If you have multiple versions of the same _movie, episode, clip_, you'll be asked to choose the file you want to play. \*INFUSE doesn’t accept standalone audio streams
-4. Get infos of movies and tv shows using the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow by [Tom McKnight](https://github.com/tmcknight). Press <kbd>⌃</kbd><kbd>⏎</kbd> to trigger the workflow. _It requires [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow) Alfred workflow 2.16.0 or above_. Only available for _movie, show_ media types.
-5. Add or remove the media from your plex watchlist. This is only available for the following media types: _movie, show_. Press <kbd>⇧</kbd><kbd>⏎</kbd> to add or remove the media.
+| Default | Action | Medias |
+| --- | --- | --- |
+| <kbd>⏎</kbd> | Nested search, otherwise the **media actions page** | all |
+| <kbd>fn</kbd><kbd>⏎</kbd> | Media actions page | all but actors / genres |
+| <kbd>⌘</kbd><kbd>⏎</kbd> | Open on app.plex.tv | all but genres / photos |
+| <kbd>⌥</kbd><kbd>⏎</kbd> | Stream with VLC / IINA / INFUSE | movie, episode, clip, track, album |
+| <kbd>⌃</kbd><kbd>⏎</kbd> | Movie and TV Show Search | movie, show |
+| <kbd>⇧</kbd><kbd>⏎</kbd> | Add / remove watchlist | movie, show |
+| <kbd>⌘</kbd><kbd>⇧</kbd><kbd>⏎</kbd> | Mark played / unplayed (✓ shown in the subtitle) | movie, show, season, episode, clip |
+| disabled | Download the file(s) | movie, episode, clip, track, album, season |
+
+The **media actions page** gathers everything in one place: play, browse children (seasons, episodes,
+tracks...), go to the show / season / album, open on the web, mark played / unplayed, ⭐ rate (0-10), watchlist,
+Movie and TV Show Search, ➕ add to a playlist (or create one), 🗂️ add to / remove from collections, 📄 file(s)
+details (size, container, resolution, codecs, bitrate; ⏎ shows the file in Finder when it's on this Mac or copies
+its path, ⌘⏎ copies the direct stream link), ⬇️ download, 🔄 refresh metadata, 🔍 analyze, ℹ️ infos (⌘L for the
+summary) and 🗑️ delete from the server (needs *Allow media deletion* in the server settings). **Return** brings you
+back to your search results.
+
+Details:
+
+1. **Nested search**: on _actor, director, collection, artist, album, genre, show, season_.
+2. **Open on the web** (<kbd>⌘</kbd><kbd>⏎</kbd>): open the media on app.plex.tv. Not available for _genre_.
+3. **Stream** (<kbd>⌥</kbd><kbd>⏎</kbd>) with VLC / IINA / INFUSE: _movie, episode, clip, track\*, album\*_. If
+   you have multiple versions of a _movie, episode, clip_, you choose the file to play (video, audio, subtitles
+   and size are displayed). \*INFUSE doesn't accept standalone audio streams.
+4. **Media infos** (<kbd>⌃</kbd><kbd>⏎</kbd>) with the [Movie and TV Show Search](https://github.com/tmcknight/Movie-and-TV-Show-Search-Alfred-Workflow)
+   workflow by [Tom McKnight](https://github.com/tmcknight) (2.16.0 or above): _movie, show_.
+5. **Watchlist** (<kbd>⇧</kbd><kbd>⏎</kbd>): add or remove a _movie_ or _show_ from your plex watchlist.
+6. **Poster preview**: press <kbd>⇧</kbd> (tap) or <kbd>⌘</kbd><kbd>Y</kbd> to Quick Look the poster.
+7. **Copy**: <kbd>⌘</kbd><kbd>C</kbd> copies the title.
 
 #### 4. VLC, IINA and INFUSE integration
 
-If you don't have VLC / IINA on your mac, run the following command to install it via homebrew:
+If you don't have VLC / IINA on your mac, install it with homebrew:
 
 ```shell
 brew install --cask vlc
 brew install --cask iina
 ```
 
-If you already have VLC / IINA installed check the presence of the cli with:
+The workflow uses their command line tools (`vlc` / `iina`), found in `/opt/homebrew/bin` or `/usr/local/bin`.
+Check them with:
 
 ```shell
 which vlc
 which iina
 ```
 
-If it is not found, uninstall VLC / IINA and reinstall it using homebrew. INFUSE doesn't require cli so you can just install the application from the app store.
+If they are not found, reinstall the application with homebrew. INFUSE doesn't need a command line tool, install
+the application from the App Store.
 
-Link to the VLC [homebrew formulae](https://formulae.brew.sh/cask/vlc).
-Link to the IINA [homebrew formulae](https://formulae.brew.sh/cask/iina).
-Link to the INFUSE [website](https://firecore.com/infuse).
+Links: VLC [homebrew formulae](https://formulae.brew.sh/cask/vlc), IINA [homebrew formulae](https://formulae.brew.sh/cask/iina),
+INFUSE [website](https://firecore.com/infuse).
 
-### Plex Discover : Search medias using discover
+### Plex Discover: search medias using discover
 
-Search medias and people on [Plex Discover](https://support.plex.tv/articles/discover/). You can perform the same actions \*\* listed [above](#3-actions-on-medias).
-
-\*\* Except streaming with VLC / IINA / INFUSE. Note that nested search allows you to search media title within your servers.
+Search movies, shows and people on [Plex Discover](https://support.plex.tv/articles/discover/) (add `/movie`,
+`/show` or `/people` to filter). You can perform the same actions listed [above](#3-actions-on-medias), except
+streaming. The nested search looks for the media on your servers, and **Return** brings you back to your
+Discover results. With an empty query, the most watchlisted medias are displayed, with **🖼️ Show as posters**
+on top. In the Discover Grid View, the shortcuts are the same as in the list (⏎ find it on your servers,
+⌘⏎ web, ⌃⏎ infos, ⇧⏎ watchlist).
 
 ![discover](public/discover.webp)
 
-### Plex Accounts : Manage your plex accounts
+### Plex Accounts: manage your plex accounts
 
-Connect one or more accounts to add plex media servers. Use one of the following methods to connect to your plex account :
+Connect one or more accounts with **Sign in with Plex**: your browser opens `app.plex.tv`, sign in the way you
+like (password, 2FA, Google, Apple...). Nothing is typed in Alfred. You have 3 minutes to complete the sign in.
+The servers of the account are added automatically (connections are tested in parallel) and a notification tells
+you when it's done.
 
-- Use your plex credentials (username + password + OTP if you enabled [2FA](https://support.plex.tv/articles/two-factor-authentication/)).
-- Use a plex account token. This can be useful if you use a [third party application](https://support.plex.tv/articles/use-federated-authentication-to-sign-in/) to sign in to plex. In order to get your account auth token, you'll need to :
-  - Go to https://app.plex.tv/desktop/#!/settings/account.
-  - Open the browser developper tool with <kbd>⌘</kbd><kbd>⌥</kbd><kbd>I</kbd>.
-  - Inspect a request with https://clients.plex.tv/ as base url.
-  - Copy the `X-Plex-Token` and insert in the workflow.
+> Since 3.0, sign in is OAuth only: the username / password and token methods are gone.
 
-![auth](public/auth.webp)
+In this section you can:
 
-In this section you can :
-
-- See the list of your servers. Servers that aren't added to the workflow are greyed out.
-- Manage connected users.
-- Manage connected devices.
-- Manage your watchlist.
+- **Sync** the account (refresh its data and reconnect its servers).
+- See the list of your servers. Servers that aren't added to the workflow are greyed out: press <kbd>⏎</kbd>
+  to sync them.
+- See connected users (and export them to CSV).
+- Manage devices, sorted by last activity (`Last seen 3 days ago`):
+  - **Clean up old devices**: removes in one go the devices not seen for 90+ days (`🧹 Old devices` setting).
+    Servers and this workflow are never removed.
+  - <kbd>⏎</kbd> details (product, version, activity, IP location, Google Maps), <kbd>⌘</kbd><kbd>⏎</kbd> remove.
+  - Export to CSV.
+- Manage your watchlist: <kbd>⏎</kbd> finds the media on your servers, <kbd>⌘</kbd><kbd>⏎</kbd> removes it,
+  export to CSV.
 
 ![plex_account](public/plex_account.webp)
 
-> Removing a plex account will remove all the servers connected. You can also remove a server directly in the Plex Media Servers section.
+> Removing a plex account removes all its servers. You can also remove a server in the Plex Media Servers section.
 
-When connected to the workflow, you'll be able to see the device under the `Authorized Devices` section. Follow this [documentation](https://support.plex.tv/articles/115007577087-devices/) to know more. _Note that when using an authentication token, you'll use the web session from which you obtained the token_.
+When connected, the workflow appears in the `Authorized Devices` section of plex
+([documentation](https://support.plex.tv/articles/115007577087-devices/)). Removing this device from the
+workflow also disconnects the account.
 
 ![device](public/device.webp)
 
-### Plex Media Servers : Manage servers and perform actions
+### Plex Media Servers: manage servers and perform actions
 
-Select the server to view its informations and perform actions.
+Select a server:
 
-- Download last version of plex media server from the web.
-- Backup logs and databases.
-- Display connected account.
-- Manage running sessions.
-- Perform actions on library sections:
-  - Scan library sections (search for new medias).
-  - Refresh library sections (download fresh media info from the internet).
-  - Display history.
-  - Display library sections sizes.
-- Display and modify settings of the server.
-- Display real time server statistics.
-
-> New values for settings must match the setting type and must be valid python. For example, boolean must be True or False with capital letter and string must be quoted.
+- **Update**: download the last version, or <kbd>⌘</kbd><kbd>⏎</kbd> to let a Mac / Windows server install it.
+- **Sessions** (refreshed every 5 seconds): user, player, progress, Direct Play / Transcode, bandwidth, LAN / WAN.
+  <kbd>⏎</kbd> media actions, <kbd>⌘</kbd><kbd>⏎</kbd> terminate with a message, <kbd>⌥</kbd><kbd>⏎</kbd> device
+  details, *Terminate all* when several streams play, export to CSV.
+- **Recently Added** and **Continue Watching**: media rows with all the shortcuts above.
+- **Library Sections**: scan, refresh, analyze, empty trash, history, recently added, *Search in this section*,
+  size and duration, **export the whole section to CSV** (title, year, file path, size, resolution, codecs,
+  views, ratings, TMDB / IMDB ids...).
+- **Statistics**:
+  - *Live*: bandwidth, CPU and RAM (with bars), refreshed every second.
+  - *Libraries*: items, size and duration per section, share of the storage.
+  - *Plays*: plays per day, busiest day, peak hour, top users, titles, libraries, devices and platforms.
+  - *Bandwidth*: local / remote traffic, per user, per device and per day.
+  - *Media Quality*: 4K / 1080p / 720p / SD / HDR per section.
+  - Every statistic can be exported to CSV.
+- **Settings**: display, modify and export to CSV. Values are typed naturally: `true` / `false` (or `yes` / `no`,
+  `1` / `0`) for booleans, numbers for `int` / `double` and plain text for `text` (quotes are optional).
+- **Maintenance**: download logs, download databases, empty trash, clean bundles, optimize database, run any
+  scheduled task (backup, cleanups...).
+- **Activities**: what the server is doing right now (scans, analysis...) with progress bars.
 
 ![server_actions](public/server_actions.webp)
 
-### Plex Presets : Manage presets to rapidly search medias
+### 📤 Exports
+
+CSV files are written in the `📁 Downloads & exports` folder (named `plex-<server>-<kind>-<date>.csv`, UTF-8 for
+Numbers / Excel) and shown in Finder:
+
+| From | Export |
+| --- | --- |
+| Library section | every movie / episode / track with file, size, quality, views, ratings, ids |
+| History, Statistics › Plays | every play (date, user, device, platform, library, title) |
+| Statistics | libraries, bandwidth, media quality |
+| Sessions, Settings | running sessions, every setting |
+| Account | devices, users, watchlist |
+| Presets | your presets |
+| Plex Help › Workflow Cache & Logs | **workflow logs** (zip with versions) to attach to a GitHub issue |
+
+### Plex Presets: manage presets to rapidly search medias
 
 #### 1. Create a preset
 
-Create easily preset by pressing <kbd>⏎</kbd> on `Add a new Preset`. Input a `value` for the preset **WITH FULL FILTERS NAMES**. Then input a `title` and a `subtitle` separated by a `/`.
+- From Plex Search: the last row, **💾 Save this search as a preset**, asks only for a `title` (and an optional
+  `/subtitle`).
+- Or press <kbd>⏎</kbd> on `Add a new preset`, input a `value` (filters with long names or aliases), then a
+  `title` and an optional `subtitle` separated by a `/`.
 
-#### 2. Modify a preset
+#### 2. Use and organize presets
 
-Simply press <kbd>⌘</kbd><kbd>⏎</kbd> to enter in the modified mode. Press <kbd>⏎</kbd> to edit the `title/subtitle` or the `value`.
+| Key | Action |
+| --- | --- |
+| <kbd>⏎</kbd> | open Plex Search with the preset |
+| <kbd>⌘</kbd><kbd>⏎</kbd> | edit page: title/subtitle, value (<kbd>⌘</kbd><kbd>C</kbd> copies it), duplicate, move up / down, delete |
+| <kbd>⌥</kbd><kbd>⏎</kbd> | delete (with confirmation) |
+| <kbd>⌃</kbd><kbd>⏎</kbd> | duplicate |
+| <kbd>⇧</kbd><kbd>⏎</kbd> | move up |
+
+Presets with unknown filters are flagged with ⚠️. The list can be exported to CSV.
 
 ![preset_modify](public/preset_modify.webp)
 
-#### 3. Apply a preset
-
-Simply press <kbd>⏎</kbd> on a preset to apply its value to the search workflow.
-
 ![preset_entry](public/preset_entry.webp)
 
-### Plex Help : Workflow configuration + filter & sort options
+### Plex Help: workflow configuration + filter & sort options
 
-You can manage workflow cache, data and edit filter alias.
+**Getting Started** (for new users), **Keyboard Shortcuts** (your current shortcuts and keywords), workflow
+cache (with the `plex.log` file and **Export Workflow Logs**), data and filter alias.
 
 ![plex_help](public/plex_help.webp)
 
-Filters, fields and sorts options are generated based on your libraries metadata. This will vary regarding your medias and agents used to gather information.
+Filters, fields and sorts options are generated from the library sections of **all** your servers. They vary
+with your medias and agents.
 
 #### 1. Filters
 
 > Filters can be aliased, see section `4. Alias` below
 
-Plex filters can be applied by typing `filterName=value`. Use `/` to separate them. Find the list of filters under each library sections of your servers.
+Plex filters are applied by typing `filterName=value`. Use `/` to separate them. Find the list of filters under
+each library section of your servers.
 
 Example: `libtype=movie/actor=adam driver`. It returns `movies` with `Adam Driver`.
 
@@ -202,39 +344,122 @@ Example: `libtype=movie/actor=adam driver`. It returns `movies` with `Adam Drive
 
 #### 2. Fields (advanced filters)
 
-Plex fields (or advanced filters) can be applied by typing `advancedFilters={<FILTER>}` (or `af={<FILTER>}` in `alias mode`). There is certain conditions you have to respect to make advance filters working:
+Plex fields (or advanced filters) are applied by typing `advancedFilters={<FILTER>}` (or `af={<FILTER>}`):
 
-- Use `/` to separate advanced filter from other filters.
-- You must use them along with a `libtype`.
-- You must provide a valid Python _dict_ or valid _JSON_ syntax. Double quotes `"` and single quotes `'` are valid.
+- Use `/` to separate advanced filters from other filters.
+- Use them along with a `libtype`.
+- Provide a valid Python _dict_ or _JSON_. Double quotes `"` and single quotes `'` are valid. The value is
+  parsed, never executed.
 
 To know more on how to use these filters, check the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io/en/latest/modules/library.html#plexapi.library.LibrarySection.search).
 
-Find the list of fields under each library sections of your servers.
-
-Example: `libtype=episode/advancedFilters={'show.title': 'one piece', 'episode.index': '1074'}`. It returns `episodes` where `episode number` is `1074` and the title of the show contains `one piece`.
+Example: `libtype=episode/advancedFilters={'show.title': 'one piece', 'episode.index': '1074'}`. It returns
+`episodes` where `episode number` is `1074` and the title of the show contains `one piece`.
 
 ![advanced_filters](public/advanced_filters.webp)
 
 #### 3. Sorts
 
-You can sort results by typing `sort=sortName:dir` (or `so=sortName:dir` in `alias mode`). Direction can be `:asc` for ascending or `:desc` for descending.
+Sort results by typing `sort=sortName:dir` (or `so=sortName:dir`). Direction can be `:asc` or `:desc`.
 
-Example: `libtype=movie/sort=originallyAvailableAt:desc`. This will display `movies` from the `most recent` to the `older` one.
+Example: `libtype=movie/sort=originallyAvailableAt:desc` displays `movies` from the `most recent` to the `oldest`.
 
 ![sorts](public/sorts.webp)
 
 #### 4. Alias
 
-Alias are enabled by default, and allows you, when activated, to write filters more easily. `libtype` becomes `lt`, `studio` becomes `st`...
+Aliases let you write filters faster: `libtype` becomes `lt`, `studio` becomes `st`... **Aliases and long names
+are always accepted**; the `📜 Use alias` option only changes what the workflow displays.
 
-You can disable this behavior in the user control panel by unticking the `📜 Use alias` parameter.
+Press <kbd>⏎</kbd> on a filter to change its alias. The `alias.json` file is located in the `📁 Data folder`
+(`~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex` by default). New filters shipped with an
+update are added to your file automatically, your custom aliases are kept.
 
-Alias file can be edited, but be careful about double values. It is the `alias.json` file located under the `📁 Data folder` (`~/Library/Application Support/Alfred/Workflow Data/com.benjamino.plex` by default).
-
-Example: `af={'addedAt>>': '30d'}/lt=show`. It returns `shows` added or `shows` containing new elements (seasons, epidodes) in plex during the last `30 days`.
+Example: `af={'addedAt>>': '30d'}/lt=show`. It returns `shows` added or containing new elements (seasons,
+episodes) during the last `30 days`.
 
 ![alias](public/alias.webp)
+
+## 🧩 How it works
+
+### Workflow diagram
+
+The diagram is a small hub. Every row of the workflow sets `{var:action}` and the
+**Router** sends it to the right place:
+
+```
+Plex (keyword)  ──┐
+Plex Search     ──┤
+Plex Discover   ──┤
+Grid View       ──┼──▶ Router {var:action} ──▶ browse · search · discover · grid · ask · open · reveal · mtv
+dispatch        ──┘            │              └▶ details ──▶ Text View (media sheet)
+   ▲                           └──▶ run ──▶ Run Script (main.py run) ──▶ dispatch (next step)
+   └────────────────────────────────────────────────────────────────────────┘
+grid ──▶ Run Script (main.py grid) ──▶ Grid View (posters) ──▶ Router
+ask  ──▶ Plex Prompt (Script Filter with a Return row) ──▶ Router
+run  ──▶ Run Script  +  loading page (Alfred stays open until the result)
+```
+
+| Variable | Role |
+| --- | --- |
+| `action` | `browse`, `search`, `discover`, `grid`, `ask`, `run`, `details`, `open`, `reveal`, `mtv` (or `done`) |
+| `nav` | page path, e.g. `servers/<machineId>/settings/general` |
+| `cmd` / `payload` | background command and its JSON parameters |
+| `prompt_title` / `prompt_subtitle` | text of the prompt (`ask`) |
+| `back` | history: JSON stack of the screens you came from (Return pops it) |
+| `confirm` | Yes / Cancel page content |
+| `run_id` / `loading_label` | status file and text of the loading page |
+| `state` | sort and filters of the library browser |
+| `details_file` | Markdown sheet shown by the Text View |
+
+A command (`python3 main.py run`) decides the next step (show a page, ask another question...) by printing
+Alfred variables, which go back to the Router through the `dispatch` trigger.
+
+### Code
+
+```
+src/
+├── main.py                 # entry point (checks Python version)
+├── alfred_plex/
+│   ├── cli.py              # browse | search | discover | run
+│   ├── alfred.py           # Item / Feedback / Intent (actions as Alfred variables)
+│   ├── nav.py              # page paths + router
+│   ├── settings.py         # user configuration
+│   ├── store.py            # accounts / servers / presets / alias JSON files
+│   ├── plex.py             # python-plexapi: config, connections, caches
+│   ├── context.py          # per run context
+│   ├── filters.py          # search query parser
+│   ├── media.py            # plex medias → Alfred rows
+│   ├── system.py           # notifications, logs
+│   ├── stats.py            # plays, bandwidth, libraries, quality (pure functions)
+│   ├── export.py           # CSV exports + logs archive
+│   ├── library.py          # library browser state (sort, filters)
+│   ├── posters.py          # posters cache for the Grid View
+│   ├── details.py          # Markdown media sheet for the Text View
+│   ├── views/              # pages (menu, library, grid, accounts, servers, stats, media, presets, help, search, discover)
+│   └── commands/           # background actions
+├── lib/                    # python-plexapi 4.18.3 + dependencies (pure python)
+├── notificator             # vitorgalvao/notificator (latest)
+└── info.plist
+```
+
+## 🧪 Development
+
+```shell
+# run the tests (no network needed: plexapi parses real Plex XML from a fake HTTP session)
+python3 -m pip install pytest ruff
+python3 -m pytest
+python3 -m ruff check src/alfred_plex src/main.py tests
+
+# update the bundled dependencies
+cd src && ./update.sh
+```
+
+Try a page from a terminal (from the `src` folder):
+
+```shell
+nav=help python3 main.py browse | python3 -m json.tool
+```
 
 ## ⚖️ License
 
