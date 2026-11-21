@@ -84,7 +84,8 @@ def connect(ctx: Context) -> list[Item]:
     return [
         sign_in_item(),
         alfred.message("How it works", "Sign in on the page that opens (3 min max): your servers are added "
-                       "automatically and a notification tells you when it's done", icon_name="help"),
+                       "automatically" + (" and a notification tells you when it's done" if ctx.settings.notify
+                                          else ", come back to Alfred to see the result"), icon_name="help"),
     ]
 
 

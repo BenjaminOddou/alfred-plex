@@ -37,7 +37,8 @@ Upgrading from 2.x keeps your accounts, servers, presets and aliases (2.x remove
 The workflow uses what Alfred 6 brings to workflows:
 
 - **Native notifications**: Alfred posts them itself (*Post Notification* output, macOS UserNotifications). The
-  Notificator helper app is gone, the old copy is removed from the cache at the first run.
+  Notificator helper app is gone, the old copy is removed from the cache at the first run. They can be turned off
+  with `🔔 Notifications`, as in [Alfred Emoji Wine](https://github.com/BenjaminOddou/alfred-emoji-wine).
 - **Strict modifier keys** (`strictmods`): a modifier a row doesn't use (⌥⏎ on a menu row, a disabled shortcut on a
   media...) does nothing, instead of running the ⏎ action by surprise.
 - **Posters keep their shape** (`iconresize`): in the *List with posters* view, the 2:3 posters fit in the icon
@@ -82,7 +83,8 @@ The menu subtitles show what is configured (servers, accounts, presets).
 - **Alfred stays open**: while an action runs (rating, played state, sync, export...), a **⏳ loading page**
   shows what is happening, then the page you were on comes back with a ✅ / 🚨 banner. Long actions (exports,
   downloads, sign in) and errors also end with **one macOS notification** posted by Alfred (with the
-  `🎷 Notification sound`), you can close Alfred meanwhile.
+  `🎷 Notification sound`), you can close Alfred meanwhile. Untick `🔔 Notifications` to keep the workflow
+  silent: no notification, no sound (the loading page and the logs still tell what happened).
 - **Full details** open on top of the current page: <kbd>⎋</kbd> (or <kbd>↩</kbd>) brings you back to it.
 - Pages are filtered by Alfred while you type (type `set` in a server page to only see `Settings`).
 - After an action (watchlist, preset, alias...) you come back to the page you were on, **with your search
@@ -476,7 +478,7 @@ Run Script ──▶ Arg and Vars {var:notify_text} ──▶ Post Notification 
 | `run_id` / `loading_label` | status file and text of the loading page |
 | `state` | sort and filters of the library browser |
 | `details_file` | Markdown sheet shown by the Text View |
-| `notify_title` / `notify_text` | notification posted by Alfred at the end of a long command or of an error |
+| `notify_title` / `notify_text` | notification posted by Alfred at the end of a long command or of an error (empty when `🔔 Notifications` is unticked) |
 
 A command (`python3 main.py run`) decides the next step (show a page, ask another question...) by printing
 Alfred variables, which go back to the Router through the `dispatch` trigger.

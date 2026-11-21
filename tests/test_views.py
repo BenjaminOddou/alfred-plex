@@ -95,6 +95,9 @@ def test_connect_page_is_oauth_only(env):
     assert [i["variables"]["cmd"] for i in actions] == ["account.oauth"]
     assert all(i["variables"]["action"] != "ask" for i in actions)
     assert page(env, "accounts")[1]["variables"]["cmd"] == "account.oauth"
+    assert "a notification tells you" in by_title(items, "How it works")["subtitle"]
+    silent = by_title(page({**env, "notify": "0"}, "accounts/new"), "How it works")
+    assert "notification" not in silent["subtitle"]
 
 
 def test_remove_account_asks_for_confirmation(env, saved):

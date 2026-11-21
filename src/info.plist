@@ -1297,7 +1297,8 @@ Every row of the workflow sets `{var:action}`: the **Router** sends it to a page
 (`details` → Text View), a prompt (`ask`), a background command
 (`run` → `python3 main.py run`), a web page, Finder or another workflow.
 A command picks the next step through the `dispatch` trigger; long commands and errors
-end with a macOS notification (Post Notification output).
+end with a macOS notification (Post Notification output). Untick `🔔 Notifications`
+to keep the workflow silent.
 
 Full documentation on [GitHub](https://github.com/BenjaminOddou/alfred-plex).
 
@@ -2164,6 +2165,25 @@ back to the page below</string>
 			<string>popupbutton</string>
 			<key>variable</key>
 			<string>log_level</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<true/>
+				<key>required</key>
+				<false/>
+				<key>text</key>
+				<string></string>
+			</dict>
+			<key>description</key>
+			<string>show the end of the long commands (exports, downloads, sign in) and the errors in a native macOS notification.</string>
+			<key>label</key>
+			<string>🔔 Notifications</string>
+			<key>type</key>
+			<string>checkbox</string>
+			<key>variable</key>
+			<string>notify</string>
 		</dict>
 		<dict>
 			<key>config</key>
