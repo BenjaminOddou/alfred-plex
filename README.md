@@ -8,7 +8,7 @@
 
 ✨ Welcome to the Alfred Plex repository: **An Alfred Workflow** ✨
 
-![vlc](public/vlc.gif)
+![Movies library as posters in Alfred's Grid View](public/grid.webp)
 
 ## ✅ Prerequisites
 
@@ -56,6 +56,8 @@ Launch the menu with `plex` (the keyword can be changed in the
 [Workflow Configuration](https://www.alfredapp.com/help/workflows/user-configuration/) panel). **New here?** The menu shows *Sign in with Plex* and *Getting started*: one press on ⏎ and your servers
 are added.
 
+![First run: Sign in with Plex](public/signin.webp)
+
 The workflow is divided in 6 parts:
 
 1. 🔎 **Plex Search**: type to search your servers; **empty, it lists your libraries** to browse them as a list or
@@ -69,7 +71,7 @@ The workflow is divided in 6 parts:
 
 The menu subtitles show what is configured (servers, accounts, presets).
 
-![menu](public/menu.webp)
+![Main menu](public/menu.webp)
 
 **If you're not the owner of a server, you only see its medias (no management).**
 
@@ -107,6 +109,8 @@ chosen in lists, nothing to type:
 - **🖼️ Posters**: the same selection in Alfred's **Grid View**. The footer of the selected poster shows year,
   duration, rating, content rating, resolution and ✓ played; type to filter the posters by title.
 - **🔍 Open in Plex Search** / **💾 Save as a preset**: the selection becomes a regular filter query.
+
+![Movies library: posters, sort and filters](public/library.webp)
 
 In the Grid View, **a poster does exactly what its row does in the list**: same keys, same shortcuts (⏎, ⌘⏎,
 ⌥⏎, ⌃⏎, ⇧⏎, fn⏎, ⌘⇧⏎ as configured), the → action, ⇧ / ⌘Y Quick Look. A nested search (seasons of a show,
@@ -149,7 +153,7 @@ A removed poster is downloaded again the next time it is shown.
 ### ➡️ Right arrow: an action of your choice
 
 Press <kbd>→</kbd> on a media (Plex Search, Plex Discover, libraries, recently added, posters...): Alfred shows its
-actions panel for the media title (`The Matrix (1999) · Home Server`). Type `plex` (or pick **Plex**, Alfred puts it
+actions panel for the media title (`Metropolis (1927) · Home Server`). Type `plex` (or pick **Plex**, Alfred puts it
 first once you used it) and <kbd>↩</kbd>: the action chosen in the `➡️ Right arrow` setting runs:
 
 | Setting | Action |
@@ -173,6 +177,8 @@ source (Rotten Tomatoes, IMDb, TMDB), your rating, played state, summary, **cast
 writers / producers, genres, countries, collections, labels, edition, library, TMDB / IMDb / TVDB ids and every
 file with its video, audio and subtitle streams.
 
+![Full details sheet in the Text View](public/details.webp)
+
 ### Plex Search: search medias throughout your servers
 
 Servers are searched **in parallel**, so adding servers doesn't make the search slower.
@@ -185,7 +191,7 @@ Titles containing a `/` (`AC/DC`) are searched as is.
 
 Link to the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io/en/latest/modules/server.html#plexapi.server.PlexServer.search).
 
-![simple_search](public/simple_search.webp)
+![Plex Search with the List with posters view](public/search.webp)
 
 #### 2. Advanced search
 
@@ -197,8 +203,6 @@ Link to the [Python-PlexAPI documentation](https://python-plexapi.readthedocs.io
 
 The following example `libtype=movie/decade=1980/country=france` returns `movies` released between `1980` and
 `1990` in the country `France`.
-
-![filters_full_1](public/filters_full_1.webp)
 
 Workflow specific filters:
 
@@ -237,6 +241,8 @@ details (size, container, resolution, codecs, bitrate; ⏎ shows the file in Fin
 its path, ⌘⏎ copies the direct stream link), ⬇️ download, 🔄 refresh metadata, 🔍 analyze, ℹ️ infos (⌘L for the
 summary) and 🗑️ delete from the server (needs *Allow media deletion* in the server settings). **Return** brings you
 back to your search results.
+
+![Media actions page](public/media.webp)
 
 Details:
 
@@ -283,8 +289,6 @@ Discover results. With an empty query, the most watchlisted medias are displayed
 on top. In the Discover Grid View, the shortcuts are the same as in the list (⏎ find it on your servers,
 ⌘⏎ web, ⌃⏎ infos, ⇧⏎ watchlist).
 
-![discover](public/discover.webp)
-
 ### Plex Accounts: manage your plex accounts
 
 Connect one or more accounts with **Sign in with Plex**: your browser opens `app.plex.tv`, sign in the way you
@@ -310,15 +314,11 @@ In this section you can:
 - Manage your watchlist: <kbd>⏎</kbd> finds the media on your servers, <kbd>⌘</kbd><kbd>⏎</kbd> removes it,
   export to CSV.
 
-![plex_account](public/plex_account.webp)
-
 > Removing a plex account removes all its servers. You can also remove a server in the Plex Media Servers section.
 
 When connected, the workflow appears in the `Authorized Devices` section of plex
 ([documentation](https://support.plex.tv/articles/115007577087-devices/)). Removing this device from the
 workflow also disconnects the account.
-
-![device](public/device.webp)
 
 ### Plex Media Servers: manage servers and perform actions
 
@@ -345,7 +345,7 @@ Select a server:
   scheduled task (backup, cleanups...).
 - **Activities**: what the server is doing right now (scans, analysis...) with progress bars.
 
-![server_actions](public/server_actions.webp)
+![Server page](public/server.webp)
 
 ### 📤 Exports
 
@@ -383,16 +383,12 @@ Numbers / Excel) and shown in Finder:
 
 Presets with unknown filters are flagged with ⚠️. The list can be exported to CSV.
 
-![preset_modify](public/preset_modify.webp)
-
-![preset_entry](public/preset_entry.webp)
+![Plex Presets](public/presets.webp)
 
 ### Plex Help: workflow configuration + filter & sort options
 
 **Getting Started** (for new users), **Keyboard Shortcuts** (your current shortcuts and keywords), workflow
 cache (with the `plex.log` file and **Export Workflow Logs**), data and filter alias.
-
-![plex_help](public/plex_help.webp)
 
 Filters, fields and sorts options are generated from the library sections of **all** your servers. They vary
 with your medias and agents.
@@ -405,8 +401,6 @@ Plex filters are applied by typing `filterName=value`. Use `/` to separate them.
 each library section of your servers.
 
 Example: `libtype=movie/actor=adam driver`. It returns `movies` with `Adam Driver`.
-
-![filters_full_2](public/filters_full_2.webp)
 
 #### 2. Fields (advanced filters)
 
@@ -422,15 +416,11 @@ To know more on how to use these filters, check the [Python-PlexAPI documentatio
 Example: `libtype=episode/advancedFilters={'show.title': 'one piece', 'episode.index': '1074'}`. It returns
 `episodes` where `episode number` is `1074` and the title of the show contains `one piece`.
 
-![advanced_filters](public/advanced_filters.webp)
-
 #### 3. Sorts
 
 Sort results by typing `sort=sortName:dir` (or `so=sortName:dir`). Direction can be `:asc` or `:desc`.
 
 Example: `libtype=movie/sort=originallyAvailableAt:desc` displays `movies` from the `most recent` to the `oldest`.
-
-![sorts](public/sorts.webp)
 
 #### 4. Alias
 
@@ -443,8 +433,6 @@ update are added to your file automatically, your custom aliases are kept.
 
 Example: `af={'addedAt>>': '30d'}/lt=show`. It returns `shows` added or containing new elements (seasons,
 episodes) during the last `30 days`.
-
-![alias](public/alias.webp)
 
 ## 🧩 How it works
 
@@ -527,6 +515,12 @@ Try a page from a terminal (from the `src` folder):
 ```shell
 nav=help python3 main.py browse | python3 -m json.tool
 ```
+
+## 🎞️ Screenshots
+
+The screenshots only show films that are free to use: public domain films and the Blender open movies
+(*Big Buck Bunny*, *Elephants Dream*, *Sintel*, *Tears of Steel*, *Cosmos Laundromat*: CC BY, © Blender Foundation |
+[blender.org](https://www.blender.org)). Posters come from [Wikimedia Commons](https://commons.wikimedia.org).
 
 ## ⚖️ License
 
