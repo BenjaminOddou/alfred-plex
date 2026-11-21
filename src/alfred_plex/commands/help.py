@@ -13,21 +13,21 @@ def edit_alias(ctx: Context, text: str) -> None:
     long_key, short = ctx.payload["long"], text.strip()
     alias = ctx.store.alias
     if not short or "=" in short or "/" in short:
-        warning(ctx.settings, "An alias can't be empty or contain '=' or '/'")
+        warning("An alias can't be empty or contain '=' or '/'")
         return
     owner = next((e.long for e in alias.entries if e.short == short and e.long != long_key), None)
     if owner:
-        warning(ctx.settings, f"The alias {short} is already used for {owner}")
+        warning(f"The alias {short} is already used for {owner}")
         return
     entries = [AliasEntry(short if e.long == long_key else e.short, e.long) for e in alias.entries]
     ctx.store.save_alias(Alias(entries, alias.enabled))
-    success(ctx.settings, f"Alias of {long_key} is now {short}")
+    success(f"Alias of {long_key} is now {short}")
 
 
 @command("alias.reset")
 def reset_alias(ctx: Context, text: str) -> None:
     ctx.store.reset_alias()
-    success(ctx.settings, "The alias file is reset")
+    success("The alias file is reset")
 
 
 @command("folder.clear")
@@ -38,7 +38,7 @@ def clear(ctx: Context, text: str) -> None:
     else:
         # Presets are personal work: they survive a data cleanup (same as v2).
         count = clear_folder(ctx.settings.data_dir, keep=("presets.json",))
-    success(ctx.settings, f"{kind.capitalize()} folder cleared ({count} file(s) removed)")
+    success(f"{kind.capitalize()} folder cleared ({count} file(s) removed)")
 
 
 @command("posters.purge")
@@ -46,7 +46,7 @@ def purge_posters(ctx: Context, text: str) -> None:
     from .. import fmt, posters
 
     count, size = posters.purge(ctx.settings)
-    success(ctx.settings, f"Poster cache purged ({count} poster(s), {fmt.size(size)})")
+    success(f"Poster cache purged ({count} poster(s), {fmt.size(size)})")
 
 
 @command("posters.remove")
@@ -55,6 +55,6 @@ def remove_poster(ctx: Context, text: str) -> None:
 
     name = ctx.payload.get("title") or "The poster"
     if posters.remove(ctx.settings, ctx.payload.get("name", "")):
-        success(ctx.settings, f"Poster of {name} removed from the cache")
+        success(f"Poster of {name} removed from the cache")
     else:
-        warning(ctx.settings, f"Poster of {name} is not in the cache anymore")
+        warning(f"Poster of {name} is not in the cache anymore")

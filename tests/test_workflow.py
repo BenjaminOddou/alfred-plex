@@ -6,7 +6,6 @@ Python code agree with each other.
 
 from __future__ import annotations
 
-import os
 import plistlib
 import re
 from collections import Counter
@@ -59,7 +58,7 @@ def test_objects_do_not_overlap():
 
 def test_small_diagram():
     # v2 had 133 objects and 95 connections
-    assert len(OBJECTS) <= 28  # 3.1: + Universal Action "More details" and its script, + Text View ↩ back
+    assert len(OBJECTS) <= 30  # 3.1: + Universal Action, + Text View ↩ back; 3.2: + Post Notification
 
 
 def test_self_triggers_exist():
@@ -133,8 +132,8 @@ def test_prompt_and_command_chain():
     assert [t["uid"] for t in targets(prompt["uid"])] == [router()["uid"]]
     assert not of_type("input.keyword")
     run = next(o for o in of_type("action.script") if 'main.py run "$1"' in o["config"]["script"])
-    (then,) = targets(run["uid"])
-    assert then["config"]["externaltriggerid"] == "dispatch"
+    then = [t for t in targets(run["uid"]) if t["type"].endswith("callexternaltrigger")]
+    assert [t["config"]["externaltriggerid"] for t in then] == ["dispatch"]
     assert {"prompt_title", "prompt_subtitle", "run_id", "loading_label"} <= set(alfred.ROUTING_VARS)
 
 
@@ -222,12 +221,25 @@ def test_versions_are_aligned():
 
 
 # --------------------------------------------------------------------- files
-def test_notificator_is_the_latest_upstream():
-    notificator = SRC / "notificator"
-    assert os.access(notificator, os.X_OK)
-    text = notificator.read_text()
-    assert text.startswith("#!/bin/zsh --no-rcs")
-    assert "checksum_icon" in text  # rebuilt when the workflow icon changes
+def test_alfred_posts_the_notifications():
+    # Alfred 6 posts them natively (UserNotifications): no Notificator app anymore
+    assert not (SRC / "notificator").exists()
+    run = next(o for o in of_type("action.script") if 'main.py run "$1"' in o["config"]["script"])
+    (argument,) = [t for t in targets(run["uid"]) if t["type"] == "alfred.workflow.utility.argument"]
+    assert argument["config"]["argument"] == "{var:notify_text}"
+    (post,) = targets(argument["uid"])
+    assert post["type"] == "alfred.workflow.output.notification"
+    config = post["config"]
+    assert config["onlyshowifquerypopulated"]  # quick commands send an empty text: no notification
+    assert config["title"] == "{var:notify_title}" and config["text"] == "{query}"
+    output = alfred.run_output(alfred.done(), notify=("✅ Success!", "Done"))
+    assert '"notify_title": "✅ Success!"' in output and '"notify_text": "Done"' in output
+
+
+def test_sound_choices_are_system_sounds():
+    entry = next(c for c in PLIST["userconfigurationconfig"] if c["variable"] == "sound")
+    values = [value for _, value in entry["config"]["pairs"]]
+    assert "" in values and "default" not in values  # mute; "Classic" was a Notificator sound
 
 
 def test_bundled_plexapi_version():

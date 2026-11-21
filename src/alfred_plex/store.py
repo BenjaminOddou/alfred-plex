@@ -9,9 +9,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-import secrets
-import shutil
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -34,13 +31,13 @@ def read_json(path: Path, default: Any) -> Any:
 
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    tmp = path.with_name(f".{path.name}.{os.urandom(4).hex()}.tmp")  # unique: threads may write the same file
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as file:
+        with tmp.open("x", encoding="utf-8") as file:
             json.dump(data, file, indent=4, ensure_ascii=False)
         os.replace(tmp, path)
     except BaseException:
-        Path(tmp).unlink(missing_ok=True)
+        tmp.unlink(missing_ok=True)
         raise
 
 
@@ -57,6 +54,8 @@ class ItemsFile:
     def items(self) -> list[dict]:
         if self._items is None:
             if self.seed and not self.path.exists():
+                import shutil
+
                 shutil.copyfile(self.seed, self.path)
             data = read_json(self.path, {"items": []})
             items = data.get("items") if isinstance(data, dict) else None
@@ -168,6 +167,8 @@ class Store:
         self._alias = alias
 
     def reset_alias(self) -> None:
+        import shutil
+
         shutil.copyfile(self.bundled_alias_path, self.alias_path)
         self._alias = None
 
@@ -180,4 +181,4 @@ class Store:
 
     @staticmethod
     def new_id() -> str:
-        return secrets.token_hex(16)
+        return os.urandom(16).hex()

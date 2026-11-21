@@ -13,7 +13,8 @@
 ## ✅ Prerequisites
 
 - macOS.
-- **Alfred 5.5 or above** (Grid View and Text View) with the [Alfred Powerpack](https://www.alfredapp.com/powerpack/).
+- **Alfred 6** with the [Alfred Powerpack](https://www.alfredapp.com/powerpack/). Alfred 5.5 still runs the
+  workflow (Grid View and Text View), without the [Alfred 6 extras](#-alfred-6).
 - An access to a plex media server.
 - **Python 3.10 or above** (required by python-plexapi 4.18). The Python shipped with the Xcode command line tools
   is 3.9: install a recent one with [Homebrew](https://brew.sh) (`brew install python`) or from
@@ -30,6 +31,17 @@ python3 --version
 2. Double click the `.alfredworkflow` file to install.
 
 Upgrading from 2.x keeps your accounts, servers, presets and aliases (2.x removed them at every update).
+
+### 🆕 Alfred 6
+
+The workflow uses what Alfred 6 brings to workflows:
+
+- **Native notifications**: Alfred posts them itself (*Post Notification* output, macOS UserNotifications). The
+  Notificator helper app is gone, the old copy is removed from the cache at the first run.
+- **Strict modifier keys** (`strictmods`): a modifier a row doesn't use (⌥⏎ on a menu row, a disabled shortcut on a
+  media...) does nothing, instead of running the ⏎ action by surprise.
+- **Posters keep their shape** (`iconresize`): in the *List with posters* view, the 2:3 posters fit in the icon
+  instead of being stretched to a square.
 
 ## 🏎️ Plex API
 
@@ -69,7 +81,8 @@ The menu subtitles show what is configured (servers, accounts, presets).
 - <kbd>⌘</kbd><kbd>⏎</kbd> on **Return** jumps straight back to the main menu.
 - **Alfred stays open**: while an action runs (rating, played state, sync, export...), a **⏳ loading page**
   shows what is happening, then the page you were on comes back with a ✅ / 🚨 banner. Long actions (exports,
-  downloads, sign in) also send a notification, you can close Alfred meanwhile.
+  downloads, sign in) and errors also end with **one macOS notification** posted by Alfred (with the
+  `🎷 Notification sound`), you can close Alfred meanwhile.
 - **Full details** open on top of the current page: <kbd>⎋</kbd> (or <kbd>↩</kbd>) brings you back to it.
 - Pages are filtered by Alfred while you type (type `set` in a server page to only see `Settings`).
 - After an action (watchlist, preset, alias...) you come back to the page you were on, **with your search
@@ -275,7 +288,7 @@ on top. In the Discover Grid View, the shortcuts are the same as in the list (�
 Connect one or more accounts with **Sign in with Plex**: your browser opens `app.plex.tv`, sign in the way you
 like (password, 2FA, Google, Apple...). Nothing is typed in Alfred. You have 3 minutes to complete the sign in.
 The servers of the account are added automatically (connections are tested in parallel) and a notification tells
-you when it's done.
+you when it's done (the added servers, and the ones that could not be reached).
 
 > Since 3.0, sign in is OAuth only: the username / password and token methods are gone.
 
@@ -449,6 +462,7 @@ dispatch        ──┘            │              └▶ details ──▶ T
 grid ──▶ Run Script (main.py grid) ──▶ Grid View (posters) ──▶ Router
 ask  ──▶ Plex Prompt (Script Filter with a Return row) ──▶ Router
 run  ──▶ Run Script  +  loading page (Alfred stays open until the result)
+Run Script ──▶ Arg and Vars {var:notify_text} ──▶ Post Notification (only when the text is not empty)
 ```
 
 | Variable | Role |
@@ -462,6 +476,7 @@ run  ──▶ Run Script  +  loading page (Alfred stays open until the result)
 | `run_id` / `loading_label` | status file and text of the loading page |
 | `state` | sort and filters of the library browser |
 | `details_file` | Markdown sheet shown by the Text View |
+| `notify_title` / `notify_text` | notification posted by Alfred at the end of a long command or of an error |
 
 A command (`python3 main.py run`) decides the next step (show a page, ask another question...) by printing
 Alfred variables, which go back to the Router through the `dispatch` trigger.
@@ -481,7 +496,7 @@ src/
 │   ├── context.py          # per run context
 │   ├── filters.py          # search query parser
 │   ├── media.py            # plex medias → Alfred rows
-│   ├── system.py           # notifications, logs
+│   ├── system.py           # command messages, notification text, sound, logs
 │   ├── stats.py            # plays, bandwidth, libraries, quality (pure functions)
 │   ├── export.py           # CSV exports + logs archive
 │   ├── library.py          # library browser state (sort, filters)
@@ -490,7 +505,6 @@ src/
 │   ├── views/              # pages (menu, library, grid, accounts, servers, stats, media, presets, help, search, discover)
 │   └── commands/           # background actions
 ├── lib/                    # python-plexapi 4.18.3 + dependencies (pure python)
-├── notificator             # vitorgalvao/notificator (latest)
 └── info.plist
 ```
 

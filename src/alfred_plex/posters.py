@@ -36,9 +36,14 @@ RESIZER = "https://images.plex.tv/photo?height={h}&width={w}&minSize=1&upscale=1
 DISCOVER_IMAGES = "https://metadata-static.plex.tv"
 
 
+_FOLDERS: set[Path] = set()  # created during this run: no mkdir for every poster of a page
+
+
 def folder(settings: Settings) -> Path:
     path = settings.cache_dir / "posters"
-    path.mkdir(parents=True, exist_ok=True)
+    if path not in _FOLDERS:
+        path.mkdir(parents=True, exist_ok=True)
+        _FOLDERS.add(path)
     return path
 
 
@@ -259,6 +264,10 @@ def avatars(settings: Settings, session: Any, users: dict[str, tuple[str, str | 
 
 
 def prune(settings: Settings, keep: int = MAX_FILES) -> None:
-    files = sorted(folder(settings).glob("*.jpg"), key=lambda p: p.stat().st_mtime, reverse=True)
+    """Keep the ``keep`` most recent posters (the dates are only read when there are too many)."""
+    files = list(folder(settings).glob("*.jpg"))
+    if len(files) <= keep:
+        return
+    files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     for old in files[keep:]:
         old.unlink(missing_ok=True)

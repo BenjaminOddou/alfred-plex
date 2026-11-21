@@ -193,7 +193,7 @@ def search(ctx: Context) -> list[Item]:
 @page("grid/discover")
 def discover(ctx: Context) -> list[Item]:
     """Discover as posters: same shortcuts as the list (⌘ web, ⌃ infos, ⇧ watchlist...)."""
-    from .discover import _results, meta_key, poster_icons
+    from .discover import meta_key, poster_icons, results_and_watchlist
     from .discover import to_item as discover_item
 
     saved = ctx.default_account()
@@ -201,9 +201,8 @@ def discover(ctx: Context) -> list[Item]:
         return [alfred.message("No plex account connected", "Sign in with Plex first", alfred.browse("accounts/new"))]
     uuid = saved["uuid"]
     account = ctx.account(uuid)
-    metas = _results(ctx, account, ctx.state.get("query", ""))
+    metas, watchlist = results_and_watchlist(ctx, account, uuid, ctx.state.get("query", ""))
     images = poster_icons(ctx, account, metas)
-    watchlist = ctx.watchlist(uuid)
     here = _here(ctx)
     text = ctx.state.get("query", "")
     items = [Item(f"🔍 {'Edit the search' if text else 'Search'}",

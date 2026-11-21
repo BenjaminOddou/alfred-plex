@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import partial
 from typing import Any
 from urllib.parse import quote
 
@@ -9,7 +10,7 @@ from .. import alfred, fmt, nav, posters
 from ..alfred import Feedback, Intent, Item
 from ..context import Context
 from ..media import attach
-from ..plex import discover_json
+from ..plex import discover_json, parallel
 from . import back_item, error_item, remember_page
 
 SEARCH_TYPES = {"movie": "movies", "show": "tv", "people": "people", "person": "people"}
@@ -109,6 +110,15 @@ def _results(ctx: Context, account: Any, query: str) -> list[dict]:
     return results
 
 
+def results_and_watchlist(ctx: Context, account: Any, uuid: str, query: str) -> tuple[list[dict], set[str]]:
+    """Discover results and the account watchlist, fetched at the same time."""
+    watchlist, metas = parallel(lambda job: job(), [partial(ctx.watchlist, uuid),
+                                                    partial(_results, ctx, account, query)])
+    if isinstance(metas, Exception):
+        raise metas
+    return metas, watchlist if isinstance(watchlist, set) else set()
+
+
 def posters_item(query: str) -> Item:
     return Item("🖼️ Show as posters", f"Discover {'results' if query else 'trending'} in Alfred's Grid View",
                 intent=alfred.grid("grid/discover", state={"query": query}), icon=alfred.icon("photo"))
@@ -147,8 +157,7 @@ def _results_rows(ctx: Context, feedback: Feedback, uuid: str, here: Intent) -> 
     rows = []
     try:
         account = ctx.account(uuid)
-        watchlist = ctx.watchlist(uuid)
-        metas = _results(ctx, account, ctx.query)
+        metas, watchlist = results_and_watchlist(ctx, account, uuid, ctx.query)
         images = poster_icons(ctx, account, metas) if ctx.settings.list_posters else {}
         for meta in metas:
             item = to_item(ctx, uuid, meta, watchlist, here)

@@ -113,7 +113,7 @@ def run(cmd: str, /, then: Intent | None = None, **payload: Any) -> Intent:
 
 
 LABELS = {
-    "account.oauth": "Waiting for the Plex sign in in your browser",
+    "account.oauth": "Waiting for the Plex sign in in your browser (3 min max)",
     "account.sync": "Syncing the account and its servers",
     "account.remove": "Removing the account",
     "device.remove": "Removing the device",
@@ -345,7 +345,10 @@ class Feedback:
         return self
 
     def to_dict(self) -> dict[str, Any]:
-        data: dict[str, Any] = {"skipknowledge": True, "items": [i.to_dict() for i in self.items]}
+        # Alfred 6: a modifier a row doesn't define does nothing (instead of the ⏎ action), and posters keep
+        # their 2:3 shape in the list icons instead of being stretched to a square.
+        data: dict[str, Any] = {"skipknowledge": True, "strictmods": True, "iconresize": "fit",
+                                "items": [i.to_dict() for i in self.items]}
         if self.rerun:
             data["rerun"] = self.rerun
         return data
@@ -354,10 +357,11 @@ class Feedback:
         return json.dumps(self.to_dict(), ensure_ascii=False)
 
 
-def run_output(intent: Intent | None) -> str:
-    """JSON printed by ``main.py run``: Alfred turns it into variables for the dispatcher."""
+def run_output(intent: Intent | None, notify: tuple[str, str] = ("", "")) -> str:
+    """JSON printed by ``main.py run``: Alfred turns it into variables for the dispatcher.
+
+    ``notify`` (title, text) feeds Alfred's Post Notification output, which only shows a non empty text.
+    """
     intent = intent or done()
-    return json.dumps(
-        {"alfredworkflow": {"arg": intent.arg, "variables": intent.as_vars()}},
-        ensure_ascii=False,
-    )
+    variables = {**intent.as_vars(), "notify_title": notify[0], "notify_text": notify[1]}
+    return json.dumps({"alfredworkflow": {"arg": intent.arg, "variables": variables}}, ensure_ascii=False)

@@ -1,7 +1,7 @@
 # Development tooling only: the workflow itself ships its dependencies in src/lib.
 [project]
 name = "alfred-plex"
-version = "3.1.0"
+version = "3.2.0"
 description = "Alfred workflow to browse and manage Plex Media Servers"
 requires-python = ">=3.10"
 license = { text = "MIT" }

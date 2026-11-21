@@ -61,7 +61,7 @@ def render_grid_output(ctx: Context) -> str:
                       ensure_ascii=False)
 
 
-# Commands that can take a while: also notify, the user may have left Alfred.
+# Commands that can take a while: Alfred also posts a notification at the end, the user may have left Alfred.
 LONG_COMMANDS = {"account.oauth", "account.sync", "devices.cleanup", "export", "logs.export", "media.download",
                  "server.logs", "server.databases", "server.install"}
 
@@ -73,25 +73,27 @@ def run_command(ctx: Context, text: str) -> str:
     name = ctx.var("cmd")
     run_id = ctx.var("run_id")
     system.MESSAGES.clear()
-    system.QUIET = name not in LONG_COMMANDS
     runs.write(ctx.settings, run_id, state="running", started=time.time(), label=ctx.var("loading_label"))
-    state = "done"
     try:
         intent = commands.execute(ctx, name, text)
     except plex.PlexError as error:
-        failure(ctx.settings, str(error), error.__cause__ or error)
-        intent, state = alfred.done(), "error"
+        failure(str(error), error.__cause__ or error)
+        intent = None
     except Exception as error:  # noqa: BLE001 - tell the user instead of failing silently
-        failure(ctx.settings, "Something went wrong, check the logs and create a GitHub issue", error)
-        intent, state = alfred.done(), "error"
+        failure("Something went wrong, check the logs and create a GitHub issue", error)
+        intent = None
     intent = intent or alfred.done()
     if intent.action in alfred.NAV_ACTIONS and "back" not in intent.variables:
         # a page chosen by the command: Return goes back to where the user started
         intent.variables["back"] = alfred.history_json(ctx.history)
-    if any(level == "error" for level, _ in system.MESSAGES):
-        state = "error"
-    runs.write(ctx.settings, run_id, state=state, messages=system.MESSAGES, next=intent.to_dict())
-    return alfred.run_output(intent)
+    failed = any(level == "error" for level, _ in system.MESSAGES)
+    runs.write(ctx.settings, run_id, state="error" if failed else "done", messages=system.MESSAGES,
+               next=intent.to_dict())
+    # Quick commands answer in Alfred only (loading page), long ones and errors are also notified.
+    title, message = system.notification(system.MESSAGES) if failed or name in LONG_COMMANDS else ("", "")
+    if message:
+        system.play(ctx.settings.sound)
+    return alfred.run_output(intent, notify=(title, message))
 
 
 def more_output(ctx: Context, text: str) -> str:
