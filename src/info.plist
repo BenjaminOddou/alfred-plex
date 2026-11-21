@@ -139,18 +139,6 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>081C64D9-616B-5040-B5AE-08C7C4DDCBEA</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>sourceoutputuid</key>
-				<string>201E904F-5A58-518D-B8B3-54EE72D24344</string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
 				<string>291B0BA5-76BD-5A43-83BE-DE4EAFC284F4</string>
 				<key>modifiers</key>
 				<integer>0</integer>
@@ -212,6 +200,18 @@
 			<dict>
 				<key>destinationuid</key>
 				<string>7EC90905-1827-5804-B57F-2E12D8ACEA53</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>201E904F-5A58-518D-B8B3-54EE72D24344</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>081C64D9-616B-5040-B5AE-08C7C4DDCBEA</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -401,15 +401,19 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>availableviaurlhandler</key>
-				<false/>
-				<key>triggerid</key>
+				<key>externaltriggerid</key>
 				<string>browse</string>
+				<key>passinputasargument</key>
+				<false/>
+				<key>passvariables</key>
+				<true/>
+				<key>workflowbundleid</key>
+				<string>self</string>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.trigger.external</string>
+			<string>alfred.workflow.output.callexternaltrigger</string>
 			<key>uid</key>
-			<string>1F5F4AA3-4DE4-5ADD-8A88-6DF4228AF0F7</string>
+			<string>291B0BA5-76BD-5A43-83BE-DE4EAFC284F4</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -469,12 +473,46 @@ python3 main.py browse "$1"</string>
 				<key>availableviaurlhandler</key>
 				<false/>
 				<key>triggerid</key>
+				<string>browse</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.external</string>
+			<key>uid</key>
+			<string>1F5F4AA3-4DE4-5ADD-8A88-6DF4228AF0F7</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>availableviaurlhandler</key>
+				<false/>
+				<key>triggerid</key>
 				<string>search</string>
 			</dict>
 			<key>type</key>
 			<string>alfred.workflow.trigger.external</string>
 			<key>uid</key>
 			<string>B03BBDA3-0179-57B2-9E67-96DF9B736700</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>externaltriggerid</key>
+				<string>search</string>
+				<key>passinputasargument</key>
+				<true/>
+				<key>passvariables</key>
+				<true/>
+				<key>workflowbundleid</key>
+				<string>self</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.callexternaltrigger</string>
+			<key>uid</key>
+			<string>F66570A1-2CD4-5509-8731-B08547757C07</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -525,223 +563,6 @@ python3 main.py search "$1"</string>
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
 			<string>2F0D39B5-DC32-5EB3-8513-94A99DBC1438</string>
-			<key>version</key>
-			<integer>3</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>availableviaurlhandler</key>
-				<false/>
-				<key>triggerid</key>
-				<string>discover</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.trigger.external</string>
-			<key>uid</key>
-			<string>2FCB6CF4-B265-5F68-BEA0-BBEB5EECD479</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>alfredfiltersresults</key>
-				<false/>
-				<key>alfredfiltersresultsmatchmode</key>
-				<integer>0</integer>
-				<key>argumenttreatemptyqueryasnil</key>
-				<true/>
-				<key>argumenttrimmode</key>
-				<integer>0</integer>
-				<key>argumenttype</key>
-				<integer>1</integer>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>keyword</key>
-				<string></string>
-				<key>queuedelaycustom</key>
-				<integer>3</integer>
-				<key>queuedelayimmediatelyinitially</key>
-				<true/>
-				<key>queuedelaymode</key>
-				<integer>0</integer>
-				<key>queuemode</key>
-				<integer>2</integer>
-				<key>runningsubtext</key>
-				<string>Loading...</string>
-				<key>script</key>
-				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-python3 main.py discover "$1"</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>subtext</key>
-				<string>Search movies, shows and people on Plex Discover</string>
-				<key>title</key>
-				<string>Plex Discover</string>
-				<key>type</key>
-				<integer>11</integer>
-				<key>withspace</key>
-				<false/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.input.scriptfilter</string>
-			<key>uid</key>
-			<string>CCCCB44E-670E-5A95-B0DB-8B1086BC9ED9</string>
-			<key>version</key>
-			<integer>3</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>availableviaurlhandler</key>
-				<false/>
-				<key>triggerid</key>
-				<string>grid</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.trigger.external</string>
-			<key>uid</key>
-			<string>20D557AB-7767-562F-B3BD-54B3173EF06C</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-python3 main.py grid "$1"</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>type</key>
-				<integer>11</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>F0C27208-D9B6-57B3-B0F1-FF244059CF00</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>columncount</key>
-				<integer>5</integer>
-				<key>filterable</key>
-				<true/>
-				<key>fixedorder</key>
-				<true/>
-				<key>imageaspect</key>
-				<integer>2</integer>
-				<key>inputfile</key>
-				<string></string>
-				<key>inputtype</key>
-				<integer>0</integer>
-				<key>loadingtext</key>
-				<string>Loading posters...</string>
-				<key>showsubtitles</key>
-				<true/>
-				<key>showtitles</key>
-				<true/>
-				<key>subtitlesinfooter</key>
-				<true/>
-				<key>titlesinfooter</key>
-				<false/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.userinterface.grid</string>
-			<key>uid</key>
-			<string>004FFE40-B752-594D-A872-548E05BFB102</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>availableviaurlhandler</key>
-				<false/>
-				<key>triggerid</key>
-				<string>dispatch</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.trigger.external</string>
-			<key>uid</key>
-			<string>C5FCC189-EFF8-5E2C-907E-52DEE49D7D8B</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>availableviaurlhandler</key>
-				<false/>
-				<key>triggerid</key>
-				<string>ask</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.trigger.external</string>
-			<key>uid</key>
-			<string>E17097EF-0A4D-5C3B-B52B-BA5A85349CE8</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>alfredfiltersresults</key>
-				<false/>
-				<key>alfredfiltersresultsmatchmode</key>
-				<integer>0</integer>
-				<key>argumenttreatemptyqueryasnil</key>
-				<true/>
-				<key>argumenttrimmode</key>
-				<integer>0</integer>
-				<key>argumenttype</key>
-				<integer>1</integer>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>keyword</key>
-				<string></string>
-				<key>queuedelaycustom</key>
-				<integer>3</integer>
-				<key>queuedelayimmediatelyinitially</key>
-				<true/>
-				<key>queuedelaymode</key>
-				<integer>0</integer>
-				<key>queuemode</key>
-				<integer>2</integer>
-				<key>runningsubtext</key>
-				<string>Loading...</string>
-				<key>script</key>
-				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-python3 main.py prompt "$1"</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>subtext</key>
-				<string>Type, then ⏎ (or Return to go back)</string>
-				<key>title</key>
-				<string>Plex Prompt</string>
-				<key>type</key>
-				<integer>11</integer>
-				<key>withspace</key>
-				<false/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.input.scriptfilter</string>
-			<key>uid</key>
-			<string>704D7D06-4435-50FA-A1F1-987C4F42AC9C</string>
 			<key>version</key>
 			<integer>3</integer>
 		</dict>
@@ -907,44 +728,6 @@ python3 main.py prompt "$1"</string>
 			<key>config</key>
 			<dict>
 				<key>externaltriggerid</key>
-				<string>browse</string>
-				<key>passinputasargument</key>
-				<false/>
-				<key>passvariables</key>
-				<true/>
-				<key>workflowbundleid</key>
-				<string>self</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.output.callexternaltrigger</string>
-			<key>uid</key>
-			<string>291B0BA5-76BD-5A43-83BE-DE4EAFC284F4</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>externaltriggerid</key>
-				<string>search</string>
-				<key>passinputasargument</key>
-				<true/>
-				<key>passvariables</key>
-				<true/>
-				<key>workflowbundleid</key>
-				<string>self</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.output.callexternaltrigger</string>
-			<key>uid</key>
-			<string>F66570A1-2CD4-5509-8731-B08547757C07</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>externaltriggerid</key>
 				<string>discover</string>
 				<key>passinputasargument</key>
 				<true/>
@@ -957,6 +740,86 @@ python3 main.py prompt "$1"</string>
 			<string>alfred.workflow.output.callexternaltrigger</string>
 			<key>uid</key>
 			<string>66C9C662-5E9A-55D6-A60A-628268568FF8</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>availableviaurlhandler</key>
+				<false/>
+				<key>triggerid</key>
+				<string>discover</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.external</string>
+			<key>uid</key>
+			<string>2FCB6CF4-B265-5F68-BEA0-BBEB5EECD479</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string></string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>2</integer>
+				<key>runningsubtext</key>
+				<string>Loading...</string>
+				<key>script</key>
+				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+python3 main.py discover "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>Search movies, shows and people on Plex Discover</string>
+				<key>title</key>
+				<string>Plex Discover</string>
+				<key>type</key>
+				<integer>11</integer>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>CCCCB44E-670E-5A95-B0DB-8B1086BC9ED9</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>availableviaurlhandler</key>
+				<false/>
+				<key>triggerid</key>
+				<string>ask</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.external</string>
+			<key>uid</key>
+			<string>E17097EF-0A4D-5C3B-B52B-BA5A85349CE8</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -982,6 +845,128 @@ python3 main.py prompt "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string></string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>2</integer>
+				<key>runningsubtext</key>
+				<string>Loading...</string>
+				<key>script</key>
+				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+python3 main.py prompt "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>Type, then ⏎ (or Return to go back)</string>
+				<key>title</key>
+				<string>Plex Prompt</string>
+				<key>type</key>
+				<integer>11</integer>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>704D7D06-4435-50FA-A1F1-987C4F42AC9C</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+python3 main.py grid "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>11</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>F0C27208-D9B6-57B3-B0F1-FF244059CF00</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>columncount</key>
+				<integer>5</integer>
+				<key>filterable</key>
+				<true/>
+				<key>fixedorder</key>
+				<true/>
+				<key>imageaspect</key>
+				<integer>2</integer>
+				<key>inputfile</key>
+				<string></string>
+				<key>inputtype</key>
+				<integer>0</integer>
+				<key>loadingtext</key>
+				<string></string>
+				<key>showsubtitles</key>
+				<true/>
+				<key>showtitles</key>
+				<true/>
+				<key>subtitlesinfooter</key>
+				<true/>
+				<key>titlesinfooter</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.userinterface.grid</string>
+			<key>uid</key>
+			<string>004FFE40-B752-594D-A872-548E05BFB102</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>availableviaurlhandler</key>
+				<false/>
+				<key>triggerid</key>
+				<string>grid</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.external</string>
+			<key>uid</key>
+			<string>20D557AB-7767-562F-B3BD-54B3173EF06C</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>externaltriggerid</key>
 				<string>ask</string>
 				<key>passinputasargument</key>
@@ -995,6 +980,40 @@ python3 main.py prompt "$1"</string>
 			<string>alfred.workflow.output.callexternaltrigger</string>
 			<key>uid</key>
 			<string>5088B92A-D4F7-52B8-9627-2EE7C37DD1ED</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>externaltriggerid</key>
+				<string>dispatch</string>
+				<key>passinputasargument</key>
+				<true/>
+				<key>passvariables</key>
+				<true/>
+				<key>workflowbundleid</key>
+				<string>self</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.callexternaltrigger</string>
+			<key>uid</key>
+			<string>4A9323C2-207A-5C70-AA46-C22432CE7C57</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>availableviaurlhandler</key>
+				<false/>
+				<key>triggerid</key>
+				<string>dispatch</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.external</string>
+			<key>uid</key>
+			<string>C5FCC189-EFF8-5E2C-907E-52DEE49D7D8B</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -1025,19 +1044,21 @@ python3 main.py run "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>externaltriggerid</key>
-				<string>dispatch</string>
-				<key>passinputasargument</key>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>onlyshowifquerypopulated</key>
 				<true/>
-				<key>passvariables</key>
-				<true/>
-				<key>workflowbundleid</key>
-				<string>self</string>
+				<key>removeextension</key>
+				<false/>
+				<key>text</key>
+				<string>{query}</string>
+				<key>title</key>
+				<string>{var:notify_title}</string>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.output.callexternaltrigger</string>
+			<string>alfred.workflow.output.notification</string>
 			<key>uid</key>
-			<string>4A9323C2-207A-5C70-AA46-C22432CE7C57</string>
+			<string>1E5102B6-6E97-5105-AD9A-9FEB8CD2E99C</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -1057,6 +1078,23 @@ python3 main.py run "$1"</string>
 			<string>alfred.workflow.output.callexternaltrigger</string>
 			<key>uid</key>
 			<string>081C64D9-616B-5040-B5AE-08C7C4DDCBEA</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>{var:notify_text}</string>
+				<key>passthroughargument</key>
+				<false/>
+				<key>variables</key>
+				<dict/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>uid</key>
+			<string>B7690817-D6F6-543F-A1E5-71AC28E8389A</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -1096,6 +1134,30 @@ python3 main.py run "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+python3 main.py back "$1"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>11</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>C3A7E2F0-7D2D-5C70-BFAE-8F2A9C3B4D53</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>browser</key>
 				<string></string>
 				<key>skipqueryencode</key>
@@ -1111,38 +1173,6 @@ python3 main.py run "$1"</string>
 			<string>alfred.workflow.action.openurl</string>
 			<key>uid</key>
 			<string>983A9A13-1C39-5E23-A063-EA6BF077935D</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>path</key>
-				<string>{query}</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.revealfile</string>
-			<key>uid</key>
-			<string>F74D8D25-C283-5EC1-ABD1-119C2F7CA0E1</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>externaltriggerid</key>
-				<string>mtvID</string>
-				<key>passinputasargument</key>
-				<true/>
-				<key>passvariables</key>
-				<false/>
-				<key>workflowbundleid</key>
-				<string>com.mcknight.movies</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.output.callexternaltrigger</string>
-			<key>uid</key>
-			<string>33A03FA7-48B3-51A8-86D7-A4DC78210B92</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -1194,62 +1224,32 @@ python3 main.py more "$1"</string>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-python3 main.py back "$1"</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>type</key>
-				<integer>11</integer>
+				<key>path</key>
+				<string>{query}</string>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.action.script</string>
+			<string>alfred.workflow.action.revealfile</string>
 			<key>uid</key>
-			<string>C3A7E2F0-7D2D-5C70-BFAE-8F2A9C3B4D53</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>argument</key>
-				<string>{var:notify_text}</string>
-				<key>passthroughargument</key>
-				<false/>
-				<key>variables</key>
-				<dict/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.argument</string>
-			<key>uid</key>
-			<string>B7690817-D6F6-543F-A1E5-71AC28E8389A</string>
+			<string>F74D8D25-C283-5EC1-ABD1-119C2F7CA0E1</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>lastpathcomponent</key>
-				<false/>
-				<key>onlyshowifquerypopulated</key>
+				<key>externaltriggerid</key>
+				<string>mtvID</string>
+				<key>passinputasargument</key>
 				<true/>
-				<key>removeextension</key>
+				<key>passvariables</key>
 				<false/>
-				<key>text</key>
-				<string>{query}</string>
-				<key>title</key>
-				<string>{var:notify_title}</string>
+				<key>workflowbundleid</key>
+				<string>com.mcknight.movies</string>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.output.notification</string>
+			<string>alfred.workflow.output.callexternaltrigger</string>
 			<key>uid</key>
-			<string>1E5102B6-6E97-5105-AD9A-9FEB8CD2E99C</string>
+			<string>33A03FA7-48B3-51A8-86D7-A4DC78210B92</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -1301,8 +1301,7 @@ end with a macOS notification (Post Notification output).
 
 Full documentation on [GitHub](https://github.com/BenjaminOddou/alfred-plex).
 
-© Benjamin Oddou
-</string>
+© Benjamin Oddou</string>
 	<key>uidata</key>
 	<dict>
 		<key>004FFE40-B752-594D-A872-548E05BFB102</key>
@@ -1313,9 +1312,9 @@ Full documentation on [GitHub](https://github.com/BenjaminOddou/alfred-plex).
 			<string>Grid View: posters
 (type to filter)</string>
 			<key>xpos</key>
-			<real>430.0</real>
+			<real>430</real>
 			<key>ypos</key>
-			<real>530.0</real>
+			<real>530</real>
 		</dict>
 		<key>081C64D9-616B-5040-B5AE-08C7C4DDCBEA</key>
 		<dict>
@@ -1323,9 +1322,9 @@ Full documentation on [GitHub](https://github.com/BenjaminOddou/alfred-plex).
 			<string>Meanwhile: loading page
 (Alfred stays open)</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>780.0</real>
+			<real>780</real>
 		</dict>
 		<key>1E5102B6-6E97-5105-AD9A-9FEB8CD2E99C</key>
 		<dict>
@@ -1335,36 +1334,36 @@ Full documentation on [GitHub](https://github.com/BenjaminOddou/alfred-plex).
 			<string>Long commands and errors:
 macOS notification</string>
 			<key>xpos</key>
-			<real>1400.0</real>
+			<real>1400</real>
 			<key>ypos</key>
-			<real>780.0</real>
+			<real>780</real>
 		</dict>
 		<key>1F5F4AA3-4DE4-5ADD-8A88-6DF4228AF0F7</key>
 		<dict>
 			<key>note</key>
 			<string>Open a page of the menu</string>
 			<key>xpos</key>
-			<real>30.0</real>
+			<real>30</real>
 			<key>ypos</key>
-			<real>30.0</real>
+			<real>30</real>
 		</dict>
 		<key>20D557AB-7767-562F-B3BD-54B3173EF06C</key>
 		<dict>
 			<key>note</key>
 			<string>Open posters (Grid View)</string>
 			<key>xpos</key>
-			<real>30.0</real>
+			<real>30</real>
 			<key>ypos</key>
-			<real>530.0</real>
+			<real>530</real>
 		</dict>
 		<key>291B0BA5-76BD-5A43-83BE-DE4EAFC284F4</key>
 		<dict>
 			<key>note</key>
 			<string>Show page {var:nav}</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>30.0</real>
+			<real>30</real>
 		</dict>
 		<key>2F0D39B5-DC32-5EB3-8513-94A99DBC1438</key>
 		<dict>
@@ -1374,18 +1373,18 @@ macOS notification</string>
 			<string>Live search on your servers
 (empty: your libraries)</string>
 			<key>xpos</key>
-			<real>230.0</real>
+			<real>230</real>
 			<key>ypos</key>
-			<real>155.0</real>
+			<real>155</real>
 		</dict>
 		<key>2FCB6CF4-B265-5F68-BEA0-BBEB5EECD479</key>
 		<dict>
 			<key>note</key>
 			<string>Open Plex Discover (argument = query)</string>
 			<key>xpos</key>
-			<real>30.0</real>
+			<real>30</real>
 			<key>ypos</key>
-			<real>280.0</real>
+			<real>280</real>
 		</dict>
 		<key>33A03FA7-48B3-51A8-86D7-A4DC78210B92</key>
 		<dict>
@@ -1394,27 +1393,27 @@ macOS notification</string>
 			<key>note</key>
 			<string>Movie and TV Show Search workflow</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>1280.0</real>
+			<real>1280</real>
 		</dict>
 		<key>408A70D8-092C-5DDE-BC3A-C8C8AFD3EA95</key>
 		<dict>
 			<key>note</key>
 			<string>Show posters {var:nav}</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>405.0</real>
+			<real>405</real>
 		</dict>
 		<key>4A9323C2-207A-5C70-AA46-C22432CE7C57</key>
 		<dict>
 			<key>note</key>
 			<string>Then: next step</string>
 			<key>xpos</key>
-			<real>1160.0</real>
+			<real>1160</real>
 			<key>ypos</key>
-			<real>655.0</real>
+			<real>655</real>
 		</dict>
 		<key>4E620DE0-46A0-5505-BA06-A1CFBB9AD891</key>
 		<dict>
@@ -1424,27 +1423,27 @@ macOS notification</string>
 			<string>Text View: media sheet
 (stacked: ⎋ goes back)</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>905.0</real>
+			<real>905</real>
 		</dict>
 		<key>5088B92A-D4F7-52B8-9627-2EE7C37DD1ED</key>
 		<dict>
 			<key>note</key>
 			<string>Prompt {var:prompt_title}</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>530.0</real>
+			<real>530</real>
 		</dict>
 		<key>66C9C662-5E9A-55D6-A60A-628268568FF8</key>
 		<dict>
 			<key>note</key>
 			<string>Open Plex Discover</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>280.0</real>
+			<real>280</real>
 		</dict>
 		<key>704D7D06-4435-50FA-A1F1-987C4F42AC9C</key>
 		<dict>
@@ -1454,9 +1453,9 @@ macOS notification</string>
 			<string>Text input with a Return row
 (setting, preset, alias...)</string>
 			<key>xpos</key>
-			<real>230.0</real>
+			<real>230</real>
 			<key>ypos</key>
-			<real>405.0</real>
+			<real>405</real>
 		</dict>
 		<key>7EC90905-1827-5804-B57F-2E12D8ACEA53</key>
 		<dict>
@@ -1465,18 +1464,18 @@ macOS notification</string>
 			<key>note</key>
 			<string>Run command {var:cmd}</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>655.0</real>
+			<real>655</real>
 		</dict>
 		<key>983A9A13-1C39-5E23-A063-EA6BF077935D</key>
 		<dict>
 			<key>note</key>
 			<string>Open a web page</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>1030.0</real>
+			<real>1030</real>
 		</dict>
 		<key>9D328051-1333-5457-A218-E2222BA21261</key>
 		<dict>
@@ -1486,9 +1485,9 @@ macOS notification</string>
 			<string>Menu ▸ Accounts ▸ Servers ▸ Presets ▸ Help
 Page = {var:nav}</string>
 			<key>xpos</key>
-			<real>230.0</real>
+			<real>230</real>
 			<key>ypos</key>
-			<real>30.0</real>
+			<real>30</real>
 		</dict>
 		<key>9E85DAD3-2C27-5915-ACD8-35BBAE1AB96D</key>
 		<dict>
@@ -1497,9 +1496,9 @@ Page = {var:nav}</string>
 			<key>note</key>
 			<string>Route on {var:action}</string>
 			<key>xpos</key>
-			<real>660.0</real>
+			<real>658</real>
 			<key>ypos</key>
-			<real>155.0</real>
+			<real>155</real>
 		</dict>
 		<key>A1E5C0DE-5B0B-5A5E-9D8C-6D0E7A1F2B31</key>
 		<dict>
@@ -1507,18 +1506,18 @@ Page = {var:nav}</string>
 			<string>→ on a media, ↩ on "Plex":
 the action chosen in the configuration</string>
 			<key>xpos</key>
-			<real>30.0</real>
+			<real>30</real>
 			<key>ypos</key>
-			<real>1030.0</real>
+			<real>1030</real>
 		</dict>
 		<key>B03BBDA3-0179-57B2-9E67-96DF9B736700</key>
 		<dict>
 			<key>note</key>
 			<string>Open Plex Search (argument = query)</string>
 			<key>xpos</key>
-			<real>30.0</real>
+			<real>30</real>
 			<key>ypos</key>
-			<real>155.0</real>
+			<real>155</real>
 		</dict>
 		<key>B2F6D1EF-6C1C-5B6F-AE9D-7E1F8B2A3C42</key>
 		<dict>
@@ -1528,9 +1527,9 @@ the action chosen in the configuration</string>
 			<string>More details page of the media
 (other text: Plex Search)</string>
 			<key>xpos</key>
-			<real>230.0</real>
+			<real>230</real>
 			<key>ypos</key>
-			<real>1030.0</real>
+			<real>1030</real>
 		</dict>
 		<key>B7690817-D6F6-543F-A1E5-71AC28E8389A</key>
 		<dict>
@@ -1538,9 +1537,9 @@ the action chosen in the configuration</string>
 			<string>Notification text
 (empty: no notification)</string>
 			<key>xpos</key>
-			<real>1160.0</real>
+			<real>1160</real>
 			<key>ypos</key>
-			<real>780.0</real>
+			<real>780</real>
 		</dict>
 		<key>C3A7E2F0-7D2D-5C70-BFAE-8F2A9C3B4D53</key>
 		<dict>
@@ -1550,18 +1549,18 @@ the action chosen in the configuration</string>
 			<string>↩ in the media sheet:
 back to the page below</string>
 			<key>xpos</key>
-			<real>1160.0</real>
+			<real>1160</real>
 			<key>ypos</key>
-			<real>905.0</real>
+			<real>905</real>
 		</dict>
 		<key>C5FCC189-EFF8-5E2C-907E-52DEE49D7D8B</key>
 		<dict>
 			<key>note</key>
 			<string>Next step decided by a command</string>
 			<key>xpos</key>
-			<real>430.0</real>
+			<real>430</real>
 			<key>ypos</key>
-			<real>655.0</real>
+			<real>655</real>
 		</dict>
 		<key>CCCCB44E-670E-5A95-B0DB-8B1086BC9ED9</key>
 		<dict>
@@ -1570,18 +1569,18 @@ back to the page below</string>
 			<key>note</key>
 			<string>Live search on Plex Discover</string>
 			<key>xpos</key>
-			<real>230.0</real>
+			<real>230</real>
 			<key>ypos</key>
-			<real>280.0</real>
+			<real>280</real>
 		</dict>
 		<key>E17097EF-0A4D-5C3B-B52B-BA5A85349CE8</key>
 		<dict>
 			<key>note</key>
 			<string>Ask the user for a text</string>
 			<key>xpos</key>
-			<real>30.0</real>
+			<real>30</real>
 			<key>ypos</key>
-			<real>405.0</real>
+			<real>405</real>
 		</dict>
 		<key>F0C27208-D9B6-57B3-B0F1-FF244059CF00</key>
 		<dict>
@@ -1590,27 +1589,27 @@ back to the page below</string>
 			<key>note</key>
 			<string>Posters of {var:nav}</string>
 			<key>xpos</key>
-			<real>230.0</real>
+			<real>230</real>
 			<key>ypos</key>
-			<real>530.0</real>
+			<real>530</real>
 		</dict>
 		<key>F66570A1-2CD4-5509-8731-B08547757C07</key>
 		<dict>
 			<key>note</key>
 			<string>Open Plex Search</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>155.0</real>
+			<real>155</real>
 		</dict>
 		<key>F74D8D25-C283-5EC1-ABD1-119C2F7CA0E1</key>
 		<dict>
 			<key>note</key>
 			<string>Show in Finder</string>
 			<key>xpos</key>
-			<real>920.0</real>
+			<real>920</real>
 			<key>ypos</key>
-			<real>1155.0</real>
+			<real>1155</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
