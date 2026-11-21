@@ -89,8 +89,10 @@ def run_command(ctx: Context, text: str) -> str:
     failed = any(level == "error" for level, _ in system.MESSAGES)
     runs.write(ctx.settings, run_id, state="error" if failed else "done", messages=system.MESSAGES,
                next=intent.to_dict())
-    # Quick commands answer in Alfred only (loading page), long ones and errors are also notified.
-    title, message = system.notification(system.MESSAGES) if failed or name in LONG_COMMANDS else ("", "")
+    # Quick commands answer in Alfred only (loading page), long ones and errors are also notified,
+    # unless 🔔 Notifications is unticked: no notification, no sound (the loading page and the log keep it all).
+    notified = ctx.settings.notify and (failed or name in LONG_COMMANDS)
+    title, message = system.notification(system.MESSAGES) if notified else ("", "")
     if message:
         system.play(ctx.settings.sound)
     return alfred.run_output(intent, notify=(title, message))

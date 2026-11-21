@@ -113,6 +113,7 @@ class Settings:
     workflow_dir: Path = WORKFLOW_DIR
     version: str = ""
     language: str = "en"
+    notify: bool = True  # 🔔 Notifications checkbox
     sound: str = "Submarine"
     log_level: str = "INFO"
     date_format: str = "%Y-%m-%d"
@@ -139,6 +140,7 @@ class Settings:
             downloads_dir=Path(_text(env, "downloads_folder", "~/Downloads")).expanduser(),
             version=env.get("alfred_workflow_version", ""),
             language=_text(env, "language", "en"),
+            notify=_bool(env, "notify", True),
             # An empty sound means "mute", so it must not fall back to the default.
             sound=env.get("sound", "Submarine"),
             log_level=_text(env, "log_level", "INFO").upper(),

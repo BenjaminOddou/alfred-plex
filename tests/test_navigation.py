@@ -127,6 +127,21 @@ def test_only_long_commands_and_errors_are_notified(env, monkeypatch, detached):
     assert failed["notify_title"] == "🚨 Error!" and failed["notify_text"]
 
 
+def test_notifications_unticked_keep_the_workflow_silent(env, monkeypatch, detached, tmp_path):
+    monkeypatch.setattr(cli, "LONG_COMMANDS", {"export"})
+    monkeypatch.setattr(system, "SOUNDS", tmp_path)
+    (tmp_path / "Submarine.aiff").write_bytes(b"")
+    silent = {**env, "notify": "0"}
+    for intent in (alfred.run("export", kind="presets"), alfred.run("does.not.exist")):
+        output = run(silent, intent)
+        assert output["notify_title"] == output["notify_text"] == ""  # Alfred posts nothing
+        status = runs.read(make_ctx(silent).settings, intent.variables["run_id"])
+        assert status["state"] in {"done", "error"} and status["messages"]  # the loading page still tells it
+    assert detached == []  # no sound either
+    assert run({**env, "notify": "1"}, alfred.run("export", kind="presets"))["notify_text"]
+    assert detached == [["afplay", str(tmp_path / "Submarine.aiff")]]
+
+
 def test_notification_sums_up_the_command():
     assert system.notification([]) == ("", "")
     title, text = system.notification([("success", "NAS added"), ("warning", "Failed to connect to: Old")])

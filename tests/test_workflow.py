@@ -236,6 +236,14 @@ def test_alfred_posts_the_notifications():
     assert '"notify_title": "✅ Success!"' in output and '"notify_text": "Done"' in output
 
 
+def test_notifications_checkbox():
+    entry = next(c for c in PLIST["userconfigurationconfig"] if c["variable"] == "notify")
+    assert entry["type"] == "checkbox" and entry["config"]["default"] is True
+    assert entry["label"] == "🔔 Notifications" and entry["description"]
+    order = [c["variable"] for c in PLIST["userconfigurationconfig"]]
+    assert order.index("notify") + 1 == order.index("sound")  # next to the 🎷 Notification sound
+
+
 def test_sound_choices_are_system_sounds():
     entry = next(c for c in PLIST["userconfigurationconfig"] if c["variable"] == "sound")
     values = [value for _, value in entry["config"]["pairs"]]

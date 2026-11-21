@@ -19,6 +19,7 @@ class TestSettings:
         settings = Settings.from_env({})
         assert settings.limit == 15
         assert settings.use_alias is True
+        assert settings.notify is True  # 🔔 Notifications on by default
         assert settings.media_player == "vlc"
         assert settings.default_view == {"sort": "originallyAvailableAt:desc"}
         assert settings.shortcuts.nested_search == "arg"
@@ -28,8 +29,9 @@ class TestSettings:
 
     def test_user_configuration(self, env):
         settings = Settings.from_env({**env, "limit_number": "30", "filters_bool": "0", "media_player": "IINA",
-                                      "short_web": "alt+shift", "sound": ""})
+                                      "short_web": "alt+shift", "sound": "", "notify": "0"})
         assert settings.limit == 30
+        assert settings.notify is False
         assert settings.use_alias is False
         assert settings.media_player == "iina"
         assert settings.shortcuts.web == "alt+shift"
