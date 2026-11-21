@@ -2984,10 +2984,8 @@ back to the page below</string>
 			<string>short_download</string>
 		</dict>
 	</array>
-	<key>variablesdontexport</key>
-	<array/>
 	<key>version</key>
-	<string>3.2.0</string>
+	<string>3.2.1</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>
