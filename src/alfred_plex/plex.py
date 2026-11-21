@@ -1,7 +1,7 @@
 """Everything that talks to python-plexapi: config, connections and caches.
 
-plexapi is imported lazily so that pages which do not need it (menu,
-presets, help...) open instantly.
+plexapi (and pickle, platform, threads) is imported lazily so that pages
+which do not need it (menu, presets, help...) open instantly.
 """
 
 from __future__ import annotations
@@ -9,11 +9,8 @@ from __future__ import annotations
 import json
 import logging
 import os
-import pickle
-import platform
 import time
 from collections.abc import Callable, Iterable
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import TYPE_CHECKING, TypeVar
 
@@ -40,8 +37,11 @@ class PlexError(Exception):
 
 # ------------------------------------------------------------------ setup
 def plexapi_config(settings: Settings) -> str:
+    import platform
+
     return "\n".join(
         [
+            f"# {config_stamp(settings)}",
             "[plexapi]",
             f"timeout = {CONNECT_TIMEOUT}",
             "autoreload = false",
@@ -61,6 +61,11 @@ def plexapi_config(settings: Settings) -> str:
     )
 
 
+def config_stamp(settings: Settings) -> str:
+    """What plexapi's config depends on: it is only written again when this changes."""
+    return f"alfred-plex {settings.version} {settings.language}"
+
+
 def bootstrap(settings: Settings) -> None:
     """Write plexapi's config (only when it changed) and point plexapi to it.
 
@@ -69,9 +74,13 @@ def bootstrap(settings: Settings) -> None:
     """
     settings.ensure_dirs()
     config = settings.cache_dir / "plexapi.ini"
-    content = plexapi_config(settings)
-    if not config.exists() or config.read_text(encoding="utf-8") != content:
-        config.write_text(content, encoding="utf-8")
+    try:
+        with config.open(encoding="utf-8") as file:
+            current = file.readline().strip()
+    except OSError:
+        current = ""
+    if current != f"# {config_stamp(settings)}":  # first line of the file (no macOS version lookup each run)
+        config.write_text(plexapi_config(settings), encoding="utf-8")
     os.environ["PLEXAPI_CONFIG_PATH"] = str(config)
 
     marker = settings.cache_dir / "version"
@@ -81,6 +90,10 @@ def bootstrap(settings: Settings) -> None:
             if path.is_file() and (path.suffix in {".pickle", ".json"} or "." not in path.name):
                 path.unlink(missing_ok=True)
         (settings.data_dir / "config.ini").unlink(missing_ok=True)  # v2 leftover
+        for app in settings.cache_dir.glob("Notificator for *.app"):  # 3.1 leftover: Alfred posts notifications
+            import shutil
+
+            shutil.rmtree(app, ignore_errors=True)
         marker.write_text(settings.version, encoding="utf-8")
 
 
@@ -98,6 +111,8 @@ def parallel(func: Callable[[T], R], items: Iterable[T], workers: int = 8) -> li
 
     if len(items) <= 1:
         return [safe(i) for i in items]
+    from concurrent.futures import ThreadPoolExecutor
+
     with ThreadPoolExecutor(max_workers=min(workers, len(items))) as pool:
         return list(pool.map(safe, items))
 
@@ -115,6 +130,8 @@ def _account_cache(settings: Settings, uuid: str) -> Path:
 
 
 def cache_account(settings: Settings, account: MyPlexAccount) -> None:
+    import pickle
+
     try:
         with _account_cache(settings, account.uuid).open("wb") as file:
             pickle.dump(account, file)
@@ -142,6 +159,8 @@ def load_account(settings: Settings, token: str, uuid: str, fresh: bool = False)
     """
     path = _account_cache(settings, uuid)
     if not fresh and path.exists() and time.time() - path.stat().st_mtime < ACCOUNT_TTL:
+        import pickle
+
         try:
             with path.open("rb") as file:
                 return pickle.load(file)

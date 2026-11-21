@@ -38,10 +38,10 @@ def test_every_command_is_registered():
     assert not {"account.username", "account.password", "account.otp", "account.token"} & names
 
 
-def test_unknown_command_notifies(env, notifications):
+def test_unknown_command_notifies(env, messages):
     result = run(env, alfred.run("does.not.exist"))
     assert result["action"] == "done"
-    assert notifications[-1]["title"] == "🚨 Error!"
+    assert messages[-1]["title"] == "🚨 Error!"
 
 
 def test_then_is_used_when_command_returns_nothing(env):
@@ -49,11 +49,11 @@ def test_then_is_used_when_command_returns_nothing(env):
     assert result["action"] == "browse" and result["nav"] == "help/alias"
 
 
-def test_plex_errors_are_explained(env, saved, monkeypatch, notifications):
+def test_plex_errors_are_explained(env, saved, monkeypatch, messages):
     monkeypatch.setattr(plex, "connect", lambda s: (_ for _ in ()).throw(OSError("down")))
     result = run(env, alfred.run("server.scan", mid=fakes.MID))
     assert result["action"] == "done"
-    assert notifications[-1]["message"] == "Failed to connect to the plex server Home Server"
+    assert messages[-1]["message"] == "Failed to connect to the plex server Home Server"
 
 
 # ------------------------------------------------------------------- presets
@@ -69,7 +69,7 @@ def test_create_preset_in_two_prompts(env):
     assert len(preset["id"]) == 32
 
 
-def test_edit_and_remove_preset(env, notifications):
+def test_edit_and_remove_preset(env, messages):
     ctx = make_ctx(env)
     preset_id = ctx.store.presets.items[1]["id"]
     run(env, alfred.run("preset.edit_title", id=preset_id), "New title/New sub")
@@ -78,12 +78,12 @@ def test_edit_and_remove_preset(env, notifications):
     assert (preset["title"], preset["subtitle"], preset["arg"]) == ("New title", "New sub", "lt=show")
     run(env, alfred.run("preset.remove", then=alfred.browse("presets/remove"), id=preset_id))
     assert make_ctx(env).store.presets.get(preset_id) is None
-    assert notifications[-1]["message"] == "The preset New title is removed"
+    assert messages[-1]["message"] == "The preset New title is removed"
 
 
-def test_preset_needs_a_title(env, notifications):
+def test_preset_needs_a_title(env, messages):
     run(env, alfred.run("preset.new_title", value="lt=movie"), "  ")
-    assert notifications[-1]["title"] == "⚠️ Warning!"
+    assert messages[-1]["title"] == "⚠️ Warning!"
 
 
 # --------------------------------------------------------------------- alias
@@ -93,9 +93,9 @@ def test_edit_alias(env):
 
 
 @pytest.mark.parametrize("text", ["ge", "", "a=b", "a/b"])
-def test_edit_alias_refused(env, notifications, text):
+def test_edit_alias_refused(env, messages, text):
     run(env, alfred.run("alias.edit", long="libtype"), text)
-    assert notifications[-1]["title"] == "⚠️ Warning!"
+    assert messages[-1]["title"] == "⚠️ Warning!"
     assert make_ctx(env).store.alias.resolve("lt") == "libtype"
 
 
@@ -106,13 +106,21 @@ def test_clear_data_keeps_presets(env, saved):
     assert names == ["presets.json"]
 
 
-def test_clear_cache_keeps_notificator_app(env):
+def test_clear_cache_keeps_folders(env):
     ctx = make_ctx(env)
-    app = ctx.settings.cache_dir / "Notificator for Plex.app"
-    app.mkdir()
+    posters = ctx.settings.cache_dir / "posters"
+    posters.mkdir()
     (ctx.settings.cache_dir / "account-x.pickle").write_bytes(b"x")
     run(env, alfred.run("folder.clear", kind="cache"))
-    assert app.exists() and not (ctx.settings.cache_dir / "account-x.pickle").exists()
+    assert posters.exists() and not (ctx.settings.cache_dir / "account-x.pickle").exists()
+
+
+def test_update_removes_the_old_notificator_app(env):
+    ctx = make_ctx(env)
+    app = ctx.settings.cache_dir / "Notificator for Plex.app" / "Contents"
+    app.mkdir(parents=True)
+    make_ctx({**env, "alfred_workflow_version": "9.9.9"})  # a new version of the workflow
+    assert not app.parent.exists()
 
 
 # ------------------------------------------------------------------- servers
@@ -130,25 +138,25 @@ def test_parse_setting_errors(raw, kind):
         parse_setting(raw, kind)
 
 
-def test_change_setting(env, plex_online, notifications):
+def test_change_setting(env, plex_online, messages):
     run(env, alfred.run("server.setting", mid=fakes.MID, id="LogVerbose"), "true")
     assert ("PUT", "/:/prefs", {"LogVerbose": "true"}) in plex_online.calls
-    assert notifications[-1]["message"] == "LogVerbose value is now True"
+    assert messages[-1]["message"] == "LogVerbose value is now True"
 
 
-def test_change_setting_with_wrong_type(env, plex_online, notifications):
+def test_change_setting_with_wrong_type(env, plex_online, messages):
     run(env, alfred.run("server.setting", mid=fakes.MID, id="LogVerbose"), "maybe")
-    assert notifications[-1]["title"] == "🚨 Error!"
+    assert messages[-1]["title"] == "🚨 Error!"
     assert all(method == "GET" for method, _, _ in plex_online.calls)
 
 
-def test_terminate_session_uses_plexapi_stop(env, plex_online, notifications):
+def test_terminate_session_uses_plexapi_stop(env, plex_online, messages):
     run(env, alfred.ask("Terminate", "", "server.terminate", mid=fakes.MID, session=42, title="The Matrix"),
         "Time to sleep")
     method, path, query = plex_online.calls[-1]
     assert path == "/status/sessions/terminate"
     assert query == {"sessionId": "abc123", "reason": "Time to sleep"}
-    assert notifications[-1]["message"] == "The session 'The Matrix' is terminated"
+    assert messages[-1]["message"] == "The session 'The Matrix' is terminated"
 
 
 def test_scan_one_section_and_all(env, plex_online):
@@ -159,10 +167,10 @@ def test_scan_one_section_and_all(env, plex_online):
     assert plex_online.calls[-1][1] == "/library/sections/all/refresh"
 
 
-def test_remove_server(env, saved, notifications):
+def test_remove_server(env, saved, messages):
     run(env, alfred.run("server.remove", mid=fakes.MID))
     assert make_ctx(env).store.servers.items == []
-    assert notifications[-1]["message"] == "The plex server Home Server (neo) is removed"
+    assert messages[-1]["message"] == "The plex server Home Server (neo) is removed"
 
 
 # ------------------------------------------------------------------ accounts
@@ -196,7 +204,7 @@ def oauth(monkeypatch, account):
     return state
 
 
-def test_oauth_first_sign_in_saves_account_and_servers(env, oauth, account, notifications):
+def test_oauth_first_sign_in_saves_account_and_servers(env, oauth, account, messages):
     resource = SimpleNamespace(name="NAS", provides="server", clientIdentifier="nas-1", device="Synology",
                                platformVersion="7.2", accessToken="nas-token", owned=True,
                                connect=lambda timeout: SimpleNamespace(_baseurl="https://nas.plex.direct:32400"))
@@ -213,22 +221,22 @@ def test_oauth_first_sign_in_saves_account_and_servers(env, oauth, account, noti
     server = ctx.store.server("nas-1")
     assert server["baseURL"] == "https://nas.plex.direct:32400" and server["owner"] is True
     assert ctx.store.server("old-1") is None
-    assert any("Server(s): NAS" in n["message"] for n in notifications)
-    assert notifications[-1]["message"] == "Failed to connect to: Old"
+    assert any("Server(s): NAS" in n["message"] for n in messages)
+    assert messages[-1]["message"] == "Failed to connect to: Old"
 
     again = run(env, alfred.run("account.oauth", then=alfred.browse("accounts")))
     assert again["nav"] == f"accounts/{fakes.ACCOUNT_UUID}"  # already known: its page
 
 
-def test_oauth_cancelled(env, oauth, notifications):
+def test_oauth_cancelled(env, oauth, messages):
     oauth["token"] = None
     result = run(env, alfred.run("account.oauth", then=alfred.browse("accounts")))
     assert result["nav"] == "accounts"
-    assert notifications[-1]["message"] == "Plex sign in expired or was cancelled"
+    assert messages[-1]["message"] == "Plex sign in expired or was cancelled"
     assert make_ctx(env).store.accounts.items == []
 
 
-def test_remove_account_removes_its_servers(env, saved, notifications):
+def test_remove_account_removes_its_servers(env, saved, messages):
     run(env, alfred.run("account.remove", uuid=fakes.ACCOUNT_UUID))
     ctx = make_ctx(env)
     assert ctx.store.accounts.items == [] and ctx.store.servers.items == []
@@ -252,7 +260,7 @@ def test_watchlist_toggle_updates_cache(env, plex_online, account):
     assert make_ctx(env).watchlist(fakes.ACCOUNT_UUID) == {"plex://movie/5d7768", "plex://show/dark"}
 
 
-def test_watchlist_already_in_wanted_state(env, plex_online, account, notifications):
+def test_watchlist_already_in_wanted_state(env, plex_online, account, messages):
     from plexapi.exceptions import BadRequest
 
     def already(item):
@@ -260,7 +268,7 @@ def test_watchlist_already_in_wanted_state(env, plex_online, account, notificati
 
     account.addToWatchlist = already
     run(env, alfred.run("watchlist", uuid=fakes.ACCOUNT_UUID, guid="plex://movie/5d7768", title="M", add=True))
-    assert notifications[-1]["title"] == "✅ Success!"
+    assert messages[-1]["title"] == "✅ Success!"
 
 
 def test_mtv_resolves_tmdb_id(env, plex_online, account):
@@ -291,10 +299,10 @@ def test_stream_starts_player(env, plex_online, monkeypatch):
     assert started[0][-2] == "Inception (2010)"
 
 
-def test_stream_without_player(env, plex_online, monkeypatch, notifications):
+def test_stream_without_player(env, plex_online, monkeypatch, messages):
     monkeypatch.setattr(media_commands, "which", lambda name: None)
     run(env, alfred.run("stream", mid=fakes.MID, key="/library/metadata/11", type="movie"))
-    assert "Can't find the vlc command line tool" in notifications[-1]["message"]
+    assert "Can't find the vlc command line tool" in messages[-1]["message"]
 
 
 # ----------------------------------------------------------------------- cli

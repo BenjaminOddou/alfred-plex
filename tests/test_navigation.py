@@ -115,15 +115,32 @@ def test_details_can_be_shown_again_from_the_loading_page(env, plex_online):
     assert again["variables"]["action"] == "details"
 
 
-def test_quick_commands_do_not_notify(env, monkeypatch, notifications):
+def test_only_long_commands_and_errors_are_notified(env, monkeypatch, detached):
     monkeypatch.setattr(cli, "LONG_COMMANDS", {"export"})
-    ctx = make_ctx(env)
-    preset_id = ctx.store.presets.items[1]["id"]
-    run(env, alfred.run("preset.duplicate", id=preset_id))
-    assert notifications == []  # shown in Alfred by the loading page instead
-    run(env, alfred.run("export", kind="presets"))
-    assert notifications[-1]["title"] == "✅ Success!"  # long ones also notify
-    assert system.QUIET is False
+    preset_id = make_ctx(env).store.presets.items[1]["id"]
+    quick = run(env, alfred.run("preset.duplicate", id=preset_id))
+    assert quick["notify_title"] == quick["notify_text"] == ""  # shown in Alfred by the loading page instead
+    assert detached == []
+    long = run(env, alfred.run("export", kind="presets"))
+    assert long["notify_title"] == "✅ Success!" and "exported to" in long["notify_text"]
+    failed = run(env, alfred.run("does.not.exist"))
+    assert failed["notify_title"] == "🚨 Error!" and failed["notify_text"]
+
+
+def test_notification_sums_up_the_command():
+    assert system.notification([]) == ("", "")
+    title, text = system.notification([("success", "NAS added"), ("warning", "Failed to connect to: Old")])
+    assert title == "⚠️ Warning!" and text == "NAS added ǀ Failed to connect to: Old"
+    assert system.notification([("warning", "a"), ("error", "b")])[0] == "🚨 Error!"
+
+
+def test_notification_sound(env, monkeypatch, tmp_path, detached):
+    monkeypatch.setattr(system, "SOUNDS", tmp_path)
+    (tmp_path / "Submarine.aiff").write_bytes(b"")
+    system.play("Submarine")
+    system.play("")  # mute
+    system.play("default")  # 3.1 "Classic": not a file, no sound
+    assert detached == [["afplay", str(tmp_path / "Submarine.aiff")]]
 
 
 def test_status_file(env):

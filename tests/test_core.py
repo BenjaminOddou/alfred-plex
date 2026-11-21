@@ -162,9 +162,15 @@ class TestHistory:
         assert [i["subtitle"] for i in data["items"]] == ["1", "2"]
         assert data["rerun"] == 1 and data["skipknowledge"] is True
 
+    def test_feedback_uses_alfred_6_keys(self):
+        data = Feedback([Item("A")]).to_dict()
+        assert data["strictmods"] is True  # an undefined modifier never runs the ⏎ action
+        assert data["iconresize"] == "fit"  # 2:3 posters are not stretched in the lists
+
     def test_run_output_defaults_to_done(self):
         data = json.loads(alfred.run_output(None))
         assert data["alfredworkflow"]["variables"]["action"] == "done"
+        assert data["alfredworkflow"]["variables"]["notify_text"] == ""  # no notification
 
     def test_intent_from_garbage(self):
         assert Intent.from_json("not json") is None

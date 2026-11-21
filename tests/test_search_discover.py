@@ -168,6 +168,26 @@ def test_unreachable_server_is_reported(env, saved, monkeypatch):
     assert any("Failed to connect to the plex server Home Server" in i["title"] for i in items)
 
 
+def test_offline_server_does_not_hide_the_others(env, plex_online, saved, monkeypatch):
+    from alfred_plex import plex
+
+    servers = json.loads((saved / "servers.json").read_text())
+    servers["items"].append({**servers["items"][0], "machineIdentifier": "offline", "friendlyName": "Old NAS",
+                             "baseURL": "http://old"})
+    (saved / "servers.json").write_text(json.dumps(servers))
+    online = plex.connect
+
+    def connect(server):
+        if server["machineIdentifier"] == "offline":
+            raise OSError("down")
+        return online(server)
+
+    monkeypatch.setattr(plex, "connect", connect)
+    items = search(env, "matrix")
+    assert any(i["title"] == "🚨 Failed to connect to the plex server Old NAS" for i in items)
+    assert by_title(items, "The Matrix (1999)")["subtitle"].startswith("Home Server")
+
+
 # ------------------------------------------------------------------- discover
 def discover(env, query: str = "") -> list[dict]:
     return render_discover(make_ctx(env, query=query, nav="discover")).to_dict()["items"]

@@ -41,24 +41,26 @@ def env(tmp_path: Path) -> dict:
 
 
 @pytest.fixture(autouse=True)
-def notifications(monkeypatch) -> list[dict]:
-    """Capture notifications instead of running Notificator."""
+def messages(monkeypatch) -> list[dict]:
+    """Every message of the commands (success / warning / failure), even the ones of quick commands."""
     sent: list[dict] = []
 
-    def spawn(cmd: list[str]) -> None:
-        args = dict(zip(cmd[1::2], cmd[2::2], strict=False))
-        sent.append({"title": args.get("--title"), "message": args.get("--message"), "cmd": cmd})
+    class Recorder(list):
+        def append(self, entry) -> None:
+            super().append(entry)
+            level, text = entry
+            sent.append({"title": system.TITLES[level], "message": text})
 
-    monkeypatch.setattr(system, "_spawn", spawn)
-    # Quick commands only answer in Alfred (loading page): notify everything in tests to check messages.
-    from alfred_plex import cli
-
-    class Everything(set):
-        def __contains__(self, item) -> bool:
-            return True
-
-    monkeypatch.setattr(cli, "LONG_COMMANDS", Everything())
+    monkeypatch.setattr(system, "MESSAGES", Recorder())
     return sent
+
+
+@pytest.fixture(autouse=True)
+def detached(monkeypatch) -> list[list[str]]:
+    """Processes started without waiting (sounds): recorded, never run."""
+    started: list[list[str]] = []
+    monkeypatch.setattr(system, "_detach", started.append)
+    return started
 
 
 def came_from(variables: dict):

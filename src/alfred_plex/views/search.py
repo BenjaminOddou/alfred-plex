@@ -2,22 +2,15 @@
 
 from __future__ import annotations
 
+from functools import partial
 from typing import Any
 
 from .. import alfred, filters, fmt, nav
 from ..alfred import Feedback, Intent, Item
 from ..context import Context
 from ..media import Source, prefetch_posters, to_item
-from ..plex import parallel
+from ..plex import PlexError, parallel
 from . import back_item, error_item, remember_page
-
-
-def _sources(ctx: Context, query: filters.SearchQuery) -> tuple[list[Source], list[Item]]:
-    servers = [s for s in ctx.store.servers.items if query.accepts_server(s.get("friendlyName", ""))]
-    results = parallel(lambda s: Source(s, ctx.server(s["machineIdentifier"])), servers)
-    sources = [r for r in results if isinstance(r, Source)]
-    errors = [error_item(r) for r in results if isinstance(r, Exception)]
-    return sources, errors
 
 
 def _library_search(ctx: Context, src: Source, query: filters.SearchQuery) -> list[Any]:
@@ -42,23 +35,38 @@ def _keep(media: Any, query: filters.SearchQuery, watchlist: set[str]) -> bool:
 
 
 def collect(ctx: Context, query: filters.SearchQuery, finder) -> tuple[list[tuple[Source, Any, set[str]]], list[Item]]:
-    """Search every server in parallel: ``[(source, media, watchlist)]`` + error rows."""
-    sources, errors = _sources(ctx, query)
-    watchlists: dict[str, set[str]] = {}
-    for src in sources:
-        if src.account_uuid and src.account_uuid not in watchlists:
-            watchlists[src.account_uuid] = ctx.watchlist(src.account_uuid)
+    """Search every server in parallel: ``[(source, media, watchlist)]`` + error rows.
 
-    results = parallel(lambda src: (src, finder(ctx, src, query)), sources)
-    found = []
-    for result in results:
+    One thread per server connects then searches (a slow server doesn't delay the others), the watchlists
+    load at the same time.
+    """
+    servers = [s for s in ctx.store.servers.items if query.accepts_server(s.get("friendlyName", ""))]
+    uuids = list(dict.fromkeys(s["account_uuid"] for s in servers if s.get("account_uuid")))
+
+    def search(server: dict):
+        try:
+            src = Source(server, ctx.server(server["machineIdentifier"]))
+        except PlexError as error:  # offline: an error row, returned (search errors are raised)
+            return None, error
+        return src, finder(ctx, src, query)
+
+    jobs = [partial(ctx.watchlist, uuid) for uuid in uuids] + [partial(search, server) for server in servers]
+    results = parallel(lambda job: job(), jobs)
+    watchlists = {uuid: w for uuid, w in zip(uuids, results, strict=False) if isinstance(w, set)}
+    found, errors, failed, searched = [], [], [], 0
+    for result in results[len(uuids):]:
         if isinstance(result, Exception):
+            failed.append(result)
             continue
         src, medias = result
+        if src is None:
+            errors.append(error_item(medias))
+            continue
+        searched += 1
         watchlist = watchlists.get(src.account_uuid, set())
         found += [(src, media, watchlist) for media in medias if _keep(media, query, watchlist)]
-    if all(isinstance(r, Exception) for r in results) and results:
-        raise results[0]
+    if failed and not searched:
+        raise failed[0]
     return found, errors
 
 

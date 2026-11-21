@@ -33,7 +33,7 @@ def watchlist(ctx: Context, text: str) -> Intent | None:
         log.info("Watchlist already up to date: %s", error)
     plex.update_watchlist_cache(ctx.settings, uuid, data["guid"], add)
     verb = "added to" if add else "removed from"
-    success(ctx.settings, f"{data.get('title', 'Media')} was {verb} the watchlist of {account.friendlyName}")
+    success(f"{data.get('title', 'Media')} was {verb} the watchlist of {account.friendlyName}")
     return then(ctx)
 
 
@@ -75,7 +75,7 @@ def stream(ctx: Context, text: str) -> None:
     player = ctx.settings.media_player
     binary = "open" if player == "infuse" else which(player)
     if not binary:
-        warning(ctx.settings, f"Can't find the {player} command line tool, see the README to install it")
+        warning(f"Can't find the {player} command line tool, see the README to install it")
         return
     data = ctx.payload
     server = ctx.server(data["mid"])
@@ -98,11 +98,11 @@ def movie_tv_search(ctx: Context, text: str) -> Intent | None:
     try:
         guids = plex.online_guids(ctx.account(data["uuid"]), data["key"])
     except Exception as error:  # noqa: BLE001
-        failure(ctx.settings, "Can't get the media infos from plex", error)
+        failure("Can't get the media infos from plex", error)
         return alfred.done()
     tmdb = next((g.split("://", 1)[1] for g in guids if g.startswith("tmdb://")), None)
     if not tmdb:
-        warning(ctx.settings, "No TMDB id found for this media")
+        warning("No TMDB id found for this media")
         return alfred.done()
     return alfred.mtv(f"{'m' if data.get('type') == 'movie' else 't'}:{tmdb}")
 
@@ -130,10 +130,10 @@ def played(ctx: Context, text: str) -> None:
     title = ctx.payload.get("title", media.title)
     if ctx.payload.get("played", True):
         media.markPlayed()
-        success(ctx.settings, f"{title} is marked as played")
+        success(f"{title} is marked as played")
     else:
         media.markUnplayed()
-        success(ctx.settings, f"{title} is marked as unplayed")
+        success(f"{title} is marked as unplayed")
 
 
 @command("media.rate")
@@ -141,26 +141,26 @@ def rate(ctx: Context, text: str) -> None:
     try:
         rating = parse_rating(text)
     except ValueError as error:
-        warning(ctx.settings, f"Invalid rating: {error}")
+        warning(f"Invalid rating: {error}")
         return
     _, media = _media(ctx)
     media.rate(rating)
     title = ctx.payload.get("title", media.title)
-    success(ctx.settings, f"{title} rated {rating}/10" if rating is not None else f"Rating of {title} cleared")
+    success(f"{title} rated {rating}/10" if rating is not None else f"Rating of {title} cleared")
 
 
 @command("media.refresh")
 def refresh_media(ctx: Context, text: str) -> None:
     _, media = _media(ctx)
     media.refresh()
-    success(ctx.settings, f"Metadata refresh started for {ctx.payload.get('title', media.title)}")
+    success(f"Metadata refresh started for {ctx.payload.get('title', media.title)}")
 
 
 @command("media.analyze")
 def analyze(ctx: Context, text: str) -> None:
     _, media = _media(ctx)
     media.analyze()
-    success(ctx.settings, f"Analysis started for {ctx.payload.get('title', media.title)}")
+    success(f"Analysis started for {ctx.payload.get('title', media.title)}")
 
 
 @command("media.delete")
@@ -172,9 +172,9 @@ def delete(ctx: Context, text: str) -> None:
     try:
         media.delete()
     except (BadRequest, Unauthorized) as error:
-        failure(ctx.settings, "Deletion refused: enable 'Allow media deletion' in the server settings", error)
+        failure("Deletion refused: enable 'Allow media deletion' in the server settings", error)
         return
-    success(ctx.settings, f"{title} is deleted from the server")
+    success(f"{title} is deleted from the server")
 
 
 @command("media.download")
@@ -183,12 +183,9 @@ def download(ctx: Context, text: str) -> Intent | None:
     title = ctx.payload.get("title", media.title)
     folder = ctx.settings.downloads_dir
     folder.mkdir(parents=True, exist_ok=True)
-    from ..system import notify
-
-    notify(ctx.settings, "⏳ Please wait!", f"Downloading {title}...")
     files = media.download(savepath=str(folder), keep_original_name=True)
     files = files if isinstance(files, list) else [files]
-    success(ctx.settings, f"{title} downloaded ({len(files)} file(s)) in {folder}")
+    success(f"{title} downloaded ({len(files)} file(s)) in {folder}")
     return alfred.reveal(str(files[0])) if files else None
 
 
@@ -197,41 +194,41 @@ def add_to_playlist(ctx: Context, text: str) -> None:
     server, media = _media(ctx)
     playlist = server.fetchItem(f"/playlists/{ctx.payload['playlist']}")
     playlist.addItems([media])
-    success(ctx.settings, f"{ctx.payload.get('title', media.title)} added to the playlist {playlist.title}")
+    success(f"{ctx.payload.get('title', media.title)} added to the playlist {playlist.title}")
 
 
 @command("media.playlist_new")
 def new_playlist(ctx: Context, text: str) -> None:
     name = text.strip()
     if not name:
-        warning(ctx.settings, "A playlist needs a name")
+        warning("A playlist needs a name")
         return
     server, media = _media(ctx)
     server.createPlaylist(name, items=[media])
-    success(ctx.settings, f"Playlist {name} created with {ctx.payload.get('title', media.title)}")
+    success(f"Playlist {name} created with {ctx.payload.get('title', media.title)}")
 
 
 @command("media.collection")
 def collection(ctx: Context, text: str) -> None:
     name = (ctx.payload.get("name") or text).strip()
     if not name:
-        warning(ctx.settings, "A collection needs a name")
+        warning("A collection needs a name")
         return
     _, media = _media(ctx)
     title = ctx.payload.get("title", media.title)
     if ctx.payload.get("add", True):
         media.addCollection(name)
-        success(ctx.settings, f"{title} added to the collection {name}")
+        success(f"{title} added to the collection {name}")
     else:
         media.removeCollection(name)
-        success(ctx.settings, f"{title} removed from the collection {name}")
+        success(f"{title} removed from the collection {name}")
 
 
 @command("clipboard")
 def clipboard(ctx: Context, text: str) -> None:
     value = ctx.payload.get("text", "")
     subprocess.run(["pbcopy"], input=value.encode(), check=False)
-    success(ctx.settings, f"{ctx.payload.get('label', 'Text')} copied to the clipboard")
+    success(f"{ctx.payload.get('label', 'Text')} copied to the clipboard")
 
 
 @command("media.details")
@@ -257,6 +254,6 @@ def remove_from_playlist(ctx: Context, text: str) -> None:
             removed += 1
     title = ctx.payload.get("title", media.title)
     if removed:
-        success(ctx.settings, f"{title} removed from the playlist {playlist.title}")
+        success(f"{title} removed from the playlist {playlist.title}")
     else:
-        warning(ctx.settings, f"{title} is not in the playlist {playlist.title} anymore")
+        warning(f"{title} is not in the playlist {playlist.title} anymore")

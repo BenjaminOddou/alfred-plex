@@ -111,6 +111,16 @@
 				<key>vitoclose</key>
 				<false/>
 			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>B7690817-D6F6-543F-A1E5-71AC28E8389A</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
 		</array>
 		<key>9D328051-1333-5457-A218-E2222BA21261</key>
 		<array>
@@ -291,6 +301,19 @@
 			<dict>
 				<key>destinationuid</key>
 				<string>4A9323C2-207A-5C70-AA46-C22432CE7C57</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>B7690817-D6F6-543F-A1E5-71AC28E8389A</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>1E5102B6-6E97-5105-AD9A-9FEB8CD2E99C</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -1192,6 +1215,44 @@ python3 main.py back "$1"</string>
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>{var:notify_text}</string>
+				<key>passthroughargument</key>
+				<false/>
+				<key>variables</key>
+				<dict/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>uid</key>
+			<string>B7690817-D6F6-543F-A1E5-71AC28E8389A</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>onlyshowifquerypopulated</key>
+				<true/>
+				<key>removeextension</key>
+				<false/>
+				<key>text</key>
+				<string>{query}</string>
+				<key>title</key>
+				<string>{var:notify_title}</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.notification</string>
+			<key>uid</key>
+			<string>1E5102B6-6E97-5105-AD9A-9FEB8CD2E99C</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string># 🎩 Alfred Plex
@@ -1235,7 +1296,8 @@ Every row of the workflow sets `{var:action}`: the **Router** sends it to a page
 (`browse`, `search`, `discover`), posters (`grid` → Grid View), a media sheet
 (`details` → Text View), a prompt (`ask`), a background command
 (`run` → `python3 main.py run`), a web page, Finder or another workflow.
-A command picks the next step through the `dispatch` trigger.
+A command picks the next step through the `dispatch` trigger; long commands and errors
+end with a macOS notification (Post Notification output).
 
 Full documentation on [GitHub](https://github.com/BenjaminOddou/alfred-plex).
 
@@ -1262,6 +1324,18 @@ Full documentation on [GitHub](https://github.com/BenjaminOddou/alfred-plex).
 (Alfred stays open)</string>
 			<key>xpos</key>
 			<real>920.0</real>
+			<key>ypos</key>
+			<real>780.0</real>
+		</dict>
+		<key>1E5102B6-6E97-5105-AD9A-9FEB8CD2E99C</key>
+		<dict>
+			<key>colorindex</key>
+			<integer>2</integer>
+			<key>note</key>
+			<string>Long commands and errors:
+macOS notification</string>
+			<key>xpos</key>
+			<real>1400.0</real>
 			<key>ypos</key>
 			<real>780.0</real>
 		</dict>
@@ -1457,6 +1531,16 @@ the action chosen in the configuration</string>
 			<real>230.0</real>
 			<key>ypos</key>
 			<real>1030.0</real>
+		</dict>
+		<key>B7690817-D6F6-543F-A1E5-71AC28E8389A</key>
+		<dict>
+			<key>note</key>
+			<string>Notification text
+(empty: no notification)</string>
+			<key>xpos</key>
+			<real>1160.0</real>
+			<key>ypos</key>
+			<real>780.0</real>
 		</dict>
 		<key>C3A7E2F0-7D2D-5C70-BFAE-8F2A9C3B4D53</key>
 		<dict>
@@ -2149,14 +2233,10 @@ back to the page below</string>
 						<string>Morse ♨️</string>
 						<string>Morse</string>
 					</array>
-					<array>
-						<string>Classic 😃</string>
-						<string>default</string>
-					</array>
 				</array>
 			</dict>
 			<key>description</key>
-			<string>workflow notification sound.</string>
+			<string>sound played with the notifications (long commands and errors).</string>
 			<key>label</key>
 			<string>🎷 Notification sound</string>
 			<key>type</key>
@@ -2888,7 +2968,7 @@ back to the page below</string>
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>3.1.0</string>
+	<string>3.2.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/BenjaminOddou/alfred-plex</string>
 </dict>

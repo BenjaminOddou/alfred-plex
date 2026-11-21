@@ -7,7 +7,7 @@ from typing import Any
 from .. import alfred, nav, plex
 from ..alfred import Intent
 from ..context import Context
-from ..system import failure, log, notify, open_in_background, success, warning
+from ..system import failure, log, open_in_background, success, warning
 from . import command, then
 
 OAUTH_TIMEOUT = 180
@@ -61,9 +61,9 @@ def save_account(ctx: Context, account: Any) -> Intent | None:
     verb = "updated" if updated else "added"
     message = f"{account.friendlyName or account.username} {verb}"
     message += f" ǀ Server(s): {', '.join(added)}" if added else " ǀ No server found"
-    success(ctx.settings, message)
+    success(message)
     if failed:
-        warning(ctx.settings, f"Failed to connect to: {', '.join(failed)}")
+        warning(f"Failed to connect to: {', '.join(failed)}")
     # a new user lands on the menu, which now shows his servers and what to do next
     return alfred.browse("") if first else alfred.browse(nav.join("accounts", account.uuid))
 
@@ -72,7 +72,7 @@ def _sign_in(ctx: Context, token: str) -> Intent | None:
     try:
         account = plex.sign_in(token)
     except Exception as error:  # noqa: BLE001
-        failure(ctx.settings, "Failed to connect to your plex account", error)
+        failure("Failed to connect to your plex account", error)
         return then(ctx)
     return save_account(ctx, account)
 
@@ -85,11 +85,10 @@ def oauth(ctx: Context, text: str) -> Intent | None:
     login = MyPlexPinLogin(oauth=True)
     open_in_background(login.oauthUrl())
     hint = f"Complete the sign in in your browser ({OAUTH_TIMEOUT // 60} min max)"
-    log.info(hint)
-    notify(ctx.settings, "🔐 Plex sign in", hint)
+    log.info(hint)  # the loading page says it too
     login.run(timeout=OAUTH_TIMEOUT)
     if not login.waitForLogin():
-        warning(ctx.settings, "Plex sign in expired or was cancelled")
+        warning("Plex sign in expired or was cancelled")
         return then(ctx)
     return _sign_in(ctx, token=login.token)
 
@@ -100,7 +99,7 @@ def sync(ctx: Context, text: str) -> Intent | None:
     try:
         account = ctx.account(uuid, fresh=True)
     except Exception as error:  # noqa: BLE001
-        failure(ctx.settings, "Failed to connect to your plex account, sign in again", error)
+        failure("Failed to connect to your plex account, sign in again", error)
         return alfred.browse("accounts/new")
     save_account(ctx, account)
     return None
@@ -118,7 +117,7 @@ def remove_account(ctx: Context, uuid: str) -> str:
 @command("account.remove")
 def remove(ctx: Context, text: str) -> None:
     name = remove_account(ctx, ctx.payload["uuid"])
-    success(ctx.settings, f"The account {name} and its servers are removed")
+    success(f"The account {name} and its servers are removed")
 
 
 @command("device.remove")
@@ -127,7 +126,7 @@ def remove_device(ctx: Context, text: str) -> None:
     device = ctx.account(uuid).device(clientId=client_id)
     name = f"{device.name} - {device.platform} {device.platformVersion}"
     device.delete()
-    success(ctx.settings, f"The device '{name}' is removed")
+    success(f"The device '{name}' is removed")
     if ctx.payload.get("current"):
         remove_account(ctx, uuid)
 
@@ -147,7 +146,7 @@ def cleanup_devices(ctx: Context, text: str) -> None:
         except Exception as error:  # noqa: BLE001 - keep cleaning the others
             log.warning("Cannot remove device %s: %r", device.name, error)
             failed.append(device.name)
-    success(ctx.settings, f"{len(removed)} old device(s) removed")
+    success(f"{len(removed)} old device(s) removed")
     if failed:
-        warning(ctx.settings, f"Failed to remove: {', '.join(failed)}")
+        warning(f"Failed to remove: {', '.join(failed)}")
 

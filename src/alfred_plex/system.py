@@ -1,33 +1,37 @@
-"""Side effects on the Mac: logging, notifications, opening things."""
+"""Side effects on the Mac: logging, command messages, sounds, opening things."""
 
 from __future__ import annotations
 
 import logging
 import os
-import shutil
-import subprocess
-from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from .settings import Settings
 
 log = logging.getLogger("alfred_plex")
 
-# Messages of the current command, shown by the loading page: [(level, text)]
+# Messages of the current command: [(level, text)]. The loading page shows them, and long commands sum them
+# up in a notification posted by Alfred (Post Notification output, after the Run Script).
 MESSAGES: list[tuple[str, str]] = []
-# Quick commands answer in Alfred (loading page) only; long ones also notify (you may have left).
-QUIET = False
+TITLES = {"success": "✅ Success!", "warning": "⚠️ Warning!", "error": "🚨 Error!"}
+SOUNDS = Path("/System/Library/Sounds")
+LOG_SIZE = 512_000
 
 # Alfred runs scripts with a minimal PATH: add Homebrew so vlc / iina CLIs are found.
 EXTRA_PATHS = ("/opt/homebrew/bin", "/usr/local/bin")
 
 
 def setup_logging(settings: Settings) -> None:
+    """``plex.log`` in the cache folder, rotated at startup (cheaper than ``logging.handlers``)."""
     if log.handlers:
         return
-    handler = RotatingFileHandler(
-        settings.cache_dir / "plex.log", maxBytes=512_000, backupCount=2, encoding="utf-8"
-    )
+    path = settings.cache_dir / "plex.log"
+    try:
+        if path.stat().st_size > LOG_SIZE:
+            os.replace(path, path.with_name("plex.log.1"))
+    except OSError:
+        pass
+    handler = logging.FileHandler(path, encoding="utf-8", delay=True)
     handler.setFormatter(
         logging.Formatter("%(asctime)s %(levelname)s %(message)s", f"{settings.date_format} %H:%M:%S")
     )
@@ -36,46 +40,49 @@ def setup_logging(settings: Settings) -> None:
     log.propagate = False
 
 
-def notify(settings: Settings, title: str, message: str) -> None:
-    """Show a macOS notification with the workflow icon (via Notificator).
-
-    Arguments are passed as a list, never through a shell, so titles coming
-    from Plex (``$(...)``, quotes...) cannot inject commands.
-    """
-    cmd = [str(settings.workflow_dir / "notificator"), "--message", message, "--title", title]
-    if settings.sound:
-        cmd += ["--sound", settings.sound]
-    try:
-        _spawn(cmd)
-    except (OSError, subprocess.SubprocessError) as error:
-        log.warning("Notification failed: %s", error)
-
-
-def _spawn(cmd: list[str]) -> None:
-    subprocess.run(cmd, check=False, capture_output=True, timeout=30)
-
-
-def success(settings: Settings, message: str) -> None:
+def success(message: str) -> None:
     MESSAGES.append(("success", message))
     log.info(message)
-    if not QUIET:
-        notify(settings, "✅ Success!", message)
 
 
-def warning(settings: Settings, message: str) -> None:
+def warning(message: str) -> None:
     MESSAGES.append(("warning", message))
     log.warning(message)
-    if not QUIET:
-        notify(settings, "⚠️ Warning!", message)
 
 
-def failure(settings: Settings, message: str, error: BaseException | None = None) -> None:
+def failure(message: str, error: BaseException | None = None) -> None:
     MESSAGES.append(("error", message))
     if error is not None:
         log.error("%s: %r", message, error, exc_info=error)
     else:
         log.error(message)
-    notify(settings, "🚨 Error!", message)
+
+
+def notification(messages: list[tuple[str, str]]) -> tuple[str, str]:
+    """(title, text) of the notification that sums up a command: the worst level gives the title."""
+    if not messages:
+        return "", ""
+    levels = {level for level, _ in messages}
+    level = "error" if "error" in levels else "warning" if "warning" in levels else "success"
+    return TITLES[level], " ǀ ".join(text for _, text in messages)
+
+
+def play(sound: str) -> None:
+    """Play a macOS system sound (``sound`` setting) without waiting for it."""
+    path = SOUNDS / f"{sound}.aiff"
+    if not sound or not path.is_file():
+        return
+    try:
+        _detach(["afplay", str(path)])
+    except OSError as error:
+        log.warning("Sound failed: %s", error)
+
+
+def _detach(cmd: list[str]) -> None:
+    import subprocess
+
+    subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     start_new_session=True)
 
 
 def search_path() -> str:
@@ -84,15 +91,19 @@ def search_path() -> str:
 
 
 def which(program: str) -> str | None:
+    import shutil
+
     return shutil.which(program, path=search_path())
 
 
 def open_in_background(target: str) -> None:
+    import subprocess
+
     subprocess.run(["open", target], check=False)
 
 
 def clear_folder(folder: Path, keep: tuple[str, ...] = ()) -> int:
-    """Delete regular files of ``folder`` (sub-folders such as Notificator.app are kept)."""
+    """Delete the regular files of ``folder`` (sub-folders such as ``posters`` are kept)."""
     removed = 0
     if not folder.is_dir():
         return removed

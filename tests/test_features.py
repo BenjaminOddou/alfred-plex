@@ -87,7 +87,7 @@ def test_playlists_of_the_media_come_first(env, plex_online):
     assert items[3]["variables"]["cmd"] == "media.playlist"
 
 
-def test_remove_from_playlist(env, plex_online, notifications):
+def test_remove_from_playlist(env, plex_online, messages):
     plex_online.routes["/playlists/500/items"] = (
         '<MediaContainer size="2"><Video ratingKey="11" key="/library/metadata/11" type="movie" title="Inception" '
         'playlistItemID="1"/><Video ratingKey="10" key="/library/metadata/10" type="movie" title="The Matrix" '
@@ -95,7 +95,7 @@ def test_remove_from_playlist(env, plex_online, notifications):
     plex_online.routes["/playlists/500/items/2"] = fakes.EMPTY
     run(env, alfred.run("media.playlist_remove", mid=fakes.MID, key=10, title="The Matrix", playlist=500))
     assert ("DELETE", "/playlists/500/items/2", {}) in [(m, p, {}) for m, p, _ in plex_online.calls]
-    assert "removed from the playlist Favorites" in notifications[-1]["message"]
+    assert "removed from the playlist Favorites" in messages[-1]["message"]
 
 
 def test_collections_page(env, plex_online):
@@ -116,7 +116,7 @@ def test_parse_rating_out_of_range():
         parse_rating("11")
 
 
-def test_media_commands_call_plex(env, plex_online, notifications):
+def test_media_commands_call_plex(env, plex_online, messages):
     base = {"mid": fakes.MID, "key": 10, "title": "The Matrix"}
     run(env, alfred.run("media.played", played=False, **base))
     assert plex_online.calls[-1][1] == "/:/unscrobble"
@@ -130,7 +130,7 @@ def test_media_commands_call_plex(env, plex_online, notifications):
     assert plex_online.calls[-1][:2] == ("PUT", "/library/metadata/10/analyze")
     run(env, alfred.run("media.delete", **base))
     assert plex_online.calls[-1][:2] == ("DELETE", "/library/metadata/10")
-    assert notifications[-1]["message"] == "The Matrix is deleted from the server"
+    assert messages[-1]["message"] == "The Matrix is deleted from the server"
 
 
 def test_add_to_playlist_and_collection(env, plex_online):
@@ -160,12 +160,12 @@ def test_download_reveals_the_file(env, plex_online, monkeypatch, tmp_path):
     assert result["action"] == "reveal" and result["arg"].endswith("The Matrix (1999).mkv")
 
 
-def test_clipboard(env, monkeypatch, notifications):
+def test_clipboard(env, monkeypatch, messages):
     copied = []
     monkeypatch.setattr(media_commands.subprocess, "run", lambda cmd, input=None, **_: copied.append((cmd, input)))
     run(env, alfred.run("clipboard", text="/movies/a.mkv", label="File path"))
     assert copied == [(["pbcopy"], b"/movies/a.mkv")]
-    assert notifications[-1]["message"] == "File path copied to the clipboard"
+    assert messages[-1]["message"] == "File path copied to the clipboard"
 
 
 # ---------------------------------------------------------------- servers
@@ -205,7 +205,7 @@ def test_library_section_page(env, plex_online):
     assert json.loads(export["variables"]["payload"]) == {"kind": "library", "mid": fakes.MID, "section": 1}
 
 
-def test_maintenance_commands(env, plex_online, notifications, monkeypatch):
+def test_maintenance_commands(env, plex_online, messages, monkeypatch):
     base = {"mid": fakes.MID}
     run(env, alfred.run("server.trash", section=1, **base))
     assert plex_online.calls[-1][:2] == ("PUT", "/library/sections/1/emptyTrash")
@@ -218,7 +218,7 @@ def test_maintenance_commands(env, plex_online, notifications, monkeypatch):
     run(env, alfred.run("server.butler", task="BackupDatabase", title="Backup Database", **base))
     assert plex_online.calls[-1][:2] == ("POST", "/butler/BackupDatabase")
     run(env, alfred.run("server.install", **base))
-    assert "can't install updates by itself" in notifications[-1]["message"]
+    assert "can't install updates by itself" in messages[-1]["message"]
     run(env, alfred.ask("Terminate all", "", "server.terminate_all", **base), "Bye")
     assert plex_online.calls[-1][2] == {"sessionId": "abc123", "reason": "Bye"}
 
@@ -354,11 +354,11 @@ def test_export_server_tables(env, plex_online):
     assert rows[1][0] == "The Matrix (1999)"
 
 
-def test_export_presets_and_unknown_kind(env, notifications):
+def test_export_presets_and_unknown_kind(env, messages):
     _, rows = export(env, kind="presets")
     assert rows[0] == ["title", "subtitle", "value", "id"] and len(rows) == 4
     result = run(env, alfred.run("export", kind="nope"))
-    assert result["action"] == "done" and "Unknown export" in notifications[-1]["message"]
+    assert result["action"] == "done" and "Unknown export" in messages[-1]["message"]
 
 
 def test_export_logs_archive(env):
@@ -371,11 +371,11 @@ def test_export_logs_archive(env):
 
 
 # ----------------------------------------------------------------- devices
-def test_devices_cleanup_only_removes_old_clients(env, plex_online, account, notifications):
+def test_devices_cleanup_only_removes_old_clients(env, plex_online, account, messages):
     run(env, alfred.run("devices.cleanup", uuid=fakes.ACCOUNT_UUID, days=90))
     deleted = [d.name for d in account.devices_list if d.deleted]
     assert deleted == ["Old iPad"]  # not the NAS (server), not this workflow (current token)
-    assert notifications[-1]["message"] == "1 old device(s) removed"
+    assert messages[-1]["message"] == "1 old device(s) removed"
 
 
 def test_stale_days_setting(env, plex_online):
